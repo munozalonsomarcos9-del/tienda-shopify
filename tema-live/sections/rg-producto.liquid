@@ -7,7 +7,6 @@
   assign sid = section.id
   assign s = section.settings
   assign current = product.selected_or_first_available_variant
-  assign first_media = current.featured_media | default: product.featured_media
 
   comment
     Colección de marca = la más grande del producto, sin contar la general ni las de material.
@@ -531,7 +530,7 @@
     <div class="rgp-lightbox__in">
       <button type="button" class="rgp-close" data-rgp-close aria-label="Cerrar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       <button type="button" class="rgp-nav rgp-nav--prev" data-rgp-lb-prev aria-label="Foto anterior"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-      <img data-rgp-lb-img alt="">
+      <img data-rgp-lb-img alt="" width="1600" height="1600">
       <button type="button" class="rgp-nav rgp-nav--next" data-rgp-lb-next aria-label="Foto siguiente"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
   </dialog>
@@ -649,7 +648,7 @@
 
 {% schema %}
 {
-  "name": "RacingGrip · Ficha de producto",
+  "name": "RG · Ficha de producto",
   "tag": "section",
   "class": "rg-producto-section",
   "settings": [
