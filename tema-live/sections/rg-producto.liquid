@@ -81,11 +81,13 @@
   #rgp-{{ sid }} .rgp-vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
   /* Ruta */
-  #rgp-{{ sid }} .rgp-crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 clamp(18px,2.4vw,30px);padding:0;list-style:none;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  #rgp-{{ sid }} .rgp-crumbs{max-width:100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 clamp(18px,2.4vw,30px);padding:0;list-style:none;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
   #rgp-{{ sid }} .rgp-crumbs a{text-decoration:none}
   #rgp-{{ sid }} .rgp-crumbs a:hover{color:var(--accent)}
   #rgp-{{ sid }} .rgp-crumbs li+li::before{content:"/";margin-right:8px;color:var(--line-strong)}
   #rgp-{{ sid }} .rgp-crumbs [aria-current]{color:var(--text);max-width:40ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #rgp-{{ sid }} .rgp-crumbs li:last-child{display:flex;min-width:0;max-width:100%}
+  @media (max-width:560px){#rgp-{{ sid }} .rgp-crumbs [aria-current]{max-width:calc(100vw - 48px)}}
 
   /* Rejilla principal */
   #rgp-{{ sid }} .rgp-main{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:clamp(28px,4.5vw,72px);align-items:start}
@@ -413,7 +415,7 @@
                         endcase
                       -%}
                       <label class="rgp-pill">
-                        <input type="radio" name="rgp-{{ sid }}-opt-{{ forloop.parentloop.index }}" value="{{ value | escape }}" {% if option.selected_value == value %}checked{% endif %}>
+                        <input type="radio" name="rgp-{{ sid }}-opt-{{ option.position }}" value="{{ value | escape }}" {% if option.selected_value == value %}checked{% endif %}>
                         <span>{%- if dot != '' -%}<i class="rgp-dot" style="background:{{ dot }}" aria-hidden="true"></i>{%- endif -%}{{ value }}</span>
                       </label>
                     {%- endfor -%}
@@ -627,13 +629,18 @@
 
   /* Barra fija */
   const sticky = $('[data-rgp-sticky]');
-  if (sticky && addBtn && 'IntersectionObserver' in window) {
+  if (sticky && addBtn) {
     const buy = $('.rgp-buy');
-    new IntersectionObserver(([e]) => {
-      const show = !e.isIntersecting && e.boundingClientRect.top < 0;
+    let shown = null, tick = false;
+    const check = () => {
+      tick = false;
+      const show = buy.getBoundingClientRect().bottom < 0;
+      if (show === shown) return; shown = show;
       sticky.toggleAttribute('data-show', show); sticky.setAttribute('aria-hidden', !show);
       stickyBtn.tabIndex = show ? 0 : -1;
-    }).observe(buy);
+    };
+    addEventListener('scroll', () => { if (!tick) { tick = true; requestAnimationFrame(check); } }, { passive: true });
+    addEventListener('resize', check); check();
     stickyBtn.addEventListener('click', () => { if (form.requestSubmit) form.requestSubmit(addBtn); else addBtn.click(); });
   }
 
