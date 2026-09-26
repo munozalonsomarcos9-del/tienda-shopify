@@ -374,7 +374,7 @@
             <div class="rgp-price">
               <span class="rgp-price__now" data-rgp-price>{{ current.price | money }}</span>
               <s class="rgp-price__was" data-rgp-was {% unless current.compare_at_price > current.price %}hidden{% endunless %}>{{ current.compare_at_price | money }}</s>
-              <span class="rgp-price__save" data-rgp-save {% unless current.compare_at_price > current.price %}hidden{% endunless %}>{%- if current.compare_at_price > current.price -%}−{{ current.compare_at_price | minus: current.price | times: 100 | divided_by: current.compare_at_price }}%{%- endif -%}</span>
+              <span class="rgp-price__save" data-rgp-save {% unless current.compare_at_price > current.price %}hidden{% endunless %}>{%- if current.compare_at_price > current.price -%}−{{ current.compare_at_price | minus: current.price | times: 100.0 | divided_by: current.compare_at_price | round }}%{%- endif -%}</span>
             </div>
             <span class="rgp-price__tax">{{ s.tax_text }}</span>
           </div>

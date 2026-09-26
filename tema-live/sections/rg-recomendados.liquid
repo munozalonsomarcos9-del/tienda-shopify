@@ -81,6 +81,8 @@
   #rgr-{{ sid }} .rgr-t{margin:0;font-weight:600;font-size:16px;line-height:1.3;color:var(--text)}
   #rgr-{{ sid }} .rgr-foot{margin-top:auto;padding-top:8px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
   #rgr-{{ sid }} .rgr-p{font-family:var(--mono);font-weight:600;font-size:19px;line-height:1.1}
+  #rgr-{{ sid }} .rgr-p s{font-size:13px;color:var(--muted);margin-left:6px}
+  #rgr-{{ sid }} .rgr-sale{position:absolute;z-index:2;top:12px;right:12px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.1em;padding:5px 9px;border-radius:3px;background:var(--kerb);color:#fff}
   #rgr-{{ sid }} .rgr-p small{display:block;font-family:var(--body);font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
   #rgr-{{ sid }} .rgr-go{flex:0 0 auto;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line-strong);transition:background .2s,color .2s,border-color .2s}
   #rgr-{{ sid }} .rgr-card:hover .rgr-go{background:var(--accent);border-color:var(--accent);color:#1A1400}
@@ -127,6 +129,7 @@
         <li>
           <a class="rgr-card" href="{{ p.url }}">
             <div class="rgr-img">
+              {%- if p.compare_at_price_min > p.price_min -%}<span class="rgr-sale">−{{ p.compare_at_price_min | minus: p.price_min | times: 100.0 | divided_by: p.compare_at_price_min | round }}%</span>{%- endif -%}
               {%- if s.show_rank -%}
                 <span class="rgr-rank{% if forloop.index <= 3 %} rgr-rank--top{% endif %}"><b>#{{ forloop.index }}</b>{% if forloop.index <= 3 %} {{ s.rank_label }}{% endif %}</span>
               {%- endif -%}
@@ -141,7 +144,7 @@
               {%- if meta != '' -%}<span class="rgr-meta">{{ meta }}</span>{%- endif -%}
               <h3 class="rgr-t">{{ p.title }}</h3>
               <div class="rgr-foot">
-                <span class="rgr-p">{%- if p.price_varies -%}<small>Desde</small>{%- else -%}<small>Precio</small>{%- endif -%}{{ p.price_min | money }}</span>
+                <span class="rgr-p">{%- if p.price_varies -%}<small>Desde</small>{%- else -%}<small>Precio</small>{%- endif -%}{{ p.price_min | money }}{%- if p.compare_at_price_min > p.price_min -%}<s>{{ p.compare_at_price_min | money }}</s>{%- endif -%}</span>
                 <span class="rgr-go" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
               </div>
             </div>

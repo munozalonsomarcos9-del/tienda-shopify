@@ -292,7 +292,7 @@
               <a class="rgc2-card" href="{{ p.url }}">
                 <div class="rgc2-card__img">
                   {%- if on_sale -%}
-                    <span class="rgc2-badge rgc2-badge--sale">Oferta</span>
+                    <span class="rgc2-badge rgc2-badge--sale">Oferta −{{ p.compare_at_price_min | minus: p.price_min | times: 100.0 | divided_by: p.compare_at_price_min | round }}%</span>
                   {%- elsif p.variants.size > 1 and s.show_variants_badge -%}
                     <span class="rgc2-badge">{{ p.variants.size }} opciones</span>
                   {%- endif -%}
