@@ -14,14 +14,12 @@
   assign brand_blocks = section.blocks | where: 'type', 'brand'
   assign material_blocks = section.blocks | where: 'type', 'material'
 
-  assign total = 0
   assign min_price = nil
   for b in brand_blocks
     assign c = b.settings.collection
     if c == blank
       continue
     endif
-    assign total = total | plus: c.products_count
     for p in c.products
       if min_price == nil or p.price_min < min_price
         assign min_price = p.price_min
@@ -181,7 +179,6 @@
         {%- if s.subtitle != blank -%}<p class="rgk-sub">{{ s.subtitle }}</p>{%- endif -%}
       </div>
       <ul class="rgk-stats">
-        <li><b>{{ total }}</b><span>Modelos</span></li>
         <li><b>{{ brand_blocks.size }}</b><span>Marcas</span></li>
         {%- if min_price -%}<li><b>{{ min_price | money_without_trailing_zeros }}</b><span>Desde · IVA incl.</span></li>{%- endif -%}
       </ul>
@@ -194,7 +191,7 @@
         {%- for b in brand_blocks -%}
           {%- assign c = b.settings.collection -%}
           {%- if c == blank -%}{%- continue -%}{%- endif -%}
-          <li><a href="#rgk-{{ sid }}-{{ c.handle }}" data-rgk-jump>{{ b.settings.label | default: c.title }} <small>{{ c.products_count }}</small></a></li>
+          <li><a href="#rgk-{{ sid }}-{{ c.handle }}" data-rgk-jump>{{ b.settings.label | default: c.title }}</a></li>
         {%- endfor -%}
         {%- if material_blocks.size > 0 -%}<li><a href="#rgk-{{ sid }}-materiales" data-rgk-jump>{{ s.materials_title }}</a></li>{%- endif -%}
       </ul>
@@ -221,7 +218,7 @@
             <div class="rgk-brand__body">
               <span class="rgk-brand__name">{{ b.settings.label | default: c.title }}</span>
               <div class="rgk-brand__meta">
-                <span>{{ c.products_count }} {% if c.products_count == 1 %}modelo{% else %}modelos{% endif %}</span>
+                <span>Ver modelos</span>
                 {%- if cmin -%}<b><small>Desde</small>{{ cmin | money }}</b>{%- endif -%}
               </div>
             </div>
@@ -249,7 +246,7 @@
       <section class="rgk-group" id="rgk-{{ sid }}-{{ c.handle }}" data-rgk-group aria-labelledby="rgk-{{ sid }}-{{ c.handle }}-t" {{ b.shopify_attributes }}>
         <div class="rgk-group__head">
           <div class="rgk-group__txt">
-            <p class="rgk-kicker">{{ c.products_count }} {% if c.products_count == 1 %}modelo{% else %}modelos{% endif %}</p>
+            <p class="rgk-kicker">Colección</p>
             <h2 class="rgk-h2" id="rgk-{{ sid }}-{{ c.handle }}-t">Volantes <em>{{ b.settings.label | default: c.title }}</em></h2>
             {%- if series -%}
               <ul class="rgk-sub-chips">
@@ -311,7 +308,7 @@
             {%- assign mimg = b.settings.image | default: c.image | default: c.products.first.featured_media -%}
             <a class="rgk-mat" href="{{ c.url }}" {{ b.shopify_attributes }}>
               {%- if mimg -%}{{ mimg | image_url: width: 900 | image_tag: loading: 'lazy', widths: '450, 700, 900', sizes: '(min-width: 750px) 33vw, 100vw', alt: '' }}{%- endif -%}
-              <div><b>{{ b.settings.label | default: c.title }}</b><span>{{ c.products_count }} modelos →</span></div>
+              <div><b>{{ b.settings.label | default: c.title }}</b><span>Ver modelos →</span></div>
             </a>
           {%- endfor -%}
         </div>

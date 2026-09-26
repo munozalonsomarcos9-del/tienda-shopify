@@ -218,7 +218,6 @@
           {%- if collection.description != blank -%}<div class="rgc2-desc">{{ collection.description }}</div>{%- endif -%}
           {%- if s.show_stats and collection.products_count > 0 -%}
             <ul class="rgc2-stats">
-              <li><b>{{ collection.products_count }}</b><span>{% if collection.products_count == 1 %}Modelo{% else %}Modelos{% endif %}</span></li>
               {%- if min_price -%}<li><b>{{ min_price | money_without_trailing_zeros }}</b><span>Desde · IVA incl.</span></li>{%- endif -%}
               {%- if s.stat_3_value != blank -%}<li><b>{{ s.stat_3_value }}</b><span>{{ s.stat_3_label }}</span></li>{%- endif -%}
             </ul>
@@ -253,7 +252,7 @@
       {%- endif -%}
 
       <div class="rgc2-tools">
-        <p class="rgc2-count" style="margin:0"><b>{{ collection.products_count }}</b> {% if collection.products_count == 1 %}volante{% else %}volantes{% endif %}</p>
+        <p class="rgc2-count" style="margin:0"><b>Hechos</b> a medida</p>
         {%- if s.show_sort and collection.products_count > 1 -%}
           <div class="rgc2-sort">
             <label for="rgc2-sort-{{ sid }}">Ordenar</label>
