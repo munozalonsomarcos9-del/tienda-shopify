@@ -636,6 +636,12 @@
     const url = new URL(location.href); url.searchParams.set('variant', v.id); history.replaceState({}, '', url);
   };
   fieldsets.forEach(fs => fs.addEventListener('change', update));
+  /* Al abrir la página, la galería empieza en la foto de la versión elegida */
+  const startV = variants.find(v => String(v.id) === String(idInput.value));
+  if (startV && startV.featured_media) {
+    const k = slides.findIndex(s => s.dataset.mediaId === String(startV.featured_media.id));
+    if (k > 0) requestAnimationFrame(() => { track.scrollTo({ left: slides[k].offsetLeft, behavior: 'auto' }); mark(k); });
+  }
 
   /* Cantidad */
   const q = $('.rgp-qty input');
