@@ -1,0 +1,83 @@
+{%- comment -%} RacingGrip · Banner de vídeo del volante (en su ficha). Usa el campo «Vídeo del banner». {%- endcomment -%}
+{%- assign vid = product.metafields.custom.video_banner.value -%}
+{%- if vid != blank -%}
+{%- liquid
+  assign sid = section.id
+  assign s = section.settings
+  assign vsrc = ''
+  assign best = 0
+  for src in vid.sources
+    if src.mime_type == 'video/mp4' and src.height <= 1080 and src.height > best
+      assign vsrc = src.url
+      assign best = src.height
+    endif
+  endfor
+  if vsrc == ''
+    assign vsrc = vid.sources.first.url
+  endif
+-%}
+<style>
+  #rgvp-{{ sid }}{--bg:{{ s.color_bg }};--text:{{ s.color_text }};--muted:{{ s.color_muted }};--accent:{{ s.color_accent }};--kerb:{{ s.color_kerb }};
+    background:var(--bg);color:var(--text);padding:{{ s.pad_top }}px 0 {{ s.pad_bottom }}px;font-family:"Barlow","Helvetica Neue",Helvetica,Arial,sans-serif}
+  #rgvp-{{ sid }} *{box-sizing:border-box}
+  #rgvp-{{ sid }} [hidden]{display:none!important}
+  #rgvp-{{ sid }} .rgvp-wrap{max-width:{{ s.max_width }}px;margin:0 auto;padding-inline:clamp(16px,3vw,40px)}
+  #rgvp-{{ sid }} .rgvp-head{display:flex;align-items:center;gap:12px;margin:0 0 16px;font-family:"Chakra Petch",Menlo,monospace;font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+  #rgvp-{{ sid }} .rgvp-head::before{content:"";width:28px;height:2px;background:var(--accent)}
+  #rgvp-{{ sid }} .rgvp-box{position:relative;aspect-ratio:16/9;border-radius:{{ s.radius }}px;overflow:hidden;background:#0B0C0D;border:1px solid color-mix(in srgb, var(--text) 10%, transparent);box-shadow:0 50px 100px -40px rgba(0,0,0,.9)}
+  #rgvp-{{ sid }} video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+  #rgvp-{{ sid }} .rgvp-bar{position:absolute;left:0;right:0;bottom:0;height:5px;background:rgba(255,255,255,.12)}
+  #rgvp-{{ sid }} .rgvp-bar i{display:block;height:100%;width:0;background:repeating-linear-gradient(115deg,var(--kerb) 0 14px,#EDEAE4 14px 28px)}
+  #rgvp-{{ sid }} .rgvp-btn{position:absolute;right:16px;bottom:18px;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;cursor:pointer;border:1px solid color-mix(in srgb, var(--text) 25%, transparent);background:color-mix(in srgb, var(--bg) 70%, transparent);color:var(--text);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  #rgvp-{{ sid }} .rgvp-btn:hover{background:var(--accent);color:#1A1400;border-color:var(--accent)}
+  #rgvp-{{ sid }} .rgvp-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+</style>
+<section id="rgvp-{{ sid }}" aria-label="Vídeo de {{ product.title | escape }}">
+  <div class="rgvp-wrap">
+    {%- if s.heading != blank -%}<p class="rgvp-head">{{ s.heading }}</p>{%- endif -%}
+    <div class="rgvp-box">
+      <video data-rgvp muted playsinline loop preload="none" poster="{{ product.featured_media | default: vid.preview_image | image_url: width: 1400 }}" src="{{ vsrc }}"></video>
+      <button type="button" class="rgvp-btn" data-rgvp-toggle aria-label="Reproducir"><svg data-p width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l14 8-14 8z"/></svg><svg data-s hidden width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg></button>
+      <div class="rgvp-bar" aria-hidden="true"><i data-rgvp-bar></i></div>
+    </div>
+  </div>
+</section>
+<script>
+(() => {
+  const root = document.getElementById('rgvp-{{ sid }}');
+  if (!root || root.dataset.ready) return; root.dataset.ready = '1';
+  const v = root.querySelector('[data-rgvp]'), btn = root.querySelector('[data-rgvp-toggle]'), bar = root.querySelector('[data-rgvp-bar]');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let userPaused = false;
+  const icons = () => { btn.querySelector('[data-p]').hidden = !v.paused; btn.querySelector('[data-s]').hidden = v.paused; btn.setAttribute('aria-label', v.paused ? 'Reproducir' : 'Pausar'); };
+  v.addEventListener('play', icons); v.addEventListener('pause', icons);
+  v.addEventListener('timeupdate', () => { bar.style.width = (v.duration ? v.currentTime / v.duration * 100 : 0) + '%'; });
+  btn.addEventListener('click', () => { if (v.paused) { userPaused = false; v.play().catch(() => {}); } else { userPaused = true; v.pause(); } });
+  v.addEventListener('click', () => btn.click());
+  if ('IntersectionObserver' in window && !reduce) {
+    new IntersectionObserver(([e]) => { if (e.isIntersecting && !userPaused) v.play().catch(() => {}); else v.pause(); }, { threshold: .4 }).observe(v);
+  }
+})();
+</script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "RG · Vídeo del volante",
+  "tag": "div",
+  "class": "rg-video-producto-section",
+  "settings": [
+    { "type": "paragraph", "content": "Muestra el vídeo del campo «Vídeo del banner» del volante. Si no tiene, no aparece." },
+    { "type": "text", "id": "heading", "label": "Antetítulo", "default": "Míralo en movimiento" },
+    { "type": "color", "id": "color_bg", "label": "Fondo", "default": "#131517" },
+    { "type": "color", "id": "color_text", "label": "Texto", "default": "#F1EFEA" },
+    { "type": "color", "id": "color_muted", "label": "Texto secundario", "default": "#9AA1A8" },
+    { "type": "color", "id": "color_accent", "label": "Acento", "default": "#FFC21A" },
+    { "type": "color", "id": "color_kerb", "label": "Bordillo (rojo)", "default": "#D8342A" },
+    { "type": "range", "id": "max_width", "label": "Ancho máximo", "min": 1000, "max": 1600, "step": 20, "unit": "px", "default": 1400 },
+    { "type": "range", "id": "radius", "label": "Esquinas redondeadas", "min": 0, "max": 20, "step": 1, "unit": "px", "default": 10 },
+    { "type": "range", "id": "pad_top", "label": "Espacio arriba", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "pad_bottom", "label": "Espacio abajo", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 72 }
+  ]
+}
+{% endschema %}

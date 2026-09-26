@@ -1,0 +1,259 @@
+{%- comment -%}
+  RacingGrip · Escaparate de vídeos interactivo.
+  Muestra el vídeo de cada volante (campo «Vídeo del banner» del producto). Al pinchar en un
+  volante se reproduce su vídeo; al terminar pasa solo al siguiente.
+{%- endcomment -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,700;1,800;1,900&family=Barlow:wght@400;500;600;700&family=Chakra+Petch:wght@500;600&display=swap">
+
+{%- liquid
+  assign sid = section.id
+  assign s = section.settings
+  assign source = s.collection | default: collections.all
+  assign brand_blocks = section.blocks | where: 'type', 'brand'
+-%}
+
+<style>
+  #rgv-{{ sid }}{
+    --bg: {{ s.color_bg }};--surface: {{ s.color_surface }};--text: {{ s.color_text }};--muted: {{ s.color_muted }};--accent: {{ s.color_accent }};--kerb: {{ s.color_kerb }};
+    --line: color-mix(in srgb, var(--text) 10%, transparent);--line-strong: color-mix(in srgb, var(--text) 18%, transparent);
+    --display:"Saira Condensed","Arial Narrow",Impact,sans-serif;--mono:"Chakra Petch",Menlo,Consolas,monospace;--body:"Barlow","Helvetica Neue",Helvetica,Arial,sans-serif;
+    position:relative;isolation:isolate;background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;
+    padding:{{ s.pad_top }}px 0 {{ s.pad_bottom }}px;
+  }
+  #rgv-{{ sid }}::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(900px 480px at 50% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%)}
+  #rgv-{{ sid }} *,#rgv-{{ sid }} *::before,#rgv-{{ sid }} *::after{box-sizing:border-box}
+  #rgv-{{ sid }} [hidden]{display:none!important}
+  #rgv-{{ sid }} img,#rgv-{{ sid }} video{display:block;max-width:100%}
+  #rgv-{{ sid }} a{color:inherit}
+  #rgv-{{ sid }} button{font:inherit;color:inherit}
+  #rgv-{{ sid }} :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  #rgv-{{ sid }} .rgv-wrap{max-width:{{ s.max_width }}px;margin:0 auto;padding-inline:clamp(16px,3vw,40px)}
+  #rgv-{{ sid }} .rgv-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+  #rgv-{{ sid }} .rgv-kicker{display:flex;align-items:center;gap:12px;margin:0 0 12px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+  #rgv-{{ sid }} .rgv-kicker::before{content:"";width:28px;height:2px;background:var(--accent)}
+  #rgv-{{ sid }} .rgv-title{margin:0;font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:clamp(36px,4.6vw,{{ s.title_size }}px);line-height:.9;color:var(--text)}
+  #rgv-{{ sid }} .rgv-title em{font-style:inherit;color:var(--accent)}
+  #rgv-{{ sid }} .rgv-sub{margin:10px 0 0;color:var(--muted);max-width:56ch}
+  #rgv-{{ sid }} .rgv-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0;padding:0;list-style:none}
+  #rgv-{{ sid }} .rgv-tab{min-height:42px;padding:8px 16px;border-radius:999px;border:1px solid var(--line-strong);background:transparent;cursor:pointer;font-weight:600;font-size:14px;transition:background .15s,border-color .15s,color .15s}
+  #rgv-{{ sid }} .rgv-tab:hover{border-color:var(--accent);color:var(--accent)}
+  #rgv-{{ sid }} .rgv-tab[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#1A1400}
+
+  /* Reproductor */
+  #rgv-{{ sid }} .rgv-player{position:relative;aspect-ratio:16/9;border-radius:{{ s.radius }}px;overflow:hidden;background:#0B0C0D;border:1px solid var(--line);box-shadow:0 50px 100px -40px rgba(0,0,0,.9),0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent)}
+  #rgv-{{ sid }} .rgv-player video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .35s}
+  #rgv-{{ sid }} .rgv-player video.is-swapping{opacity:0}
+  #rgv-{{ sid }} .rgv-bar{position:absolute;left:0;right:0;bottom:0;height:5px;background:rgba(255,255,255,.12);z-index:2}
+  #rgv-{{ sid }} .rgv-bar i{display:block;height:100%;width:0;background:repeating-linear-gradient(115deg,var(--kerb) 0 14px,#EDEAE4 14px 28px)}
+  #rgv-{{ sid }} .rgv-ctrl{position:absolute;z-index:3;right:16px;bottom:18px;display:flex;gap:8px}
+  #rgv-{{ sid }} .rgv-ctrl button,#rgv-{{ sid }} .rgv-ctrl a{height:44px;min-width:44px;padding:0 14px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;text-decoration:none;font-weight:700;font-size:14px;letter-spacing:.03em;border:1px solid var(--line-strong);background:color-mix(in srgb, var(--bg) 70%, transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:var(--text);transition:background .2s,color .2s,border-color .2s}
+  #rgv-{{ sid }} .rgv-ctrl button:hover{border-color:var(--accent);color:var(--accent)}
+  #rgv-{{ sid }} .rgv-ctrl a{background:var(--accent);border-color:var(--accent);color:#1A1400}
+  #rgv-{{ sid }} .rgv-ctrl a:hover{filter:brightness(1.06)}
+  #rgv-{{ sid }} .rgv-nav{position:absolute;top:50%;z-index:3;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;display:grid;place-items:center;cursor:pointer;border:1px solid var(--line-strong);background:color-mix(in srgb, var(--bg) 70%, transparent);color:var(--text);opacity:0;transition:opacity .2s,background .2s,color .2s}
+  #rgv-{{ sid }} .rgv-player:hover .rgv-nav,#rgv-{{ sid }} .rgv-nav:focus-visible{opacity:1}
+  #rgv-{{ sid }} .rgv-nav:hover{background:var(--accent);color:#1A1400;border-color:var(--accent)}
+  #rgv-{{ sid }} .rgv-prev{left:14px}#rgv-{{ sid }} .rgv-next{right:14px}
+  @media (max-width:749px){#rgv-{{ sid }} .rgv-nav{display:none}#rgv-{{ sid }} .rgv-ctrl{right:10px;bottom:12px}#rgv-{{ sid }} .rgv-ctrl a span{display:none}}
+
+  /* Selector de volantes */
+  #rgv-{{ sid }} .rgv-list{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 12px * 5) / 6);gap:12px;margin:16px 0 0;padding:4px 2px 8px;list-style:none;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+  #rgv-{{ sid }} .rgv-list::-webkit-scrollbar{display:none}
+  @media (max-width:989px){#rgv-{{ sid }} .rgv-list{grid-auto-columns:calc((100% - 12px * 3) / 4)}}
+  @media (max-width:560px){#rgv-{{ sid }} .rgv-list{grid-auto-columns:42%}}
+  #rgv-{{ sid }} .rgv-list li{scroll-snap-align:start}
+  #rgv-{{ sid }} .rgv-list li[hidden]{display:none}
+  #rgv-{{ sid }} .rgv-item{position:relative;width:100%;height:100%;display:flex;flex-direction:column;text-align:left;padding:0;border-radius:8px;overflow:hidden;cursor:pointer;background:var(--surface);border:1px solid var(--line);transition:border-color .2s,transform .2s}
+  #rgv-{{ sid }} .rgv-item:hover{border-color:color-mix(in srgb, var(--accent) 60%, transparent);transform:translateY(-2px)}
+  #rgv-{{ sid }} .rgv-item[aria-current="true"]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+  #rgv-{{ sid }} .rgv-item__img{position:relative;aspect-ratio:4/3;overflow:hidden;background:#E9E8E4}
+  #rgv-{{ sid }} .rgv-item__img img{width:100%;height:100%;object-fit:cover}
+  #rgv-{{ sid }} .rgv-item__play{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(to top, rgba(15,17,19,.55), transparent 60%)}
+  #rgv-{{ sid }} .rgv-item__play > span{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb, var(--bg) 75%, transparent);border:1px solid var(--line-strong);color:var(--text);transition:background .2s,color .2s}
+  #rgv-{{ sid }} .rgv-item:hover .rgv-item__play > span,#rgv-{{ sid }} .rgv-item[aria-current="true"] .rgv-item__play > span{background:var(--accent);color:#1A1400;border-color:var(--accent)}
+  #rgv-{{ sid }} .rgv-item__eq{display:none;gap:2px;align-items:flex-end;height:14px}
+  #rgv-{{ sid }} .rgv-item__eq i{width:3px;background:#1A1400;animation:rgv-eq-{{ sid }} .8s ease-in-out infinite}
+  #rgv-{{ sid }} .rgv-item__eq i:nth-child(2){animation-delay:.2s}#rgv-{{ sid }} .rgv-item__eq i:nth-child(3){animation-delay:.4s}
+  @keyframes rgv-eq-{{ sid }}{0%,100%{height:4px}50%{height:14px}}
+  #rgv-{{ sid }} .rgv-item[aria-current="true"] .rgv-item__eq{display:flex}
+  #rgv-{{ sid }} .rgv-item[aria-current="true"] .rgv-item__tri{display:none}
+  #rgv-{{ sid }} .rgv-item__body{display:flex;flex-direction:column;gap:4px;padding:10px 12px 12px}
+  #rgv-{{ sid }} .rgv-item__t{font-weight:600;font-size:14px;line-height:1.25}
+  #rgv-{{ sid }} .rgv-item__p{font-family:var(--mono);font-weight:600;font-size:14px;color:var(--accent)}
+  #rgv-{{ sid }} .rgv-empty{padding:40px;border:1px dashed var(--line-strong);border-radius:8px;color:var(--muted);text-align:center}
+  @media (prefers-reduced-motion:reduce){#rgv-{{ sid }} *{transition:none!important;animation:none!important}}
+</style>
+
+<section id="rgv-{{ sid }}" aria-labelledby="rgv-t-{{ sid }}" data-autonext="{{ s.autonext }}">
+  <div class="rgv-wrap">
+    <div class="rgv-head">
+      <div>
+        <p class="rgv-kicker">{{ s.kicker }}</p>
+        <h2 class="rgv-title" id="rgv-t-{{ sid }}">{{ s.title }}{% if s.title_accent != blank %} <em>{{ s.title_accent }}</em>{% endif %}</h2>
+        {%- if s.subtitle != blank -%}<p class="rgv-sub">{{ s.subtitle }}</p>{%- endif -%}
+      </div>
+      {%- if brand_blocks.size > 0 -%}
+        <ul class="rgv-tabs" aria-label="Filtrar por marca">
+          <li><button type="button" class="rgv-tab" data-rgv-brand="" aria-pressed="true">Todos</button></li>
+          {%- for b in brand_blocks -%}
+            <li {{ b.shopify_attributes }}><button type="button" class="rgv-tab" data-rgv-brand="{{ b.settings.tag | escape }}" aria-pressed="false">{{ b.settings.label | default: b.settings.tag }}</button></li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+
+    {%- capture items -%}
+      {%- for p in source.products limit: 50 -%}
+        {%- assign vid = p.metafields.custom.video_banner.value -%}
+        {%- if vid == blank -%}{%- continue -%}{%- endif -%}
+        {%- liquid
+          assign vsrc = ''
+          assign best = 0
+          for src in vid.sources
+            if src.mime_type == 'video/mp4' and src.height <= 1080 and src.height > best
+              assign vsrc = src.url
+              assign best = src.height
+            endif
+          endfor
+          if vsrc == ''
+            assign vsrc = vid.sources.first.url
+          endif
+          assign poster_src = p.featured_media | default: vid.preview_image
+          assign poster = poster_src | image_url: width: 1280
+        -%}
+        <li data-tags="{{ p.tags | join: '|' | escape }}">
+          <button type="button" class="rgv-item" data-rgv-item data-src="{{ vsrc }}" data-poster="{{ poster }}" data-url="{{ p.url }}" data-title="{{ p.title | escape }}" aria-current="false">
+            <span class="rgv-item__img">
+              {%- if p.featured_media -%}{{ p.featured_media | image_url: width: 400 | image_tag: loading: 'lazy', alt: '' }}{%- endif -%}
+              <span class="rgv-item__play"><span><svg class="rgv-item__tri" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l14 8-14 8z"/></svg><span class="rgv-item__eq" aria-hidden="true"><i></i><i></i><i></i></span></span></span>
+            </span>
+            <span class="rgv-item__body">
+              <span class="rgv-item__t">{{ p.title | remove_first: 'Volante ' }}</span>
+              <span class="rgv-item__p">{%- if p.price_varies -%}Desde {% endif -%}{{ p.price_min | money }}</span>
+            </span>
+          </button>
+        </li>
+      {%- endfor -%}
+    {%- endcapture -%}
+
+    {%- if items contains 'data-rgv-item' -%}
+      <div class="rgv-player">
+        <video data-rgv-video muted playsinline preload="metadata" aria-label="Vídeo del volante"></video>
+        <button type="button" class="rgv-nav rgv-prev" data-rgv-prev aria-label="Volante anterior"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button type="button" class="rgv-nav rgv-next" data-rgv-next aria-label="Volante siguiente"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+        <div class="rgv-ctrl">
+          <button type="button" data-rgv-toggle aria-label="Pausar"><svg data-rgv-ico-pause width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg><svg data-rgv-ico-play hidden width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4l14 8-14 8z"/></svg></button>
+          <a href="#" data-rgv-link><span>{{ s.button_label }}</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <div class="rgv-bar" aria-hidden="true"><i data-rgv-bar></i></div>
+      </div>
+      <ul class="rgv-list" data-rgv-list>{{ items }}</ul>
+    {%- else -%}
+      <p class="rgv-empty">Todavía no hay vídeos. Añádelos en cada volante, en el campo «Vídeo del banner».</p>
+    {%- endif -%}
+  </div>
+</section>
+
+<script>
+(() => {
+  const root = document.getElementById('rgv-{{ sid }}');
+  if (!root || root.dataset.ready) return; root.dataset.ready = '1';
+  const video = root.querySelector('[data-rgv-video]'); if (!video) return;
+  const items = [...root.querySelectorAll('[data-rgv-item]')];
+  const list = root.querySelector('[data-rgv-list]');
+  const link = root.querySelector('[data-rgv-link]');
+  const bar = root.querySelector('[data-rgv-bar]');
+  const toggle = root.querySelector('[data-rgv-toggle]');
+  const icoPause = root.querySelector('[data-rgv-ico-pause]'), icoPlay = root.querySelector('[data-rgv-ico-play]');
+  const autonext = root.dataset.autonext === 'true';
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let cur = -1, userPaused = false, inView = false;
+
+  const visibleItems = () => items.filter(b => !b.closest('li').hidden);
+  const setIcons = () => { const p = video.paused; icoPause.hidden = p; icoPlay.hidden = !p; toggle.setAttribute('aria-label', p ? 'Reproducir' : 'Pausar'); };
+  const play = () => { if (!userPaused && inView && !reduce) video.play().catch(() => {}); };
+
+  const select = (btn, focusList) => {
+    const k = items.indexOf(btn); if (k < 0) return;
+    cur = k;
+    items.forEach(b => b.setAttribute('aria-current', b === btn));
+    link.href = btn.dataset.url; link.setAttribute('aria-label', 'Ver ' + btn.dataset.title);
+    video.classList.add('is-swapping');
+    setTimeout(() => {
+      video.poster = btn.dataset.poster || '';
+      video.src = btn.dataset.src; video.load();
+      video.classList.remove('is-swapping');
+      play();
+    }, 180);
+    if (focusList) { const li = btn.closest('li'); list.scrollTo({ left: li.offsetLeft - (list.clientWidth - li.offsetWidth) / 2, behavior: 'smooth' }); }
+  };
+  const step = d => { const v = visibleItems(); if (!v.length) return; const i = v.indexOf(items[cur]); select(v[(i + d + v.length) % v.length], true); };
+
+  items.forEach(b => b.addEventListener('click', () => { userPaused = false; select(b, true); }));
+  root.querySelector('[data-rgv-prev]').addEventListener('click', () => step(-1));
+  root.querySelector('[data-rgv-next]').addEventListener('click', () => step(1));
+  toggle.addEventListener('click', () => { if (video.paused) { userPaused = false; video.play().catch(() => {}); } else { userPaused = true; video.pause(); } });
+  video.addEventListener('play', setIcons); video.addEventListener('pause', setIcons);
+  video.addEventListener('timeupdate', () => { bar.style.width = (video.duration ? video.currentTime / video.duration * 100 : 0) + '%'; });
+  video.addEventListener('ended', () => { if (autonext) step(1); else { video.currentTime = 0; play(); } });
+  video.addEventListener('click', () => toggle.click());
+
+  root.querySelectorAll('[data-rgv-brand]').forEach(tab => tab.addEventListener('click', () => {
+    const tag = tab.dataset.rgvBrand;
+    root.querySelectorAll('[data-rgv-brand]').forEach(t => t.setAttribute('aria-pressed', t === tab));
+    items.forEach(b => { const li = b.closest('li'); li.hidden = !!tag && !li.dataset.tags.split('|').includes(tag); });
+    list.scrollTo({ left: 0 });
+    const v = visibleItems(); if (v.length) select(v[0], false);
+  }));
+
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([e]) => { inView = e.isIntersecting; if (inView) play(); else video.pause(); }, { threshold: .35 }).observe(video);
+  } else { inView = true; }
+  select(items[0], false);
+})();
+</script>
+
+{% schema %}
+{
+  "name": "RG · Vídeos",
+  "tag": "div",
+  "class": "rg-videos-section",
+  "settings": [
+    { "type": "paragraph", "content": "Cada volante muestra el vídeo de su campo «Vídeo del banner» (Productos → volante → Metacampos)." },
+    { "type": "collection", "id": "collection", "label": "Volantes que se muestran", "info": "Si lo dejas vacío, se muestran todos los que tengan vídeo." },
+    { "type": "checkbox", "id": "autonext", "label": "Pasar solo al siguiente volante al acabar el vídeo", "default": true },
+    { "type": "header", "content": "Textos" },
+    { "type": "text", "id": "kicker", "label": "Antetítulo", "default": "Míralos en movimiento" },
+    { "type": "text", "id": "title", "label": "Título", "default": "Elige tu" },
+    { "type": "text", "id": "title_accent", "label": "Título (parte en color)", "default": "volante" },
+    { "type": "text", "id": "subtitle", "label": "Subtítulo", "default": "Pincha en cualquier volante para ver su vídeo. Todos se fabrican a medida para tu coche." },
+    { "type": "text", "id": "button_label", "label": "Botón sobre el vídeo", "default": "Ver este volante" },
+    { "type": "header", "content": "Colores" },
+    { "type": "color", "id": "color_bg", "label": "Fondo", "default": "#131517" },
+    { "type": "color", "id": "color_surface", "label": "Superficies", "default": "#1C1F22" },
+    { "type": "color", "id": "color_text", "label": "Texto", "default": "#F1EFEA" },
+    { "type": "color", "id": "color_muted", "label": "Texto secundario", "default": "#9AA1A8" },
+    { "type": "color", "id": "color_accent", "label": "Acento", "default": "#FFC21A" },
+    { "type": "color", "id": "color_kerb", "label": "Bordillo (rojo)", "default": "#D8342A" },
+    { "type": "header", "content": "Tamaño y espaciado" },
+    { "type": "range", "id": "title_size", "label": "Tamaño máximo del título", "min": 32, "max": 80, "step": 2, "unit": "px", "default": 56 },
+    { "type": "range", "id": "max_width", "label": "Ancho máximo", "min": 1000, "max": 1600, "step": 20, "unit": "px", "default": 1400 },
+    { "type": "range", "id": "radius", "label": "Esquinas redondeadas", "min": 0, "max": 20, "step": 1, "unit": "px", "default": 10 },
+    { "type": "range", "id": "pad_top", "label": "Espacio arriba", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "pad_bottom", "label": "Espacio abajo", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "blocks": [
+    {
+      "type": "brand",
+      "name": "Filtro de marca",
+      "settings": [
+        { "type": "text", "id": "tag", "label": "Etiqueta de los volantes", "info": "Por ejemplo: BMW, Mercedes-Benz, Porsche, Volkswagen." },
+        { "type": "text", "id": "label", "label": "Nombre del botón" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "RG · Vídeos" }]
+}
+{% endschema %}

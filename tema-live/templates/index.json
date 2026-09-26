@@ -83,11 +83,54 @@
     "rg_pagos": {
       "type": "rg-pagos",
       "settings": {}
+    },
+    "rg_videos": {
+      "type": "rg-videos",
+      "blocks": {
+        "bmw": {
+          "type": "brand",
+          "settings": {
+            "tag": "BMW",
+            "label": "BMW"
+          }
+        },
+        "mercedes": {
+          "type": "brand",
+          "settings": {
+            "tag": "Mercedes-Benz",
+            "label": "Mercedes-Benz"
+          }
+        },
+        "porsche": {
+          "type": "brand",
+          "settings": {
+            "tag": "Porsche",
+            "label": "Porsche"
+          }
+        },
+        "vw": {
+          "type": "brand",
+          "settings": {
+            "tag": "Volkswagen",
+            "label": "Volkswagen"
+          }
+        }
+      },
+      "block_order": [
+        "bmw",
+        "mercedes",
+        "porsche",
+        "vw"
+      ],
+      "settings": {
+        "collection": "todos-los-volantes"
+      }
     }
   },
   "order": [
     "rg_banner",
     "rg_destacado",
+    "rg_videos",
     "rg_colecciones",
     "rg_recomendados",
     "rg_pagos"

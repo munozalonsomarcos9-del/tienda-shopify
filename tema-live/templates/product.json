@@ -12,10 +12,15 @@
         "pad_top": 0,
         "pad_bottom": 88
       }
+    },
+    "video": {
+      "type": "rg-video-producto",
+      "settings": {}
     }
   },
   "order": [
     "main",
+    "video",
     "recomendados"
   ]
 }
