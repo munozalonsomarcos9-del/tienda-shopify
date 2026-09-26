@@ -1,0 +1,215 @@
+{%- comment -%} RacingGrip · Volantes recomendados (los más vendidos) {%- endcomment -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,700;1,800;1,900&family=Barlow:wght@400;500;600;700&family=Chakra+Petch:wght@500;600&display=swap">
+
+{%- liquid
+  assign sid = section.id
+  assign s = section.settings
+  comment
+    Los volantes salen en el orden de la colección elegida. «Todos los volantes» está
+    ordenada por «Más vendidos», así que el primero es el que más se vende.
+  endcomment
+  assign source = s.collection | default: collections.all
+  assign current_id = product.id | default: 0
+-%}
+
+<style>
+  #rgr-{{ sid }}{
+    --bg: {{ s.color_bg }};
+    --surface: {{ s.color_surface }};
+    --text: {{ s.color_text }};
+    --muted: {{ s.color_muted }};
+    --accent: {{ s.color_accent }};
+    --kerb: {{ s.color_kerb }};
+    --line: color-mix(in srgb, var(--text) 10%, transparent);
+    --line-strong: color-mix(in srgb, var(--text) 18%, transparent);
+    --display: "Saira Condensed","Arial Narrow",Impact,sans-serif;
+    --mono: "Chakra Petch",Menlo,Consolas,monospace;
+    --body: "Barlow","Helvetica Neue",Helvetica,Arial,sans-serif;
+    position:relative;isolation:isolate;
+    background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    padding:{{ s.pad_top }}px 0 {{ s.pad_bottom }}px;
+  }
+  {%- if s.top_line -%}
+  #rgr-{{ sid }}::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:repeating-linear-gradient(115deg,var(--kerb) 0 26px,#EDEAE4 26px 52px)}
+  {%- endif -%}
+  #rgr-{{ sid }} *,#rgr-{{ sid }} *::before,#rgr-{{ sid }} *::after{box-sizing:border-box}
+  #rgr-{{ sid }} img{display:block;max-width:100%;height:auto}
+  #rgr-{{ sid }} a{color:inherit}
+  #rgr-{{ sid }} button{font:inherit;color:inherit}
+  #rgr-{{ sid }} :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  #rgr-{{ sid }} .rgr-wrap{max-width:{{ s.max_width }}px;margin:0 auto;padding-inline:clamp(16px,3vw,40px)}
+
+  #rgr-{{ sid }} .rgr-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:26px}
+  #rgr-{{ sid }} .rgr-head__txt{display:flex;flex-direction:column;gap:12px;max-width:62ch}
+  #rgr-{{ sid }} .rgr-kicker{display:flex;align-items:center;gap:12px;margin:0;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+  #rgr-{{ sid }} .rgr-kicker::before{content:"";width:28px;height:2px;background:var(--accent)}
+  #rgr-{{ sid }} .rgr-title{margin:0;font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:clamp(34px,4.4vw,{{ s.title_size }}px);line-height:.92;letter-spacing:-.005em;color:var(--text)}
+  #rgr-{{ sid }} .rgr-title em{font-style:inherit;color:var(--accent)}
+  #rgr-{{ sid }} .rgr-sub{margin:0;color:var(--muted)}
+  #rgr-{{ sid }} .rgr-actions{display:flex;align-items:center;gap:10px}
+  #rgr-{{ sid }} .rgr-link{display:inline-flex;gap:8px;align-items:center;font-weight:700;text-decoration:none;color:var(--accent);margin-right:8px}
+  #rgr-{{ sid }} .rgr-link:hover{text-decoration:underline}
+  #rgr-{{ sid }} .rgr-arrow{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;cursor:pointer;background:transparent;border:1px solid var(--line-strong);color:var(--text);transition:background .2s,color .2s,border-color .2s,opacity .2s}
+  #rgr-{{ sid }} .rgr-arrow:hover:not([disabled]){background:var(--accent);border-color:var(--accent);color:#1A1400}
+  #rgr-{{ sid }} .rgr-arrow[disabled]{opacity:.3;cursor:default}
+  @media (max-width:749px){#rgr-{{ sid }} .rgr-arrow{display:none}}
+
+  #rgr-{{ sid }} .rgr-track{--gap:16px;display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - var(--gap) * ({{ s.per_row }} - 1)) / {{ s.per_row }});gap:var(--gap);margin:0;padding:4px 2px 10px;list-style:none;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;overscroll-behavior-x:contain}
+  #rgr-{{ sid }} .rgr-track::-webkit-scrollbar{display:none}
+  @media (max-width:1100px){#rgr-{{ sid }} .rgr-track{grid-auto-columns:calc((100% - var(--gap) * 2) / 3)}}
+  @media (max-width:749px){#rgr-{{ sid }} .rgr-track{--gap:10px;grid-auto-columns:72%}}
+  #rgr-{{ sid }} .rgr-track > li{scroll-snap-align:start;min-width:0}
+
+  #rgr-{{ sid }} .rgr-card{position:relative;height:100%;display:flex;flex-direction:column;border-radius:{{ s.radius }}px;overflow:hidden;text-decoration:none;background:var(--surface);border:1px solid var(--line);transition:border-color .2s,transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s}
+  #rgr-{{ sid }} .rgr-card::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:repeating-linear-gradient(115deg,var(--kerb) 0 20px,#EDEAE4 20px 40px);transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.16,1,.3,1)}
+  #rgr-{{ sid }} .rgr-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 24px 50px -24px rgba(0,0,0,.8)}
+  #rgr-{{ sid }} .rgr-card:hover::after{transform:scaleX(1)}
+  #rgr-{{ sid }} .rgr-img{position:relative;aspect-ratio:1/1;overflow:hidden;background:#E9E8E4}
+  #rgr-{{ sid }} .rgr-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.16,1,.3,1),opacity .4s}
+  #rgr-{{ sid }} .rgr-img img + img{opacity:0}
+  #rgr-{{ sid }} .rgr-card:hover .rgr-img img{transform:scale(1.05)}
+  #rgr-{{ sid }} .rgr-card:hover .rgr-img img + img{opacity:1}
+  #rgr-{{ sid }} .rgr-rank{position:absolute;z-index:2;top:12px;left:12px;display:inline-flex;align-items:baseline;gap:4px;padding:5px 10px;border-radius:3px;background:var(--bg);color:var(--text);border:1px solid var(--line-strong);font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase}
+  #rgr-{{ sid }} .rgr-rank b{font-size:15px;letter-spacing:0;color:var(--accent)}
+  #rgr-{{ sid }} .rgr-rank--top{background:var(--accent);border-color:var(--accent);color:#1A1400}
+  #rgr-{{ sid }} .rgr-rank--top b{color:#1A1400}
+  #rgr-{{ sid }} .rgr-body{display:flex;flex-direction:column;gap:8px;padding:16px 18px 22px;flex:1}
+  #rgr-{{ sid }} .rgr-meta{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  #rgr-{{ sid }} .rgr-t{margin:0;font-weight:600;font-size:16px;line-height:1.3;color:var(--text)}
+  #rgr-{{ sid }} .rgr-foot{margin-top:auto;padding-top:8px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+  #rgr-{{ sid }} .rgr-p{font-family:var(--mono);font-weight:600;font-size:19px;line-height:1.1}
+  #rgr-{{ sid }} .rgr-p small{display:block;font-family:var(--body);font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  #rgr-{{ sid }} .rgr-go{flex:0 0 auto;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line-strong);transition:background .2s,color .2s,border-color .2s}
+  #rgr-{{ sid }} .rgr-card:hover .rgr-go{background:var(--accent);border-color:var(--accent);color:#1A1400}
+  @media (max-width:749px){#rgr-{{ sid }} .rgr-body{padding:12px 14px 16px}#rgr-{{ sid }} .rgr-t{font-size:15px}#rgr-{{ sid }} .rgr-p{font-size:17px}}
+
+  #rgr-{{ sid }} .rgr-bar{margin-top:14px;height:3px;border-radius:2px;background:var(--line);overflow:hidden}
+  #rgr-{{ sid }} .rgr-bar i{display:block;height:100%;width:25%;background:var(--accent);border-radius:2px;transition:transform .2s linear;transform-origin:left}
+</style>
+
+<section id="rgr-{{ sid }}" aria-labelledby="rgr-t-{{ sid }}">
+  <div class="rgr-wrap">
+    <div class="rgr-head">
+      <div class="rgr-head__txt">
+        {%- if s.kicker != blank -%}<p class="rgr-kicker">{{ s.kicker }}</p>{%- endif -%}
+        <h2 class="rgr-title" id="rgr-t-{{ sid }}">{{ s.title }}{% if s.title_accent != blank %} <em>{{ s.title_accent }}</em>{% endif %}</h2>
+        {%- if s.subtitle != blank -%}<p class="rgr-sub">{{ s.subtitle }}</p>{%- endif -%}
+      </div>
+      <div class="rgr-actions">
+        {%- if s.link_label != blank -%}<a class="rgr-link" href="{{ source.url }}">{{ s.link_label }} <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>{%- endif -%}
+        <button type="button" class="rgr-arrow" data-rgr-prev aria-label="Anteriores"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button type="button" class="rgr-arrow" data-rgr-next aria-label="Siguientes"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+
+    <ul class="rgr-track" data-rgr-track>
+      {%- assign shown = 0 -%}
+      {%- for p in source.products -%}
+        {%- if p.id == current_id -%}{%- continue -%}{%- endif -%}
+        {%- if shown >= s.limit -%}{%- break -%}{%- endif -%}
+        {%- assign shown = shown | plus: 1 -%}
+        {%- liquid
+          assign meta = ''
+          for tag in p.tags
+            if tag == 'Volante'
+              continue
+            endif
+            if meta == ''
+              assign meta = tag
+            else
+              assign meta = meta | append: ' · ' | append: tag
+            endif
+          endfor
+        -%}
+        <li>
+          <a class="rgr-card" href="{{ p.url }}">
+            <div class="rgr-img">
+              {%- if s.show_rank -%}
+                <span class="rgr-rank{% if forloop.index <= 3 %} rgr-rank--top{% endif %}"><b>#{{ forloop.index }}</b>{% if forloop.index <= 3 %} {{ s.rank_label }}{% endif %}</span>
+              {%- endif -%}
+              {%- if p.featured_media -%}
+                {{ p.featured_media | image_url: width: 700 | image_tag: loading: 'lazy', widths: '300, 450, 600, 700', sizes: '(min-width: 1100px) 25vw, (min-width: 750px) 33vw, 72vw', alt: p.featured_media.alt | default: p.title }}
+                {%- if p.media.size > 1 -%}{{ p.media[1] | image_url: width: 700 | image_tag: loading: 'lazy', widths: '300, 450, 600, 700', sizes: '(min-width: 1100px) 25vw, (min-width: 750px) 33vw, 72vw', alt: '' }}{%- endif -%}
+              {%- else -%}
+                {{ 'product-1' | placeholder_svg_tag }}
+              {%- endif -%}
+            </div>
+            <div class="rgr-body">
+              {%- if meta != '' -%}<span class="rgr-meta">{{ meta }}</span>{%- endif -%}
+              <h3 class="rgr-t">{{ p.title }}</h3>
+              <div class="rgr-foot">
+                <span class="rgr-p">{%- if p.price_varies -%}<small>Desde</small>{%- else -%}<small>Precio</small>{%- endif -%}{{ p.price_min | money }}</span>
+                <span class="rgr-go" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+              </div>
+            </div>
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+    <div class="rgr-bar" aria-hidden="true"><i data-rgr-bar></i></div>
+  </div>
+</section>
+
+<script>
+(() => {
+  const root = document.getElementById('rgr-{{ sid }}');
+  if (!root || root.dataset.ready) return; root.dataset.ready = '1';
+  const track = root.querySelector('[data-rgr-track]');
+  const prev = root.querySelector('[data-rgr-prev]'), next = root.querySelector('[data-rgr-next]');
+  const bar = root.querySelector('[data-rgr-bar]');
+  const step = () => { const li = track.querySelector('li'); return li ? li.getBoundingClientRect().width + parseFloat(getComputedStyle(track).columnGap || 16) : track.clientWidth; };
+  const sync = () => {
+    const max = track.scrollWidth - track.clientWidth;
+    prev.disabled = track.scrollLeft <= 2; next.disabled = track.scrollLeft >= max - 2;
+    const vis = track.clientWidth / track.scrollWidth;
+    bar.style.width = (vis * 100) + '%';
+    bar.style.transform = 'translateX(' + (max > 0 ? (track.scrollLeft / max) * ((1 - vis) / vis) * 100 : 0) + '%)';
+    bar.parentElement.style.display = max > 2 ? '' : 'none';
+    if (max <= 2) { prev.hidden = next.hidden = true; }
+  };
+  prev.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: 'smooth' }));
+  next.addEventListener('click', () => track.scrollBy({ left: step(), behavior: 'smooth' }));
+  track.addEventListener('scroll', () => requestAnimationFrame(sync), { passive: true });
+  addEventListener('resize', sync); sync();
+})();
+</script>
+
+{% schema %}
+{
+  "name": "RG · Recomendados",
+  "tag": "div",
+  "class": "rg-recomendados-section",
+  "settings": [
+    { "type": "header", "content": "Qué volantes se muestran" },
+    { "type": "collection", "id": "collection", "label": "Colección", "info": "Salen en el orden de la colección. «Todos los volantes» está ordenada por «Más vendidos»." },
+    { "type": "range", "id": "limit", "label": "Cuántos mostrar", "min": 4, "max": 16, "step": 1, "default": 8 },
+    { "type": "range", "id": "per_row", "label": "Visibles a la vez en ordenador", "min": 3, "max": 5, "step": 1, "default": 4 },
+    { "type": "checkbox", "id": "show_rank", "label": "Mostrar la posición (#1, #2…)", "info": "Actívalo cuando tengas ventas: la posición sale del orden por más vendidos.", "default": false },
+    { "type": "text", "id": "rank_label", "label": "Texto junto a los 3 primeros", "default": "Top ventas" },
+    { "type": "header", "content": "Textos" },
+    { "type": "text", "id": "kicker", "label": "Antetítulo", "default": "Recomendados" },
+    { "type": "text", "id": "title", "label": "Título", "default": "Los más" },
+    { "type": "text", "id": "title_accent", "label": "Título (parte en color)", "default": "vendidos" },
+    { "type": "text", "id": "subtitle", "label": "Subtítulo", "default": "Los volantes que más eligen nuestros clientes." },
+    { "type": "text", "id": "link_label", "label": "Enlace «ver todos»", "default": "Ver todos" },
+    { "type": "header", "content": "Colores" },
+    { "type": "color", "id": "color_bg", "label": "Fondo", "default": "#131517" },
+    { "type": "color", "id": "color_surface", "label": "Superficies", "default": "#1C1F22" },
+    { "type": "color", "id": "color_text", "label": "Texto", "default": "#F1EFEA" },
+    { "type": "color", "id": "color_muted", "label": "Texto secundario", "default": "#9AA1A8" },
+    { "type": "color", "id": "color_accent", "label": "Acento", "default": "#FFC21A" },
+    { "type": "color", "id": "color_kerb", "label": "Bordillo (rojo)", "default": "#D8342A" },
+    { "type": "checkbox", "id": "top_line", "label": "Franja de bordillo arriba", "default": false },
+    { "type": "header", "content": "Tamaño y espaciado" },
+    { "type": "range", "id": "title_size", "label": "Tamaño máximo del título", "min": 32, "max": 80, "step": 2, "unit": "px", "default": 56 },
+    { "type": "range", "id": "max_width", "label": "Ancho máximo", "min": 1000, "max": 1600, "step": 20, "unit": "px", "default": 1400 },
+    { "type": "range", "id": "radius", "label": "Esquinas redondeadas", "min": 0, "max": 20, "step": 1, "unit": "px", "default": 8 },
+    { "type": "range", "id": "pad_top", "label": "Espacio arriba", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 },
+    { "type": "range", "id": "pad_bottom", "label": "Espacio abajo", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 72 }
+  ],
+  "presets": [{ "name": "RG · Recomendados" }]
+}
+{% endschema %}

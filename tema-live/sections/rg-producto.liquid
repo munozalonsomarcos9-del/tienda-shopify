@@ -14,8 +14,9 @@
   endcomment
   assign brand_coll = nil
   assign series_coll = nil
+  assign all_count = collections.all.products_count
   for c in product.collections
-    if c.handle == 'todos-los-volantes' or c.handle == 'frontpage'
+    if c.handle == 'todos-los-volantes' or c.handle == 'frontpage' or c.products_count >= all_count
       continue
     endif
     if c.handle contains 'volantes-de-'
@@ -26,7 +27,7 @@
     endif
   endfor
   for c in product.collections
-    if c.handle == 'todos-los-volantes' or c.handle == 'frontpage' or c.handle == brand_coll.handle
+    if c.handle == 'todos-los-volantes' or c.handle == 'frontpage' or c.handle == brand_coll.handle or c.products_count >= all_count
       continue
     endif
     if c.handle contains 'volantes-de-'
