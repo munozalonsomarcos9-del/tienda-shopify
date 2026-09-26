@@ -1,0 +1,175 @@
+{%- comment -%}
+  RacingGrip · Selector de idioma flotante (traducción automática de toda la página con Google Translate).
+  Idiomas de Europa ordenados alfabéticamente por su nombre en español. Formato: código|Nombre en español|Nombre propio
+  El script de Google solo se carga cuando el cliente ha elegido un idioma distinto del español.
+{%- endcomment -%}
+{%- capture langs -%}
+sq|Albanés|Shqip
+de|Alemán|Deutsch
+be|Bielorruso|Беларуская
+bs|Bosnio|Bosanski
+bg|Búlgaro|Български
+ca|Catalán|Català
+cs|Checo|Čeština
+hr|Croata|Hrvatski
+da|Danés|Dansk
+sk|Eslovaco|Slovenčina
+sl|Esloveno|Slovenščina
+es|Español|Español
+et|Estonio|Eesti
+eu|Euskera|Euskara
+fi|Finés|Suomi
+fr|Francés|Français
+cy|Galés|Cymraeg
+gl|Gallego|Galego
+el|Griego|Ελληνικά
+hu|Húngaro|Magyar
+en|Inglés|English
+ga|Irlandés|Gaeilge
+is|Islandés|Íslenska
+it|Italiano|Italiano
+lv|Letón|Latviešu
+lt|Lituano|Lietuvių
+lb|Luxemburgués|Lëtzebuergesch
+mk|Macedonio|Македонски
+mt|Maltés|Malti
+nl|Neerlandés|Nederlands
+no|Noruego|Norsk
+pl|Polaco|Polski
+pt|Portugués|Português
+ro|Rumano|Română
+ru|Ruso|Русский
+sr|Serbio|Српски
+sv|Sueco|Svenska
+uk|Ucraniano|Українська
+{%- endcapture -%}
+{%- assign lang_lines = langs | strip | newline_to_br | split: '<br />' -%}
+<style>
+  .rgi{--bg:#131517;--surface:#1C1F22;--text:#F1EFEA;--muted:#9AA1A8;--line:rgba(241,239,234,.12);--accent:#FFC21A;
+    position:fixed;left:16px;bottom:16px;z-index:60;font-family:"Barlow","Helvetica Neue",Helvetica,Arial,sans-serif;transition:bottom .3s ease}
+  body:has([data-rgp-sticky][data-show]) .rgi{bottom:96px}
+  .rgi *{box-sizing:border-box}
+  .rgi__btn{display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 16px 0 12px;border-radius:999px;cursor:pointer;
+    background:var(--bg);color:var(--text);border:1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    box-shadow:0 14px 30px -12px rgba(0,0,0,.7),0 0 0 4px rgba(255,194,26,.08);font:600 14px/1 inherit;letter-spacing:.04em}
+  .rgi__btn:hover{border-color:var(--accent)}
+  .rgi__btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  .rgi__btn svg{color:var(--accent)}
+  .rgi__code{font-family:"Chakra Petch",Menlo,monospace;text-transform:uppercase}
+  .rgi__panel{position:absolute;left:0;bottom:58px;width:min(440px,calc(100vw - 32px));max-height:min(70vh,560px);display:flex;flex-direction:column;
+    border-radius:12px;overflow:hidden;background:var(--bg);color:var(--text);border:1px solid var(--line);box-shadow:0 30px 70px -20px rgba(0,0,0,.85);
+    opacity:0;transform:translateY(8px) scale(.98);transform-origin:bottom left;visibility:hidden;transition:opacity .2s,transform .2s,visibility .2s}
+  .rgi[data-open] .rgi__panel{opacity:1;transform:none;visibility:visible}
+  .rgi__head{padding:16px 16px 12px;border-bottom:1px solid var(--line)}
+  .rgi__title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px;font-family:"Saira Condensed","Arial Narrow",sans-serif;font-style:italic;font-weight:800;font-size:22px;text-transform:uppercase}
+  .rgi__close{width:34px;height:34px;display:grid;place-items:center;border:0;border-radius:50%;background:var(--surface);color:var(--text);cursor:pointer}
+  .rgi__close:hover{color:var(--accent)}
+  .rgi__search{width:100%;height:42px;padding:0 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--text);font:500 15px/1 inherit}
+  .rgi__search::placeholder{color:var(--muted)}
+  .rgi__search:focus{outline:none;border-color:var(--accent)}
+  .rgi__list{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:0;padding:10px;list-style:none;overflow-y:auto;overscroll-behavior:contain}
+  .rgi__opt{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:9px 12px;border-radius:8px;border:1px solid transparent;
+    background:transparent;color:var(--text);text-align:left;cursor:pointer;font:inherit}
+  .rgi__opt:hover{background:var(--surface);border-color:var(--line)}
+  .rgi__opt:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+  .rgi__opt b{font-size:15px;font-weight:600}
+  .rgi__opt span{font-size:12.5px;color:var(--muted)}
+  .rgi__opt[aria-current="true"]{background:color-mix(in srgb, var(--accent) 14%, transparent);border-color:color-mix(in srgb, var(--accent) 50%, transparent)}
+  .rgi__opt[aria-current="true"] b{color:var(--accent)}
+  .rgi__opt[aria-current="true"] b::after{content:" ✓"}
+  .rgi__empty{grid-column:1/-1;padding:14px;color:var(--muted);text-align:center}
+  .rgi__foot{margin:0;padding:10px 16px 12px;border-top:1px solid var(--line);font-size:12px;line-height:1.4;color:var(--muted)}
+  @media (max-width:420px){.rgi__list{grid-template-columns:1fr}.rgi__btn{height:44px}}
+  @media (prefers-reduced-motion:reduce){.rgi,.rgi__panel{transition:none}}
+  /* Ocultar la barra y los globos de Google Translate */
+  body{top:0!important}
+  iframe.skiptranslate,.goog-te-banner-frame,#goog-gt-tt,.goog-te-balloon-frame,.goog-tooltip,.VIpgJd-ZVi9od-ORHb-OEVmcd,.VIpgJd-ZVi9od-aZ2wEe-wOHMyf{display:none!important}
+  .goog-text-highlight{background:none!important;box-shadow:none!important}
+  #rgi-gt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+<div class="rgi notranslate" translate="no" data-rgi>
+  <div class="rgi__panel" id="rgi-panel" role="dialog" aria-modal="false" aria-labelledby="rgi-title">
+    <div class="rgi__head">
+      <p class="rgi__title" id="rgi-title">Elige tu idioma
+        <button type="button" class="rgi__close" data-rgi-close aria-label="Cerrar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </p>
+      <label class="rgi-vh" for="rgi-search" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Buscar idioma</label>
+      <input id="rgi-search" class="rgi__search" type="search" placeholder="Buscar idioma…" autocomplete="off" data-rgi-search>
+    </div>
+    <ul class="rgi__list" role="list" data-rgi-list>
+      {%- for line in lang_lines -%}
+        {%- assign parts = line | strip | split: '|' -%}
+        {%- if parts.size < 3 -%}{%- continue -%}{%- endif -%}
+        <li><button type="button" class="rgi__opt" lang="{{ parts[0] }}" data-rgi-lang="{{ parts[0] }}" data-rgi-name="{{ parts[1] | downcase }} {{ parts[2] | downcase }}" aria-current="false"><b>{{ parts[1] }}</b><span>{{ parts[2] }}</span></button></li>
+      {%- endfor -%}
+      <li class="rgi__empty" data-rgi-empty hidden>No hay ningún idioma con ese nombre.</li>
+    </ul>
+    <p class="rgi__foot">Traducción automática. Los precios, los pagos y el envío no cambian.</p>
+  </div>
+  <button type="button" class="rgi__btn" data-rgi-toggle aria-expanded="false" aria-controls="rgi-panel" aria-label="Cambiar idioma de la página">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></svg>
+    <span class="rgi__code" data-rgi-code>ES</span>
+  </button>
+  <div id="rgi-gt"></div>
+</div>
+<script>
+(() => {
+  const root = document.querySelector('[data-rgi]');
+  if (!root || root.dataset.ready) return; root.dataset.ready = '1';
+  const SRC = 'es';
+  const btn = root.querySelector('[data-rgi-toggle]'), search = root.querySelector('[data-rgi-search]');
+  const opts = [...root.querySelectorAll('[data-rgi-lang]')], empty = root.querySelector('[data-rgi-empty]');
+
+  const current = () => { const m = document.cookie.match(/(?:^|;\s*)googtrans=\/[^/]*\/([^;]+)/); return m ? decodeURIComponent(m[1]) : SRC; };
+  const setCookie = (val) => {
+    const host = location.hostname, parts = host.split('.');
+    const domains = ['', host, '.' + host];
+    if (parts.length > 2) domains.push('.' + parts.slice(-2).join('.'));
+    domains.forEach(d => {
+      const dom = d ? '; domain=' + d : '';
+      document.cookie = val
+        ? 'googtrans=' + val + '; path=/' + dom + '; max-age=31536000; SameSite=Lax'
+        : 'googtrans=; path=/' + dom + '; max-age=0';
+    });
+  };
+
+  const lang = current();
+  root.querySelector('[data-rgi-code]').textContent = lang.toUpperCase();
+  opts.forEach(o => o.setAttribute('aria-current', String(o.dataset.rgiLang === lang)));
+
+  /* Solo se carga Google cuando hay que traducir */
+  if (lang !== SRC) {
+    window.rgiInit = () => {
+      new google.translate.TranslateElement({ pageLanguage: SRC, autoDisplay: false }, 'rgi-gt');
+    };
+    const s = document.createElement('script');
+    s.src = 'https://translate.google.com/translate_a/element.js?cb=rgiInit';
+    s.async = true; document.head.appendChild(s);
+  }
+
+  const open = (on) => {
+    root.toggleAttribute('data-open', on); btn.setAttribute('aria-expanded', String(on));
+    if (on) { search.value = ''; filter(''); setTimeout(() => search.focus(), 50); } else btn.focus({ preventScroll: true });
+  };
+  const filter = (q) => {
+    q = q.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    let n = 0;
+    opts.forEach(o => {
+      const hit = !q || o.dataset.rgiName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(q) || o.dataset.rgiLang === q;
+      o.parentElement.hidden = !hit; if (hit) n++;
+    });
+    empty.hidden = n > 0;
+  };
+  btn.addEventListener('click', () => open(!root.hasAttribute('data-open')));
+  root.querySelector('[data-rgi-close]').addEventListener('click', () => open(false));
+  search.addEventListener('input', () => filter(search.value));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && root.hasAttribute('data-open')) open(false); });
+  document.addEventListener('click', e => { if (root.hasAttribute('data-open') && !root.contains(e.target)) open(false); });
+  opts.forEach(o => o.addEventListener('click', () => {
+    const to = o.dataset.rgiLang;
+    if (to === current()) { open(false); return; }
+    setCookie(to === SRC ? '' : '/' + SRC + '/' + to);
+    location.reload();
+  }));
+})();
+</script>
