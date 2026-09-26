@@ -1,0 +1,405 @@
+{%- comment -%}
+  RacingGrip · Catálogo ordenado por marcas.
+  Solo se muestra en la página del catálogo completo (/collections/all); en el resto de
+  colecciones no pinta nada y se ve la sección «RG · Colección».
+{%- endcomment -%}
+{%- if collection.handle == 'all' -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,700;1,800;1,900&family=Barlow:wght@400;500;600;700&family=Chakra+Petch:wght@500;600&display=swap">
+
+{%- liquid
+  assign sid = section.id
+  assign s = section.settings
+  assign brand_blocks = section.blocks | where: 'type', 'brand'
+  assign material_blocks = section.blocks | where: 'type', 'material'
+
+  assign total = 0
+  assign min_price = nil
+  for b in brand_blocks
+    assign c = b.settings.collection
+    if c == blank
+      continue
+    endif
+    assign total = total | plus: c.products_count
+    for p in c.products
+      if min_price == nil or p.price_min < min_price
+        assign min_price = p.price_min
+      endif
+    endfor
+  endfor
+-%}
+
+<style>
+  #rgk-{{ sid }}{
+    --bg: {{ s.color_bg }};
+    --surface: {{ s.color_surface }};
+    --text: {{ s.color_text }};
+    --muted: {{ s.color_muted }};
+    --accent: {{ s.color_accent }};
+    --kerb: {{ s.color_kerb }};
+    --line: color-mix(in srgb, var(--text) 10%, transparent);
+    --line-strong: color-mix(in srgb, var(--text) 18%, transparent);
+    --display: "Saira Condensed","Arial Narrow",Impact,sans-serif;
+    --mono: "Chakra Petch",Menlo,Consolas,monospace;
+    --body: "Barlow","Helvetica Neue",Helvetica,Arial,sans-serif;
+    position:relative;isolation:isolate;
+    background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    padding:{{ s.pad_top }}px 0 {{ s.pad_bottom }}px;
+  }
+  #rgk-{{ sid }}::before{
+    content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(1100px 520px at 85% -8%, color-mix(in srgb, var(--accent) 11%, transparent), transparent 70%),
+      radial-gradient(900px 600px at -10% 20%, color-mix(in srgb, var(--kerb) 7%, transparent), transparent 70%),
+      linear-gradient(color-mix(in srgb, var(--text) 3.5%, transparent) 1px, transparent 1px) 0 0/48px 48px,
+      linear-gradient(90deg, color-mix(in srgb, var(--text) 3.5%, transparent) 1px, transparent 1px) 0 0/48px 48px;
+    -webkit-mask-image:linear-gradient(to bottom,#000 0,#000 900px,transparent 1600px);
+    mask-image:linear-gradient(to bottom,#000 0,#000 900px,transparent 1600px);
+  }
+  #rgk-{{ sid }} *,#rgk-{{ sid }} *::before,#rgk-{{ sid }} *::after{box-sizing:border-box}
+  #rgk-{{ sid }} img{display:block;max-width:100%;height:auto}
+  #rgk-{{ sid }} a{color:inherit}
+  #rgk-{{ sid }} :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  #rgk-{{ sid }} .rgk-wrap{max-width:{{ s.max_width }}px;margin:0 auto;padding-inline:clamp(16px,3vw,40px)}
+  #rgk-{{ sid }} .rgk-kicker{display:flex;align-items:center;gap:12px;margin:0;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+  #rgk-{{ sid }} .rgk-kicker::before{content:"";width:28px;height:2px;background:var(--accent)}
+  #rgk-{{ sid }} .rgk-h2{margin:0;font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:clamp(34px,4.2vw,56px);line-height:.92;color:var(--text)}
+  #rgk-{{ sid }} .rgk-h2 em{font-style:inherit;color:var(--accent)}
+
+  /* Ruta + cabecera */
+  #rgk-{{ sid }} .rgk-crumbs{display:flex;gap:8px;margin:0 0 clamp(18px,2.4vw,30px);padding:0;list-style:none;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  #rgk-{{ sid }} .rgk-crumbs a{text-decoration:none}
+  #rgk-{{ sid }} .rgk-crumbs a:hover{color:var(--accent)}
+  #rgk-{{ sid }} .rgk-crumbs li+li::before{content:"/";margin-right:8px;color:var(--line-strong)}
+  #rgk-{{ sid }} .rgk-crumbs [aria-current]{color:var(--text)}
+  #rgk-{{ sid }} .rgk-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:end;padding-bottom:clamp(28px,4vw,44px)}
+  @media (max-width:899px){#rgk-{{ sid }} .rgk-hero{grid-template-columns:1fr}}
+  #rgk-{{ sid }} .rgk-hero__txt{display:flex;flex-direction:column;gap:16px;min-width:0}
+  #rgk-{{ sid }} .rgk-title{margin:0;font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:clamp(48px,7.4vw,{{ s.title_size }}px);line-height:.86;letter-spacing:-.01em;text-wrap:balance}
+  #rgk-{{ sid }} .rgk-title em{font-style:inherit;color:var(--accent)}
+  #rgk-{{ sid }} .rgk-sub{margin:0;max-width:60ch;color:var(--muted);font-size:17px}
+  #rgk-{{ sid }} .rgk-stats{display:flex;flex-wrap:wrap;gap:1px;margin:0;padding:0;list-style:none;border:1px solid var(--line);border-radius:{{ s.radius }}px;overflow:hidden;background:var(--line)}
+  #rgk-{{ sid }} .rgk-stats li{flex:1 1 auto;display:flex;flex-direction:column;gap:2px;padding:14px 22px;background:color-mix(in srgb, var(--surface) 92%, transparent)}
+  #rgk-{{ sid }} .rgk-stats b{font-family:var(--mono);font-weight:600;font-size:24px;line-height:1.1}
+  #rgk-{{ sid }} .rgk-stats span{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+
+  /* Índice fijo */
+  #rgk-{{ sid }} .rgk-index{position:sticky;top:calc(var(--header-height,64px));z-index:20;margin-bottom:clamp(28px,4vw,44px);background:color-mix(in srgb, var(--bg) 88%, transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-block:1px solid var(--line)}
+  #rgk-{{ sid }} .rgk-index ul{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0;padding:12px 0;list-style:none}
+  #rgk-{{ sid }} .rgk-index ul::-webkit-scrollbar{display:none}
+  #rgk-{{ sid }} .rgk-index a{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:8px 16px;border-radius:999px;border:1px solid var(--line-strong);text-decoration:none;font-weight:600;font-size:14px;white-space:nowrap;transition:border-color .15s,background .15s,color .15s}
+  #rgk-{{ sid }} .rgk-index a small{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  #rgk-{{ sid }} .rgk-index a:hover{border-color:var(--accent);color:var(--accent)}
+  #rgk-{{ sid }} .rgk-index a[aria-current="true"]{background:var(--accent);border-color:var(--accent);color:#1A1400}
+  #rgk-{{ sid }} .rgk-index a[aria-current="true"] small{color:#1A1400}
+
+  /* Tarjetas de marca */
+  #rgk-{{ sid }} .rgk-brands{display:grid;grid-template-columns:repeat({{ brand_blocks.size | at_most: 4 | at_least: 1 }},minmax(0,1fr));gap:14px;margin-bottom:clamp(48px,7vw,88px)}
+  @media (max-width:989px){#rgk-{{ sid }} .rgk-brands{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  #rgk-{{ sid }} .rgk-brand{position:relative;display:flex;flex-direction:column;border-radius:{{ s.radius }}px;overflow:hidden;background:var(--surface);border:1px solid var(--line);text-decoration:none;transition:border-color .2s,transform .25s cubic-bezier(.16,1,.3,1)}
+  #rgk-{{ sid }} .rgk-brand::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;background:repeating-linear-gradient(115deg,var(--kerb) 0 22px,#EDEAE4 22px 44px);transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.16,1,.3,1)}
+  #rgk-{{ sid }} .rgk-brand:hover{border-color:var(--accent);transform:translateY(-4px)}
+  #rgk-{{ sid }} .rgk-brand:hover::after{transform:scaleX(1)}
+  #rgk-{{ sid }} .rgk-brand__img{position:relative;aspect-ratio:4/3;overflow:hidden;background:#E9E8E4}
+  #rgk-{{ sid }} .rgk-brand__img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.16,1,.3,1)}
+  #rgk-{{ sid }} .rgk-brand:hover .rgk-brand__img img{transform:scale(1.05)}
+  #rgk-{{ sid }} .rgk-brand__body{flex:1;display:flex;flex-direction:column;gap:14px;padding:18px 20px 24px}
+  #rgk-{{ sid }} .rgk-brand__name{font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:clamp(28px,2.6vw,38px);line-height:.95}
+  #rgk-{{ sid }} .rgk-brand__meta{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+  #rgk-{{ sid }} .rgk-brand__meta span{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  #rgk-{{ sid }} .rgk-brand__meta b{font-family:var(--mono);font-weight:600;font-size:18px;color:var(--text);white-space:nowrap}
+  #rgk-{{ sid }} .rgk-brand__meta b small{display:block;font-family:var(--body);font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+  @media (max-width:520px){#rgk-{{ sid }} .rgk-brands{gap:10px}#rgk-{{ sid }} .rgk-brand__img{aspect-ratio:1/1}#rgk-{{ sid }} .rgk-brand__body{padding:12px 12px 16px;gap:10px}#rgk-{{ sid }} .rgk-brand__name{font-size:20px}#rgk-{{ sid }} .rgk-brand__meta{flex-direction:column;align-items:flex-start;gap:4px}#rgk-{{ sid }} .rgk-brand__meta b{font-size:15px}}
+
+  /* Bloques por marca */
+  #rgk-{{ sid }} .rgk-group{scroll-margin-top:calc(var(--header-height,64px) + 80px);padding-top:clamp(32px,4vw,48px);margin-top:clamp(32px,4vw,48px);border-top:1px solid var(--line)}
+  #rgk-{{ sid }} .rgk-group:first-of-type{border-top:0;margin-top:0;padding-top:0}
+  #rgk-{{ sid }} .rgk-group__head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+  #rgk-{{ sid }} .rgk-group__txt{display:flex;flex-direction:column;gap:10px}
+  #rgk-{{ sid }} .rgk-sub-chips{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 0;padding:0;list-style:none}
+  #rgk-{{ sid }} .rgk-sub-chips a{display:inline-flex;min-height:34px;align-items:center;padding:5px 12px;border-radius:999px;border:1px solid var(--line-strong);text-decoration:none;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;transition:border-color .15s,color .15s}
+  #rgk-{{ sid }} .rgk-sub-chips a:hover{border-color:var(--accent);color:var(--accent)}
+  #rgk-{{ sid }} .rgk-link{display:inline-flex;gap:8px;align-items:center;font-weight:700;text-decoration:none;color:var(--accent)}
+  #rgk-{{ sid }} .rgk-link:hover{text-decoration:underline}
+  #rgk-{{ sid }} .rgk-grid{display:grid;grid-template-columns:repeat({{ s.columns }},minmax(0,1fr));gap:14px;margin:0;padding:0;list-style:none}
+  @media (max-width:1100px){#rgk-{{ sid }} .rgk-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media (max-width:749px){#rgk-{{ sid }} .rgk-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
+
+  /* Tarjeta de volante (igual que en las colecciones) */
+  #rgk-{{ sid }} .rgk-card{position:relative;height:100%;display:flex;flex-direction:column;border-radius:{{ s.radius }}px;overflow:hidden;text-decoration:none;background:var(--surface);border:1px solid var(--line);transition:border-color .2s,transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s}
+  #rgk-{{ sid }} .rgk-card::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:repeating-linear-gradient(115deg,var(--kerb) 0 20px,#EDEAE4 20px 40px);transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.16,1,.3,1)}
+  #rgk-{{ sid }} .rgk-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 24px 50px -24px rgba(0,0,0,.8)}
+  #rgk-{{ sid }} .rgk-card:hover::after{transform:scaleX(1)}
+  #rgk-{{ sid }} .rgk-card__img{position:relative;aspect-ratio:1/1;overflow:hidden;background:#E9E8E4}
+  #rgk-{{ sid }} .rgk-card__img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.16,1,.3,1),opacity .4s}
+  #rgk-{{ sid }} .rgk-card__img img + img{opacity:0}
+  #rgk-{{ sid }} .rgk-card:hover .rgk-card__img img{transform:scale(1.05)}
+  #rgk-{{ sid }} .rgk-card:hover .rgk-card__img img + img{opacity:1}
+  #rgk-{{ sid }} .rgk-badge{position:absolute;z-index:2;top:12px;left:12px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:5px 9px;border-radius:3px;background:var(--kerb);color:#fff}
+  #rgk-{{ sid }} .rgk-card__body{display:flex;flex-direction:column;gap:8px;padding:16px 18px 22px;flex:1}
+  #rgk-{{ sid }} .rgk-card__meta{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  #rgk-{{ sid }} .rgk-card__t{margin:0;font-weight:600;font-size:16px;line-height:1.3;color:var(--text)}
+  #rgk-{{ sid }} .rgk-card__foot{margin-top:auto;padding-top:8px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+  #rgk-{{ sid }} .rgk-card__p{font-family:var(--mono);font-weight:600;font-size:19px;line-height:1.1}
+  #rgk-{{ sid }} .rgk-card__p small{display:block;font-family:var(--body);font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  #rgk-{{ sid }} .rgk-card__p s{font-size:13px;color:var(--muted);margin-left:6px}
+  #rgk-{{ sid }} .rgk-go{flex:0 0 auto;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line-strong);transition:background .2s,color .2s,border-color .2s}
+  #rgk-{{ sid }} .rgk-card:hover .rgk-go{background:var(--accent);border-color:var(--accent);color:#1A1400}
+  @media (max-width:749px){#rgk-{{ sid }} .rgk-card__body{padding:12px 12px 16px}#rgk-{{ sid }} .rgk-card__t{font-size:14px}#rgk-{{ sid }} .rgk-card__p{font-size:16px}#rgk-{{ sid }} .rgk-go{display:none}#rgk-{{ sid }} .rgk-badge{top:8px;left:8px;font-size:10px}}
+
+  /* Materiales */
+  #rgk-{{ sid }} .rgk-materials{margin-top:clamp(56px,8vw,100px);padding-top:clamp(32px,4vw,48px);border-top:1px solid var(--line)}
+  #rgk-{{ sid }} .rgk-mats{display:grid;grid-template-columns:repeat({{ material_blocks.size | at_most: 4 | at_least: 1 }},minmax(0,1fr));gap:14px;margin-top:22px}
+  @media (max-width:749px){#rgk-{{ sid }} .rgk-mats{grid-template-columns:1fr}}
+  #rgk-{{ sid }} .rgk-mat{position:relative;display:flex;align-items:flex-end;min-height:180px;padding:22px;border-radius:{{ s.radius }}px;overflow:hidden;text-decoration:none;border:1px solid var(--line);isolation:isolate;transition:border-color .2s}
+  #rgk-{{ sid }} .rgk-mat img{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.16,1,.3,1)}
+  #rgk-{{ sid }} .rgk-mat::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(to top, color-mix(in srgb, var(--bg) 92%, transparent) 10%, color-mix(in srgb, var(--bg) 35%, transparent))}
+  #rgk-{{ sid }} .rgk-mat:hover{border-color:var(--accent)}
+  #rgk-{{ sid }} .rgk-mat:hover img{transform:scale(1.05)}
+  #rgk-{{ sid }} .rgk-mat div{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;width:100%}
+  #rgk-{{ sid }} .rgk-mat b{font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:clamp(26px,2.4vw,34px);line-height:.95}
+  #rgk-{{ sid }} .rgk-mat span{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);white-space:nowrap}
+  @media (prefers-reduced-motion:reduce){#rgk-{{ sid }} *{transition:none!important}}
+</style>
+
+<div id="rgk-{{ sid }}">
+  <div class="rgk-wrap">
+    <nav aria-label="Ruta">
+      <ol class="rgk-crumbs">
+        <li><a href="{{ routes.root_url }}">Inicio</a></li>
+        <li><span aria-current="page">Catálogo</span></li>
+      </ol>
+    </nav>
+
+    <header class="rgk-hero">
+      <div class="rgk-hero__txt">
+        <p class="rgk-kicker">{{ s.kicker }}</p>
+        <h1 class="rgk-title">{{ s.title }}{% if s.title_accent != blank %} <em>{{ s.title_accent }}</em>{% endif %}</h1>
+        {%- if s.subtitle != blank -%}<p class="rgk-sub">{{ s.subtitle }}</p>{%- endif -%}
+      </div>
+      <ul class="rgk-stats">
+        <li><b>{{ total }}</b><span>Modelos</span></li>
+        <li><b>{{ brand_blocks.size }}</b><span>Marcas</span></li>
+        {%- if min_price -%}<li><b>{{ min_price | money_without_trailing_zeros }}</b><span>Desde · IVA incl.</span></li>{%- endif -%}
+      </ul>
+    </header>
+  </div>
+
+  <nav class="rgk-index" aria-label="Ir a una marca">
+    <div class="rgk-wrap">
+      <ul>
+        {%- for b in brand_blocks -%}
+          {%- assign c = b.settings.collection -%}
+          {%- if c == blank -%}{%- continue -%}{%- endif -%}
+          <li><a href="#rgk-{{ sid }}-{{ c.handle }}" data-rgk-jump>{{ b.settings.label | default: c.title }} <small>{{ c.products_count }}</small></a></li>
+        {%- endfor -%}
+        {%- if material_blocks.size > 0 -%}<li><a href="#rgk-{{ sid }}-materiales" data-rgk-jump>{{ s.materials_title }}</a></li>{%- endif -%}
+      </ul>
+    </div>
+  </nav>
+
+  <div class="rgk-wrap">
+    {%- if s.show_brand_cards -%}
+      <div class="rgk-brands">
+        {%- for b in brand_blocks -%}
+          {%- assign c = b.settings.collection -%}
+          {%- if c == blank -%}{%- continue -%}{%- endif -%}
+          {%- liquid
+            assign cmin = nil
+            for p in c.products
+              if cmin == nil or p.price_min < cmin
+                assign cmin = p.price_min
+              endif
+            endfor
+            assign cimg = b.settings.image | default: c.image | default: c.products.first.featured_media
+          -%}
+          <a class="rgk-brand" href="#rgk-{{ sid }}-{{ c.handle }}" data-rgk-jump {{ b.shopify_attributes }}>
+            <div class="rgk-brand__img">{%- if cimg -%}{{ cimg | image_url: width: 700 | image_tag: loading: 'lazy', widths: '350, 500, 700', sizes: '(min-width: 990px) 25vw, (min-width: 521px) 50vw, 100vw', alt: c.title }}{%- endif -%}</div>
+            <div class="rgk-brand__body">
+              <span class="rgk-brand__name">{{ b.settings.label | default: c.title }}</span>
+              <div class="rgk-brand__meta">
+                <span>{{ c.products_count }} {% if c.products_count == 1 %}modelo{% else %}modelos{% endif %}</span>
+                {%- if cmin -%}<b><small>Desde</small>{{ cmin | money }}</b>{%- endif -%}
+              </div>
+            </div>
+          </a>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- for b in brand_blocks -%}
+      {%- assign c = b.settings.collection -%}
+      {%- if c == blank -%}{%- continue -%}{%- endif -%}
+      {%- liquid
+        comment
+          Las series de cada marca salen del menú principal: el enlace a esta colección y sus subenlaces.
+        endcomment
+        assign series = nil
+        for top in linklists[s.menu].links
+          for l in top.links
+            if l.url == c.url and l.links.size > 0
+              assign series = l.links
+            endif
+          endfor
+        endfor
+      -%}
+      <section class="rgk-group" id="rgk-{{ sid }}-{{ c.handle }}" data-rgk-group aria-labelledby="rgk-{{ sid }}-{{ c.handle }}-t" {{ b.shopify_attributes }}>
+        <div class="rgk-group__head">
+          <div class="rgk-group__txt">
+            <p class="rgk-kicker">{{ c.products_count }} {% if c.products_count == 1 %}modelo{% else %}modelos{% endif %}</p>
+            <h2 class="rgk-h2" id="rgk-{{ sid }}-{{ c.handle }}-t">Volantes <em>{{ b.settings.label | default: c.title }}</em></h2>
+            {%- if series -%}
+              <ul class="rgk-sub-chips">
+                {%- for l in series -%}<li><a href="{{ l.url }}">{{ l.title }}</a></li>{%- endfor -%}
+              </ul>
+            {%- endif -%}
+          </div>
+          <a class="rgk-link" href="{{ c.url }}">Ver la colección <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+        <ul class="rgk-grid">
+          {%- for p in c.products limit: s.per_brand -%}
+            {%- liquid
+              assign meta = ''
+              for tag in p.tags
+                if tag == 'Volante' or tag == b.settings.label or tag == c.title
+                  continue
+                endif
+                if meta == ''
+                  assign meta = tag
+                else
+                  assign meta = meta | append: ' · ' | append: tag
+                endif
+              endfor
+            -%}
+            <li>
+              <a class="rgk-card" href="{{ p.url }}">
+                <div class="rgk-card__img">
+                  {%- if p.compare_at_price_min > p.price_min -%}<span class="rgk-badge">Oferta −{{ p.compare_at_price_min | minus: p.price_min | times: 100.0 | divided_by: p.compare_at_price_min | round }}%</span>{%- endif -%}
+                  {%- if p.featured_media -%}
+                    {{ p.featured_media | image_url: width: 700 | image_tag: loading: 'lazy', widths: '300, 450, 600, 700', sizes: '(min-width: 1100px) 25vw, (min-width: 750px) 33vw, 50vw', alt: p.featured_media.alt | default: p.title }}
+                    {%- if p.media.size > 1 -%}{{ p.media[1] | image_url: width: 700 | image_tag: loading: 'lazy', widths: '300, 450, 600, 700', sizes: '(min-width: 1100px) 25vw, (min-width: 750px) 33vw, 50vw', alt: '' }}{%- endif -%}
+                  {%- else -%}
+                    {{ 'product-1' | placeholder_svg_tag }}
+                  {%- endif -%}
+                </div>
+                <div class="rgk-card__body">
+                  {%- if meta != '' -%}<span class="rgk-card__meta">{{ meta }}</span>{%- endif -%}
+                  <h3 class="rgk-card__t">{{ p.title }}</h3>
+                  <div class="rgk-card__foot">
+                    <span class="rgk-card__p">{%- if p.price_varies -%}<small>Desde</small>{%- else -%}<small>Precio</small>{%- endif -%}{{ p.price_min | money }}{%- if p.compare_at_price_min > p.price_min -%}<s>{{ p.compare_at_price_min | money }}</s>{%- endif -%}</span>
+                    <span class="rgk-go" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                  </div>
+                </div>
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </section>
+    {%- endfor -%}
+
+    {%- if material_blocks.size > 0 -%}
+      <section class="rgk-materials" id="rgk-{{ sid }}-materiales" data-rgk-group aria-labelledby="rgk-{{ sid }}-mat-t">
+        <p class="rgk-kicker">{{ s.materials_kicker }}</p>
+        <h2 class="rgk-h2" id="rgk-{{ sid }}-mat-t" style="margin-top:12px">{{ s.materials_title }}</h2>
+        <div class="rgk-mats">
+          {%- for b in material_blocks -%}
+            {%- assign c = b.settings.collection -%}
+            {%- if c == blank -%}{%- continue -%}{%- endif -%}
+            {%- assign mimg = b.settings.image | default: c.image | default: c.products.first.featured_media -%}
+            <a class="rgk-mat" href="{{ c.url }}" {{ b.shopify_attributes }}>
+              {%- if mimg -%}{{ mimg | image_url: width: 900 | image_tag: loading: 'lazy', widths: '450, 700, 900', sizes: '(min-width: 750px) 33vw, 100vw', alt: '' }}{%- endif -%}
+              <div><b>{{ b.settings.label | default: c.title }}</b><span>{{ c.products_count }} modelos →</span></div>
+            </a>
+          {%- endfor -%}
+        </div>
+      </section>
+    {%- endif -%}
+  </div>
+</div>
+
+<script>
+(() => {
+  const root = document.getElementById('rgk-{{ sid }}');
+  if (!root || root.dataset.ready) return; root.dataset.ready = '1';
+  const links = [...root.querySelectorAll('.rgk-index a')];
+  const groups = [...root.querySelectorAll('[data-rgk-group]')];
+  const list = root.querySelector('.rgk-index ul');
+  let current = null;
+  const mark = id => {
+    if (id === current) return; current = id;
+    links.forEach(a => {
+      const on = a.getAttribute('href') === '#' + id;
+      a.setAttribute('aria-current', on);
+      if (on && list) list.scrollTo({ left: a.offsetLeft - (list.clientWidth - a.offsetWidth) / 2, behavior: 'smooth' });
+    });
+  };
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => {
+      const vis = es.filter(e => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if (vis[0]) mark(vis[0].target.id);
+    }, { rootMargin: '-35% 0px -55% 0px' });
+    groups.forEach(g => io.observe(g));
+  }
+})();
+</script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "RG · Catálogo",
+  "tag": "div",
+  "class": "rg-catalogo-section",
+  "settings": [
+    { "type": "paragraph", "content": "Se muestra solo en la página del catálogo completo (el enlace «Catálogo» del menú)." },
+    { "type": "header", "content": "Cabecera" },
+    { "type": "text", "id": "kicker", "label": "Antetítulo", "default": "Catálogo completo" },
+    { "type": "text", "id": "title", "label": "Título", "default": "Todos los" },
+    { "type": "text", "id": "title_accent", "label": "Título (parte en color)", "default": "volantes" },
+    { "type": "text", "id": "subtitle", "label": "Subtítulo", "default": "Volantes deportivos a medida para BMW, Mercedes-Benz, Porsche y Volkswagen. Cuero napa, Alcántara y fibra de carbono, con compatibilidad verificada por el número de bastidor." },
+    { "type": "range", "id": "title_size", "label": "Tamaño máximo del título", "min": 56, "max": 140, "step": 4, "unit": "px", "default": 112 },
+    { "type": "header", "content": "Marcas" },
+    { "type": "checkbox", "id": "show_brand_cards", "label": "Mostrar tarjetas de marca arriba", "default": true },
+    { "type": "range", "id": "per_brand", "label": "Volantes por marca", "min": 4, "max": 24, "step": 1, "default": 16 },
+    { "type": "range", "id": "columns", "label": "Columnas en ordenador", "min": 2, "max": 5, "step": 1, "default": 4 },
+    { "type": "link_list", "id": "menu", "label": "Menú del que salen las series", "default": "main-menu" },
+    { "type": "header", "content": "Materiales" },
+    { "type": "text", "id": "materials_kicker", "label": "Antetítulo", "default": "Elige por acabado" },
+    { "type": "text", "id": "materials_title", "label": "Título", "default": "Por material" },
+    { "type": "header", "content": "Colores" },
+    { "type": "color", "id": "color_bg", "label": "Fondo", "default": "#131517" },
+    { "type": "color", "id": "color_surface", "label": "Superficies", "default": "#1C1F22" },
+    { "type": "color", "id": "color_text", "label": "Texto", "default": "#F1EFEA" },
+    { "type": "color", "id": "color_muted", "label": "Texto secundario", "default": "#9AA1A8" },
+    { "type": "color", "id": "color_accent", "label": "Acento", "default": "#FFC21A" },
+    { "type": "color", "id": "color_kerb", "label": "Bordillo (rojo)", "default": "#D8342A" },
+    { "type": "header", "content": "Tamaño y espaciado" },
+    { "type": "range", "id": "max_width", "label": "Ancho máximo", "min": 1000, "max": 1600, "step": 20, "unit": "px", "default": 1400 },
+    { "type": "range", "id": "radius", "label": "Esquinas redondeadas", "min": 0, "max": 20, "step": 1, "unit": "px", "default": 8 },
+    { "type": "range", "id": "pad_top", "label": "Espacio arriba", "min": 0, "max": 100, "step": 4, "unit": "px", "default": 28 },
+    { "type": "range", "id": "pad_bottom", "label": "Espacio abajo", "min": 0, "max": 140, "step": 4, "unit": "px", "default": 96 }
+  ],
+  "blocks": [
+    {
+      "type": "brand",
+      "name": "Marca",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Colección de la marca" },
+        { "type": "text", "id": "label", "label": "Nombre a mostrar" },
+        { "type": "image_picker", "id": "image", "label": "Imagen (opcional)" }
+      ]
+    },
+    {
+      "type": "material",
+      "name": "Material",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Colección del material" },
+        { "type": "text", "id": "label", "label": "Nombre a mostrar" },
+        { "type": "image_picker", "id": "image", "label": "Imagen (opcional)" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,9 +1,76 @@
 {
   "sections": {
+    "catalogo": {
+      "type": "rg-catalogo",
+      "blocks": {
+        "bmw": {
+          "type": "brand",
+          "settings": {
+            "collection": "volantes-bmw",
+            "label": "BMW"
+          }
+        },
+        "mercedes": {
+          "type": "brand",
+          "settings": {
+            "collection": "volantes-mercedes-benz",
+            "label": "Mercedes-Benz"
+          }
+        },
+        "porsche": {
+          "type": "brand",
+          "settings": {
+            "collection": "volantes-porsche",
+            "label": "Porsche"
+          }
+        },
+        "vw": {
+          "type": "brand",
+          "settings": {
+            "collection": "volantes-volkswagen",
+            "label": "Volkswagen"
+          }
+        },
+        "carbono": {
+          "type": "material",
+          "settings": {
+            "collection": "volantes-de-fibra-de-carbono",
+            "label": "Fibra de carbono"
+          }
+        },
+        "cuero": {
+          "type": "material",
+          "settings": {
+            "collection": "volantes-de-cuero",
+            "label": "Cuero"
+          }
+        },
+        "alcantara": {
+          "type": "material",
+          "settings": {
+            "collection": "volantes-de-alcantara",
+            "label": "Alcántara"
+          }
+        }
+      },
+      "block_order": [
+        "bmw",
+        "mercedes",
+        "porsche",
+        "vw",
+        "carbono",
+        "cuero",
+        "alcantara"
+      ],
+      "settings": {}
+    },
     "main": {
       "type": "rg-coleccion",
       "settings": {}
     }
   },
-  "order": ["main"]
+  "order": [
+    "catalogo",
+    "main"
+  ]
 }

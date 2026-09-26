@@ -3,6 +3,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,700;1,800;1,900&family=Barlow:wght@400;500;600;700&family=Chakra+Petch:wght@500;600&display=swap">
 
+{%- comment -%} En el catálogo completo (/collections/all) se muestra «RG · Catálogo» en su lugar. {%- endcomment -%}
+{%- unless collection.handle == 'all' -%}
 {%- liquid
   assign sid = section.id
   assign s = section.settings
@@ -363,6 +365,8 @@
   });
 })();
 </script>
+
+{%- endunless -%}
 
 {% schema %}
 {
