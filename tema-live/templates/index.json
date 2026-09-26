@@ -125,10 +125,87 @@
       "settings": {
         "collection": "todos-los-volantes"
       }
+    },
+    "rg_historia": {
+      "type": "rg-historia",
+      "blocks": {
+        "par_1": {
+          "type": "par",
+          "settings": {
+            "before": "El cuero pelado y brillante que te recordaba cada kilómetro.",
+            "after": "Cuero napa, Alcántara o carbono nuevos, firmes en tus manos."
+          }
+        },
+        "par_2": {
+          "type": "par",
+          "settings": {
+            "before": "La duda de si encajaría en tu coche.",
+            "after": "Comprobamos la compatibilidad con tu número de bastidor antes de fabricarlo."
+          }
+        },
+        "par_3": {
+          "type": "par",
+          "settings": {
+            "before": "Un volante igual que el de miles de coches.",
+            "after": "Uno solo tuyo: tu acabado, tu costura y tu marca de centrado."
+          }
+        },
+        "par_4": {
+          "type": "par",
+          "settings": {
+            "before": "Esperar sin saber cuándo llegaría.",
+            "after": "Envío asegurado a toda Europa en 10–15 días, con seguimiento."
+          }
+        },
+        "ventaja_1": {
+          "type": "ventaja",
+          "settings": {
+            "title": "Sensación de carreras",
+            "text": "Agarre deportivo y control preciso en cada curva."
+          }
+        },
+        "ventaja_2": {
+          "type": "ventaja",
+          "settings": {
+            "title": "Hecho a medida",
+            "text": "Fabricado para tu plataforma y con tus colores."
+          }
+        },
+        "ventaja_3": {
+          "type": "ventaja",
+          "settings": {
+            "title": "Compra sin dudas",
+            "text": "Compatibilidad verificada por bastidor antes de fabricar."
+          }
+        },
+        "ventaja_4": {
+          "type": "ventaja",
+          "settings": {
+            "title": "Ahorra en packs",
+            "text": "−10 % llevando 2 volantes y −15 % con 3 o más."
+          }
+        }
+      },
+      "block_order": [
+        "par_1",
+        "par_2",
+        "par_3",
+        "par_4",
+        "ventaja_1",
+        "ventaja_2",
+        "ventaja_3",
+        "ventaja_4"
+      ],
+      "settings": {
+        "image_product": "volante-bmw-serie-f-cuero-estilo-m",
+        "btn_link": "shopify://collections/all",
+        "btn2_link": "shopify://collections/volantes-de-oferta"
+      }
     }
   },
   "order": [
     "rg_banner",
+    "rg_historia",
     "rg_destacado",
     "rg_videos",
     "rg_colecciones",

@@ -1,0 +1,232 @@
+{%- comment -%} RacingGrip · Mensaje emocional de portada: la historia del cliente, el antes y el después, y lo que gana. {%- endcomment -%}
+{%- liquid
+  assign sid = section.id
+  assign s = section.settings
+  assign pairs = section.blocks | where: 'type', 'par'
+  assign perks = section.blocks | where: 'type', 'ventaja'
+  assign img = s.image
+  if img == blank and s.image_product != blank
+    assign img = s.image_product.featured_media
+  endif
+-%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,700;1,800;1,900&family=Barlow:wght@400;500;600;700&family=Chakra+Petch:wght@500;600&display=swap">
+<style>
+  #rgh-{{ sid }}{--bg:{{ s.color_bg }};--surface:color-mix(in srgb, var(--text) 5%, var(--bg));--text:{{ s.color_text }};--muted:{{ s.color_muted }};--accent:{{ s.color_accent }};--kerb:{{ s.color_kerb }};
+    --line:color-mix(in srgb, var(--text) 10%, transparent);--display:"Saira Condensed","Arial Narrow",Impact,sans-serif;--mono:"Chakra Petch",Menlo,monospace;
+    position:relative;isolation:isolate;overflow:hidden;background:var(--bg);color:var(--text);padding:{{ s.pad_top }}px 0 {{ s.pad_bottom }}px;
+    font-family:"Barlow","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  #rgh-{{ sid }} *{box-sizing:border-box}
+  #rgh-{{ sid }}::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+    background:radial-gradient(60% 50% at 85% 10%,color-mix(in srgb, var(--accent) 10%, transparent),transparent 70%),radial-gradient(50% 45% at 0% 100%,color-mix(in srgb, var(--kerb) 10%, transparent),transparent 70%)}
+  #rgh-{{ sid }} .rgh-wrap{max-width:{{ s.max_width }}px;margin:0 auto;padding-inline:clamp(16px,3vw,40px)}
+  #rgh-{{ sid }} .rgh-kicker{display:flex;align-items:center;gap:12px;margin:0 0 18px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+  #rgh-{{ sid }} .rgh-kicker::before{content:"";width:28px;height:2px;background:var(--accent)}
+  #rgh-{{ sid }} .rgh-title{margin:0;font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:clamp(40px,6vw,{{ s.title_size }}px);line-height:.9;letter-spacing:-.005em}
+  #rgh-{{ sid }} .rgh-title em{display:block;color:var(--accent)}
+
+  /* Apertura: texto + foto */
+  #rgh-{{ sid }} .rgh-open{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(28px,5vw,72px);align-items:center}
+  #rgh-{{ sid }} .rgh-story{margin-top:26px;max-width:60ch;color:var(--muted)}
+  #rgh-{{ sid }} .rgh-story p{margin:0 0 14px}
+  #rgh-{{ sid }} .rgh-story strong,#rgh-{{ sid }} .rgh-story b{color:var(--text);font-weight:600}
+  #rgh-{{ sid }} .rgh-story em{font-style:normal;color:var(--accent)}
+  #rgh-{{ sid }} .rgh-photo{position:relative;margin:0;aspect-ratio:4/5;border-radius:{{ s.radius }}px;overflow:hidden;background:var(--surface);box-shadow:0 50px 90px -40px rgba(0,0,0,.9),0 0 0 1px var(--line)}
+  #rgh-{{ sid }} .rgh-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.04);transition:transform 1.6s cubic-bezier(.16,1,.3,1)}
+  #rgh-{{ sid }} .rgh-photo.is-in img{transform:none}
+  #rgh-{{ sid }} .rgh-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.85))}
+  #rgh-{{ sid }} .rgh-photo::before{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;z-index:2;background:repeating-linear-gradient(115deg,var(--kerb) 0 18px,#EDEAE4 18px 36px)}
+  #rgh-{{ sid }} .rgh-quote{position:absolute;z-index:1;left:clamp(18px,4%,32px);right:clamp(18px,4%,32px);bottom:clamp(24px,5%,40px);margin:0;
+    font-family:var(--display);font-style:italic;font-weight:800;font-size:clamp(24px,2.6vw,34px);line-height:1.02;text-transform:uppercase;color:#fff}
+  #rgh-{{ sid }} .rgh-quote::before{content:"“";display:block;font-size:2.4em;line-height:.6;color:var(--accent)}
+
+  /* Antes y después */
+  #rgh-{{ sid }} .rgh-shift{margin-top:clamp(56px,8vw,104px)}
+  #rgh-{{ sid }} .rgh-h2{margin:0 0 26px;font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:clamp(30px,3.6vw,46px);line-height:.95}
+  #rgh-{{ sid }} .rgh-h2 em{color:var(--accent)}
+  #rgh-{{ sid }} .rgh-pairs{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+  #rgh-{{ sid }} .rgh-pair{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:stretch;border-radius:{{ s.radius }}px;overflow:hidden;border:1px solid var(--line);background:var(--surface)}
+  #rgh-{{ sid }} .rgh-side{display:flex;gap:14px;align-items:flex-start;padding:20px 22px;font-size:16px;line-height:1.5}
+  #rgh-{{ sid }} .rgh-side small{display:block;margin-bottom:4px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase}
+  #rgh-{{ sid }} .rgh-side--before{color:var(--muted)}
+  #rgh-{{ sid }} .rgh-side--before small{color:color-mix(in srgb, var(--kerb) 80%, #fff)}
+  #rgh-{{ sid }} .rgh-side--before .rgh-x{text-decoration:line-through;text-decoration-color:color-mix(in srgb, var(--kerb) 70%, transparent);text-decoration-thickness:1.5px}
+  #rgh-{{ sid }} .rgh-side--after{background:color-mix(in srgb, var(--accent) 7%, transparent);color:var(--text);font-weight:500}
+  #rgh-{{ sid }} .rgh-side--after small{color:var(--accent)}
+  #rgh-{{ sid }} .rgh-side i{flex:0 0 auto;display:grid;place-items:center;width:28px;height:28px;border-radius:50%;margin-top:2px}
+  #rgh-{{ sid }} .rgh-side--before i{background:color-mix(in srgb, var(--kerb) 18%, transparent);color:var(--kerb)}
+  #rgh-{{ sid }} .rgh-side--after i{background:var(--accent);color:#1A1400}
+  #rgh-{{ sid }} .rgh-arrow{display:grid;place-items:center;width:52px;color:var(--accent);background:linear-gradient(90deg,var(--surface),color-mix(in srgb, var(--accent) 7%, transparent))}
+  #rgh-{{ sid }} .rgh-side span:last-child{min-width:0}
+
+  /* Lo que ganas */
+  #rgh-{{ sid }} .rgh-perks{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;margin:clamp(40px,6vw,64px) 0 0;padding:0;list-style:none;border-radius:{{ s.radius }}px;overflow:hidden;background:var(--line);border:1px solid var(--line)}
+  #rgh-{{ sid }} .rgh-perk{padding:24px 22px;background:var(--bg)}
+  #rgh-{{ sid }} .rgh-perk b{display:block;margin-bottom:6px;font-family:var(--display);font-style:italic;font-weight:800;font-size:22px;line-height:1.05;text-transform:uppercase;color:var(--text)}
+  #rgh-{{ sid }} .rgh-perk span{display:block;font-size:15px;line-height:1.5;color:var(--muted)}
+  #rgh-{{ sid }} .rgh-perk::before{content:"";display:block;width:26px;height:3px;margin-bottom:16px;background:var(--accent)}
+
+  /* Cierre */
+  #rgh-{{ sid }} .rgh-close{position:relative;margin-top:clamp(56px,8vw,96px);padding:clamp(32px,5vw,56px);border-radius:{{ s.radius }}px;text-align:center;
+    background:linear-gradient(135deg,color-mix(in srgb, var(--accent) 12%, var(--surface)),var(--surface) 55%);border:1px solid color-mix(in srgb, var(--accent) 25%, transparent);overflow:hidden}
+  #rgh-{{ sid }} .rgh-close p{max-width:62ch;margin:0 auto 26px;font-size:clamp(17px,1.6vw,20px);line-height:1.6;color:var(--text)}
+  #rgh-{{ sid }} .rgh-close p em{font-style:normal;color:var(--accent);font-weight:600}
+  #rgh-{{ sid }} .rgh-close .rgh-title{font-size:clamp(34px,4.6vw,60px);margin-bottom:18px}
+  #rgh-{{ sid }} .rgh-ctas{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+  #rgh-{{ sid }} .rgh-btn{display:inline-flex;align-items:center;gap:10px;min-height:56px;padding:0 28px;border-radius:4px;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;transition:transform .2s,background .2s,color .2s}
+  #rgh-{{ sid }} .rgh-btn--main{background:var(--accent);color:#1A1400;box-shadow:0 18px 40px -18px var(--accent)}
+  #rgh-{{ sid }} .rgh-btn--main:hover{transform:translateY(-2px)}
+  #rgh-{{ sid }} .rgh-btn--alt{border:1px solid color-mix(in srgb, var(--text) 25%, transparent);color:var(--text)}
+  #rgh-{{ sid }} .rgh-btn--alt:hover{border-color:var(--kerb);color:#fff;background:var(--kerb)}
+  #rgh-{{ sid }} .rgh-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+  /* Entrada animada */
+  #rgh-{{ sid }} [data-rgh-reveal]{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s cubic-bezier(.16,1,.3,1)}
+  #rgh-{{ sid }} [data-rgh-reveal].is-in{opacity:1;transform:none}
+
+  @media (max-width:899px){
+    #rgh-{{ sid }} .rgh-open{grid-template-columns:1fr}
+    #rgh-{{ sid }} .rgh-photo{aspect-ratio:4/3}
+  }
+  @media (max-width:699px){
+    #rgh-{{ sid }}{font-size:16px}
+    #rgh-{{ sid }} .rgh-pair{grid-template-columns:1fr}
+    #rgh-{{ sid }} .rgh-arrow{width:auto;height:30px;background:var(--surface)}
+    #rgh-{{ sid }} .rgh-arrow svg{transform:rotate(90deg)}
+    #rgh-{{ sid }} .rgh-side{padding:16px 18px}
+    #rgh-{{ sid }} .rgh-btn{width:100%;justify-content:center}
+  }
+  @media (prefers-reduced-motion:reduce){
+    #rgh-{{ sid }} [data-rgh-reveal]{opacity:1;transform:none;transition:none}
+    #rgh-{{ sid }} .rgh-photo img{transition:none;transform:none}
+  }
+</style>
+<section id="rgh-{{ sid }}" aria-labelledby="rgh-{{ sid }}-t">
+  <div class="rgh-wrap">
+    <div class="rgh-open">
+      <div data-rgh-reveal>
+        {%- if s.kicker != blank -%}<p class="rgh-kicker">{{ s.kicker }}</p>{%- endif -%}
+        <h2 class="rgh-title" id="rgh-{{ sid }}-t">{{ s.title }}{% if s.title_accent != blank %} <em>{{ s.title_accent }}</em>{% endif %}</h2>
+        <div class="rgh-story">{{ s.story }}</div>
+      </div>
+      <figure class="rgh-photo" data-rgh-reveal>
+        {%- if img -%}{{ img | image_url: width: 1200 | image_tag: loading: 'lazy', widths: '500, 800, 1200', sizes: '(min-width: 900px) 45vw, 100vw', alt: '' }}{%- endif -%}
+        {%- if s.quote != blank -%}<blockquote class="rgh-quote">{{ s.quote }}</blockquote>{%- endif -%}
+      </figure>
+    </div>
+
+    {%- if pairs.size > 0 -%}
+      <div class="rgh-shift">
+        <h3 class="rgh-h2" data-rgh-reveal>{{ s.shift_title }}{% if s.shift_accent != blank %} <em>{{ s.shift_accent }}</em>{% endif %}</h3>
+        <ul class="rgh-pairs" role="list">
+          {%- for b in pairs -%}
+            <li class="rgh-pair" data-rgh-reveal style="transition-delay:{{ forloop.index0 | times: 90 }}ms" {{ b.shopify_attributes }}>
+              <div class="rgh-side rgh-side--before">
+                <i aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></i>
+                <span><small>Antes</small><span class="rgh-x">{{ b.settings.before }}</span></span>
+              </div>
+              <div class="rgh-arrow" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+              <div class="rgh-side rgh-side--after">
+                <i aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></i>
+                <span><small>Con RacingGrip</small>{{ b.settings.after }}</span>
+              </div>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+
+    {%- if perks.size > 0 -%}
+      <ul class="rgh-perks" role="list" data-rgh-reveal>
+        {%- for b in perks -%}
+          <li class="rgh-perk" {{ b.shopify_attributes }}><b>{{ b.settings.title }}</b><span>{{ b.settings.text }}</span></li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    <div class="rgh-close" data-rgh-reveal>
+      <h3 class="rgh-title">{{ s.close_title }}{% if s.close_accent != blank %} <em>{{ s.close_accent }}</em>{% endif %}</h3>
+      {%- if s.close_text != blank -%}<p>{{ s.close_text }}</p>{%- endif -%}
+      <div class="rgh-ctas">
+        {%- if s.btn_label != blank -%}
+          <a class="rgh-btn rgh-btn--main" href="{{ s.btn_link | default: routes.all_products_collection_url }}">{{ s.btn_label }}<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        {%- endif -%}
+        {%- if s.btn2_label != blank and s.btn2_link != blank -%}
+          <a class="rgh-btn rgh-btn--alt" href="{{ s.btn2_link }}">{{ s.btn2_label }}</a>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+(() => {
+  const root = document.getElementById('rgh-{{ sid }}');
+  if (!root || root.dataset.ready) return; root.dataset.ready = '1';
+  const els = root.querySelectorAll('[data-rgh-reveal]');
+  if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('is-in')); return; }
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
+  els.forEach(e => io.observe(e));
+})();
+</script>
+
+{% schema %}
+{
+  "name": "RG · Historia del cliente",
+  "tag": "div",
+  "class": "rg-historia-section",
+  "settings": [
+    { "type": "header", "content": "Apertura" },
+    { "type": "text", "id": "kicker", "label": "Antetítulo", "default": "Para quien siente cada curva" },
+    { "type": "text", "id": "title", "label": "Título", "default": "Llevas tiempo buscándolo." },
+    { "type": "text", "id": "title_accent", "label": "Título · parte en amarillo", "default": "Por fin lo has encontrado." },
+    { "type": "richtext", "id": "story", "label": "Historia", "default": "<p>Lo conocemos bien: un volante <strong>gastado y brillante por el uso</strong>, que ya no transmitía nada. Noches mirando fotos, piezas que no sabías si encajarían y vendedores que no contestaban.</p><p>Tú solo querías una cosa: que cada vez que arrancases, <em>volvieras a sentir lo mismo que el primer día</em>.</p>" },
+    { "type": "image_picker", "id": "image", "label": "Foto" },
+    { "type": "product", "id": "image_product", "label": "O usar la foto de este volante" },
+    { "type": "text", "id": "quote", "label": "Frase sobre la foto", "default": "No es solo un volante. Es lo que tocas cada vez que arrancas." },
+    { "type": "header", "content": "Antes y después" },
+    { "type": "text", "id": "shift_title", "label": "Título", "default": "Lo que dejas" },
+    { "type": "text", "id": "shift_accent", "label": "Título · parte en amarillo", "default": "atrás" },
+    { "type": "header", "content": "Cierre" },
+    { "type": "text", "id": "close_title", "label": "Título", "default": "Tu próxima curva" },
+    { "type": "text", "id": "close_accent", "label": "Título · parte en amarillo", "default": "empieza aquí" },
+    { "type": "inline_richtext", "id": "close_text", "label": "Texto", "default": "Imagina la próxima vez que abras la puerta: te sientas, lo agarras y <em>sonríes sin darte cuenta</em>. Ese momento está a un clic." },
+    { "type": "text", "id": "btn_label", "label": "Botón principal", "default": "Encuentra tu volante" },
+    { "type": "url", "id": "btn_link", "label": "Enlace del botón principal" },
+    { "type": "text", "id": "btn2_label", "label": "Botón secundario", "default": "Ver ofertas" },
+    { "type": "url", "id": "btn2_link", "label": "Enlace del botón secundario" },
+    { "type": "header", "content": "Colores y tamaño" },
+    { "type": "color", "id": "color_bg", "label": "Fondo", "default": "#131517" },
+    { "type": "color", "id": "color_text", "label": "Texto", "default": "#F1EFEA" },
+    { "type": "color", "id": "color_muted", "label": "Texto secundario", "default": "#A7AEB5" },
+    { "type": "color", "id": "color_accent", "label": "Acento", "default": "#FFC21A" },
+    { "type": "color", "id": "color_kerb", "label": "Bordillo (rojo)", "default": "#D8342A" },
+    { "type": "range", "id": "title_size", "label": "Tamaño máximo del título", "min": 40, "max": 96, "step": 2, "unit": "px", "default": 78 },
+    { "type": "range", "id": "max_width", "label": "Ancho máximo", "min": 1000, "max": 1600, "step": 20, "unit": "px", "default": 1320 },
+    { "type": "range", "id": "radius", "label": "Esquinas redondeadas", "min": 0, "max": 20, "step": 1, "unit": "px", "default": 10 },
+    { "type": "range", "id": "pad_top", "label": "Espacio arriba", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 96 },
+    { "type": "range", "id": "pad_bottom", "label": "Espacio abajo", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 96 }
+  ],
+  "blocks": [
+    {
+      "type": "par",
+      "name": "Antes → Después",
+      "settings": [
+        { "type": "text", "id": "before", "label": "Antes", "default": "El cuero pelado que te recordaba cada kilómetro." },
+        { "type": "text", "id": "after", "label": "Después", "default": "Un tacto nuevo y firme cada vez que lo agarras." }
+      ]
+    },
+    {
+      "type": "ventaja",
+      "name": "Lo que ganas",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Título", "default": "Hecho a medida" },
+        { "type": "text", "id": "text", "label": "Texto", "default": "Tu material, tu costura, tu marca de centrado." }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "RG · Historia del cliente", "blocks": [ { "type": "par" }, { "type": "ventaja" } ] }
+  ]
+}
+{% endschema %}
