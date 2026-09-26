@@ -1,0 +1,54 @@
+{%- comment -%} RacingGrip · Franja de pago seguro con las formas de pago aceptadas {%- endcomment -%}
+{%- assign sid = section.id -%}
+{%- assign s = section.settings -%}
+<style>
+  #rgpay-{{ sid }}{background:{{ s.color_bg }};color:{{ s.color_text }};padding:{{ s.pad_y }}px 0;font-family:"Barlow","Helvetica Neue",Helvetica,Arial,sans-serif;border-top:1px solid color-mix(in srgb, {{ s.color_text }} 10%, transparent)}
+  #rgpay-{{ sid }} *{box-sizing:border-box}
+  #rgpay-{{ sid }} .rgpay-in{max-width:1400px;margin:0 auto;padding-inline:clamp(16px,3vw,40px);display:flex;align-items:center;justify-content:space-between;gap:18px 32px;flex-wrap:wrap}
+  #rgpay-{{ sid }} .rgpay-txt{display:flex;align-items:center;gap:14px;min-width:0}
+  #rgpay-{{ sid }} .rgpay-txt svg{flex:0 0 auto;color:{{ s.color_accent }}}
+  #rgpay-{{ sid }} .rgpay-txt b{display:block;font-size:16px;font-weight:700}
+  #rgpay-{{ sid }} .rgpay-txt span{display:block;font-size:14px;color:{{ s.color_muted }}}
+  #rgpay-{{ sid }} .rg-pay{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+  #rgpay-{{ sid }} .rg-pay li{display:block}
+  #rgpay-{{ sid }} .rg-pay__i{display:block;width:52px;height:34px;border-radius:5px;box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+  @media (max-width:749px){#rgpay-{{ sid }} .rgpay-in{justify-content:center;text-align:left}#rgpay-{{ sid }} .rg-pay{justify-content:center}}
+</style>
+<div id="rgpay-{{ sid }}">
+  <div class="rgpay-in">
+    <div class="rgpay-txt">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+      <div><b>{{ s.title }}</b>{%- if s.text != blank -%}<span>{{ s.text }}</span>{%- endif -%}</div>
+    </div>
+    {%- render 'rg-pagos', s: s -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "RG · Pago seguro",
+  "tag": "div",
+  "class": "rg-pagos-section",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Título", "default": "Pago 100 % seguro" },
+    { "type": "text", "id": "text", "label": "Texto", "default": "Paga con tarjeta, Apple Pay, Google Pay o PayPal. Tus datos viajan cifrados." },
+    { "type": "header", "content": "Formas de pago que se muestran" },
+    { "type": "paragraph", "content": "Marca solo las que tengas activadas en Configuración → Pagos." },
+    { "type": "checkbox", "id": "pay_visa", "label": "Visa", "default": true },
+    { "type": "checkbox", "id": "pay_master", "label": "Mastercard", "default": true },
+    { "type": "checkbox", "id": "pay_maestro", "label": "Maestro", "default": false },
+    { "type": "checkbox", "id": "pay_amex", "label": "American Express", "default": false },
+    { "type": "checkbox", "id": "pay_apple", "label": "Apple Pay", "default": true },
+    { "type": "checkbox", "id": "pay_google", "label": "Google Pay", "default": true },
+    { "type": "checkbox", "id": "pay_paypal", "label": "PayPal", "default": true },
+    { "type": "checkbox", "id": "pay_auto", "label": "Mostrar automáticamente las que tenga activadas Shopify", "info": "Si está marcado y Shopify tiene formas de pago activas, se usan esas en lugar de las casillas.", "default": false },
+    { "type": "header", "content": "Colores y espaciado" },
+    { "type": "color", "id": "color_bg", "label": "Fondo", "default": "#131517" },
+    { "type": "color", "id": "color_text", "label": "Texto", "default": "#F1EFEA" },
+    { "type": "color", "id": "color_muted", "label": "Texto secundario", "default": "#9AA1A8" },
+    { "type": "color", "id": "color_accent", "label": "Acento", "default": "#FFC21A" },
+    { "type": "range", "id": "pad_y", "label": "Espacio arriba y abajo", "min": 8, "max": 64, "step": 4, "unit": "px", "default": 28 }
+  ],
+  "presets": [{ "name": "RG · Pago seguro" }]
+}
+{% endschema %}

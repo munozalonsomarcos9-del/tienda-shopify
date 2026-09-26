@@ -196,6 +196,12 @@
   #rgp-{{ sid }} .shopify-payment-button__button--unbranded{background:transparent!important;color:var(--text)!important;border:1px solid var(--line-strong)!important;font-family:var(--body)!important;font-weight:700!important;letter-spacing:.04em!important;text-transform:uppercase}
   #rgp-{{ sid }} .shopify-payment-button__button--unbranded:hover:not([disabled]){border-color:var(--text)!important;background:color-mix(in srgb, var(--text) 6%, transparent)!important}
   #rgp-{{ sid }} .shopify-payment-button__more-options{color:var(--muted)!important;font-size:13px}
+  #rgp-{{ sid }} .rgp-pay{display:flex;align-items:center;justify-content:space-between;gap:10px 16px;flex-wrap:wrap;margin-top:-6px;padding:12px 14px;border-radius:{{ s.radius }}px;border:1px dashed var(--line-strong)}
+  #rgp-{{ sid }} .rgp-pay__t{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  #rgp-{{ sid }} .rgp-pay__t svg{color:var(--accent)}
+  #rgp-{{ sid }} .rg-pay{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:0;padding:0}
+  #rgp-{{ sid }} .rg-pay li{display:block}
+  #rgp-{{ sid }} .rg-pay__i{display:block;width:42px;height:28px;border-radius:4px;box-shadow:0 0 0 1px rgba(255,255,255,.12)}
   #rgp-{{ sid }} .rgp-sku{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--muted)}
 
   #rgp-{{ sid }} .rgp-vin{display:flex;gap:14px;align-items:flex-start;padding:16px 18px;border-radius:{{ s.radius }}px;background:color-mix(in srgb, var(--accent) 8%, var(--surface));border:1px solid color-mix(in srgb, var(--accent) 30%, transparent)}
@@ -443,6 +449,13 @@
           </div>
         {%- endform -%}
 
+        {%- if s.show_pay -%}
+          <div class="rgp-pay">
+            <span class="rgp-pay__t"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>{{ s.pay_title }}</span>
+            {%- render 'rg-pagos', s: s, types: s.pay_types -%}
+          </div>
+        {%- endif -%}
+
         {%- if s.vin_title != blank -%}
           <div class="rgp-vin">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8 4v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V6l8-4z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>
@@ -676,6 +689,10 @@
     { "type": "checkbox", "id": "show_intro", "label": "Mostrar la entradilla de la descripción", "default": true },
     { "type": "checkbox", "id": "show_chips", "label": "Mostrar etiquetas del producto", "default": true },
     { "type": "text", "id": "zoom_hint", "label": "Ayuda sobre la foto", "default": "Pulsa para ampliar" },
+    { "type": "header", "content": "Formas de pago" },
+    { "type": "checkbox", "id": "show_pay", "label": "Mostrar formas de pago bajo el botón", "default": true },
+    { "type": "text", "id": "pay_title", "label": "Texto", "default": "Pago seguro con" },
+    { "type": "text", "id": "pay_types", "label": "Formas de pago (separadas por comas)", "info": "Pon solo las que tengas activadas. Nombres: visa, master, maestro, american_express, apple_pay, google_pay, paypal.", "default": "visa, master, apple_pay, google_pay, paypal" },
     { "type": "header", "content": "Aviso de compatibilidad" },
     { "type": "text", "id": "vin_title", "label": "Título", "default": "Compatibilidad garantizada" },
     { "type": "text", "id": "vin_text", "label": "Texto", "default": "Tras la compra te pedimos el número de bastidor (VIN) y comprobamos que el volante encaja con tu coche antes de fabricarlo." },

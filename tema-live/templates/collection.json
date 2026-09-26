@@ -67,10 +67,15 @@
     "main": {
       "type": "rg-coleccion",
       "settings": {}
+    },
+    "rg_pagos": {
+      "type": "rg-pagos",
+      "settings": {}
     }
   },
   "order": [
     "catalogo",
-    "main"
+    "main",
+    "rg_pagos"
   ]
 }

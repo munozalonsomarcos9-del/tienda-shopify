@@ -79,12 +79,17 @@
       "settings": {
         "collection": "todos-los-volantes"
       }
+    },
+    "rg_pagos": {
+      "type": "rg-pagos",
+      "settings": {}
     }
   },
   "order": [
     "rg_banner",
     "rg_destacado",
     "rg_colecciones",
-    "rg_recomendados"
+    "rg_recomendados",
+    "rg_pagos"
   ]
 }

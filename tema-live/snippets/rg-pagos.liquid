@@ -1,0 +1,45 @@
+{%- comment -%}
+  RacingGrip · Iconos de formas de pago.
+  Recibe «types» (lista separada por comas, p. ej. «visa, master, paypal») o bien «s» (los ajustes de la sección que lo usa) con casillas pay_visa, pay_master, pay_maestro,
+  pay_amex, pay_apple, pay_google y pay_paypal. Si «pay_auto» está marcado y Shopify tiene formas
+  de pago activas, se muestran esas en su lugar.
+{%- endcomment -%}
+{%- liquid
+  assign pay = ''
+  if s.pay_visa
+    assign pay = pay | append: 'visa,'
+  endif
+  if s.pay_master
+    assign pay = pay | append: 'master,'
+  endif
+  if s.pay_maestro
+    assign pay = pay | append: 'maestro,'
+  endif
+  if s.pay_amex
+    assign pay = pay | append: 'american_express,'
+  endif
+  if s.pay_apple
+    assign pay = pay | append: 'apple_pay,'
+  endif
+  if s.pay_google
+    assign pay = pay | append: 'google_pay,'
+  endif
+  if s.pay_paypal
+    assign pay = pay | append: 'paypal,'
+  endif
+  if types != blank
+    assign pay = types
+  endif
+  assign pay_list = pay | split: ','
+  if s.pay_auto and shop.enabled_payment_types.size > 0
+    assign pay_list = shop.enabled_payment_types
+  endif
+-%}
+{%- if pay_list.size > 0 -%}
+  <ul class="rg-pay" aria-label="Formas de pago aceptadas">
+    {%- for t in pay_list -%}
+      {%- assign t = t | strip -%}
+      {%- if t != blank -%}<li>{{ t | payment_type_svg_tag: class: 'rg-pay__i' }}</li>{%- endif -%}
+    {%- endfor -%}
+  </ul>
+{%- endif -%}
