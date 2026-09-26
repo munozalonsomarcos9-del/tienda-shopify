@@ -120,7 +120,16 @@ uk|Ucraniano|Українська
   const btn = root.querySelector('[data-rgi-toggle]'), search = root.querySelector('[data-rgi-search]');
   const opts = [...root.querySelectorAll('[data-rgi-lang]')], empty = root.querySelector('[data-rgi-empty]');
 
-  const current = () => { const m = document.cookie.match(/(?:^|;\s*)googtrans=\/[^/]*\/([^;]+)/); return m ? decodeURIComponent(m[1]) : SRC; };
+  /* El idioma se guarda en la cookie de Google y, por si el navegador la bloquea (p. ej. en el editor de Shopify), también en el navegador */
+  const KEY = 'rg-idioma';
+  const store = {
+    get() { try { return localStorage.getItem(KEY); } catch (e) { return null; } },
+    set(v) { try { v ? localStorage.setItem(KEY, v) : localStorage.removeItem(KEY); } catch (e) {} }
+  };
+  const current = () => {
+    const m = document.cookie.match(/(?:^|;\s*)googtrans=\/[^/]*\/([^;]+)/);
+    return (m && decodeURIComponent(m[1])) || store.get() || SRC;
+  };
   const setCookie = (val) => {
     const host = location.hostname, parts = host.split('.');
     const domains = ['', host, '.' + host];
@@ -208,6 +217,7 @@ uk|Ucraniano|Українська
     const to = o.dataset.rgiLang;
     if (to === current()) { open(false); return; }
     setCookie(to === SRC ? '' : '/' + SRC + '/' + to);
+    store.set(to === SRC ? '' : to);
     location.reload();
   }));
 })();
