@@ -139,12 +139,27 @@ uk|Ucraniano|Українська
 
   /* Solo se carga Google cuando hay que traducir */
   if (lang !== SRC) {
+    /* Si la traducción automática por cookie no arranca, se elige el idioma en el selector oculto de Google */
+    const pick = (tries) => {
+      if (document.documentElement.classList.contains('translated-ltr') || document.documentElement.classList.contains('translated-rtl')) return;
+      const combo = document.querySelector('#rgi-gt select.goog-te-combo');
+      if (combo && [...combo.options].some(o => o.value === lang)) {
+        combo.value = lang;
+        combo.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      if (tries > 0) setTimeout(() => pick(tries - 1), 700);
+    };
     window.rgiInit = () => {
       new google.translate.TranslateElement({ pageLanguage: SRC, autoDisplay: false }, 'rgi-gt');
+      setTimeout(() => pick(12), 600);
     };
-    const s = document.createElement('script');
-    s.src = 'https://translate.google.com/translate_a/element.js?cb=rgiInit';
-    s.async = true; document.head.appendChild(s);
+    const load = (url, fallback) => {
+      const s = document.createElement('script');
+      s.src = url; s.async = true;
+      if (fallback) s.onerror = () => load(fallback);
+      document.head.appendChild(s);
+    };
+    load('https://translate.googleapis.com/translate_a/element.js?cb=rgiInit', 'https://translate.google.com/translate_a/element.js?cb=rgiInit');
   }
 
   const open = (on) => {
