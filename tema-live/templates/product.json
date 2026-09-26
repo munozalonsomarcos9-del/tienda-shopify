@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "rg-producto",
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}
