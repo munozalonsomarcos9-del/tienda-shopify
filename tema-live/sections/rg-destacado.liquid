@@ -1,0 +1,278 @@
+{%- comment -%} RacingGrip · Producto destacado (por defecto, el más caro de la tienda) {%- endcomment -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,700;1,800;1,900&family=Barlow:wght@400;500;600;700&family=Chakra+Petch:wght@500;600&display=swap">
+
+{%- liquid
+  assign sid = section.id
+  assign s = section.settings
+
+  comment
+    Modo automático: recorre la colección elegida (o todo el catálogo) y se queda con la
+    variante más cara. Así el destacado cambia solo si subes un volante más caro.
+  endcomment
+  assign fp = nil
+  assign fv = nil
+  if s.mode == 'manual' and s.product != blank
+    assign fp = s.product
+    for v in fp.variants
+      if fv == nil or v.price > fv.price
+        assign fv = v
+      endif
+    endfor
+  else
+    assign source = s.source | default: collections.all
+    for p in source.products
+      for v in p.variants
+        if v.available == false
+          continue
+        endif
+        if fv == nil or v.price > fv.price
+          assign fv = v
+          assign fp = p
+        endif
+      endfor
+    endfor
+  endif
+
+  if fp
+    assign desc_parts = fp.description | split: '<h3>'
+    assign intro = desc_parts.first | strip_html | strip | truncatewords: 42
+    assign title_parts = fp.title | split: ' · '
+    assign main_media = fv.featured_media | default: fp.featured_media
+    assign fv_url = fp.url | append: '?variant=' | append: fv.id
+  endif
+-%}
+
+{%- if fp -%}
+<style>
+  #rgd-{{ sid }}{
+    --bg: {{ s.color_bg }};
+    --surface: {{ s.color_surface }};
+    --text: {{ s.color_text }};
+    --muted: {{ s.color_muted }};
+    --accent: {{ s.color_accent }};
+    --kerb: {{ s.color_kerb }};
+    --line: color-mix(in srgb, var(--text) 10%, transparent);
+    --line-strong: color-mix(in srgb, var(--text) 18%, transparent);
+    --display: "Saira Condensed","Arial Narrow",Impact,sans-serif;
+    --mono: "Chakra Petch",Menlo,Consolas,monospace;
+    --body: "Barlow","Helvetica Neue",Helvetica,Arial,sans-serif;
+    position:relative;isolation:isolate;overflow:hidden;
+    background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    padding:{{ s.pad_top }}px 0 {{ s.pad_bottom }}px;
+  }
+  #rgd-{{ sid }}::before{
+    content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(900px 520px at 30% 50%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
+      radial-gradient(700px 500px at 100% 0%, color-mix(in srgb, var(--kerb) 8%, transparent), transparent 70%),
+      linear-gradient(color-mix(in srgb, var(--text) 3.5%, transparent) 1px, transparent 1px) 0 0/48px 48px,
+      linear-gradient(90deg, color-mix(in srgb, var(--text) 3.5%, transparent) 1px, transparent 1px) 0 0/48px 48px;
+  }
+  #rgd-{{ sid }} *,#rgd-{{ sid }} *::before,#rgd-{{ sid }} *::after{box-sizing:border-box}
+  #rgd-{{ sid }} img{display:block;max-width:100%;height:auto}
+  #rgd-{{ sid }} a{color:inherit}
+  #rgd-{{ sid }} button{font:inherit;color:inherit}
+  #rgd-{{ sid }} :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  #rgd-{{ sid }} .rgd-wrap{max-width:{{ s.max_width }}px;margin:0 auto;padding-inline:clamp(16px,3vw,40px)}
+  #rgd-{{ sid }} .rgd-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:clamp(28px,5vw,80px);align-items:center}
+  @media (max-width:899px){#rgd-{{ sid }} .rgd-grid{grid-template-columns:1fr}}
+
+  /* Foto */
+  #rgd-{{ sid }} .rgd-media{display:flex;flex-direction:column;gap:12px;min-width:0}
+  #rgd-{{ sid }} .rgd-stage{position:relative;aspect-ratio:1/1;border-radius:{{ s.radius }}px;overflow:hidden;border:1px solid var(--line);
+    background:radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--text) 13%, var(--surface)) 0%, var(--surface) 50%, color-mix(in srgb, #000 35%, var(--bg)) 100%);
+    box-shadow:0 50px 90px -40px rgba(0,0,0,.85), 0 0 0 1px color-mix(in srgb, var(--accent) 12%, transparent)}
+  #rgd-{{ sid }} .rgd-stage::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+    background:repeating-linear-gradient(45deg, rgba(255,255,255,.028) 0 2px, transparent 2px 6px),repeating-linear-gradient(-45deg, rgba(0,0,0,.22) 0 2px, transparent 2px 6px);
+    -webkit-mask-image:radial-gradient(circle at 50% 45%, transparent 30%, #000 75%);mask-image:radial-gradient(circle at 50% 45%, transparent 30%, #000 75%)}
+  #rgd-{{ sid }} .rgd-stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;z-index:3;background:repeating-linear-gradient(115deg,var(--kerb) 0 22px,#EDEAE4 22px 44px)}
+  #rgd-{{ sid }} .rgd-shot{position:absolute;inset:0;display:grid;place-items:center;padding:clamp(28px,7%,64px) clamp(28px,7%,64px) calc(clamp(28px,7%,64px) + 6px)}
+  #rgd-{{ sid }} .rgd-shot img{width:auto;max-width:100%;max-height:100%;object-fit:contain;border-radius:calc({{ s.radius }}px * .6);box-shadow:0 28px 50px -18px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.06);transition:opacity .35s,transform .6s cubic-bezier(.16,1,.3,1)}
+  #rgd-{{ sid }} .rgd-stage:hover .rgd-shot img{transform:scale(1.02)}
+  #rgd-{{ sid }} .rgd-corner{position:absolute;z-index:3;width:22px;height:22px;border:2px solid var(--accent);pointer-events:none}
+  #rgd-{{ sid }} .rgd-corner--tl{top:16px;left:16px;border-right:0;border-bottom:0}
+  #rgd-{{ sid }} .rgd-corner--tr{top:16px;right:16px;border-left:0;border-bottom:0}
+  #rgd-{{ sid }} .rgd-corner--bl{bottom:24px;left:16px;border-right:0;border-top:0}
+  #rgd-{{ sid }} .rgd-corner--br{bottom:24px;right:16px;border-left:0;border-top:0}
+  #rgd-{{ sid }} .rgd-ribbon{position:absolute;z-index:4;top:22px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:var(--accent);color:#1A1400;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap;box-shadow:0 10px 30px -10px color-mix(in srgb, var(--accent) 70%, transparent)}
+  #rgd-{{ sid }} .rgd-thumbs{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding:2px}
+  #rgd-{{ sid }} .rgd-thumbs::-webkit-scrollbar{display:none}
+  #rgd-{{ sid }} .rgd-thumb{flex:0 0 auto;width:72px;height:72px;padding:0;border-radius:6px;overflow:hidden;cursor:pointer;background:var(--surface);border:1px solid var(--line);opacity:.55;transition:opacity .2s,border-color .2s}
+  #rgd-{{ sid }} .rgd-thumb:hover{opacity:.9}
+  #rgd-{{ sid }} .rgd-thumb[aria-current="true"]{opacity:1;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+  #rgd-{{ sid }} .rgd-thumb img{width:100%;height:100%;object-fit:cover}
+
+  /* Texto */
+  #rgd-{{ sid }} .rgd-info{display:flex;flex-direction:column;gap:20px;min-width:0}
+  #rgd-{{ sid }} .rgd-kicker{display:flex;align-items:center;gap:12px;margin:0;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+  #rgd-{{ sid }} .rgd-kicker::before{content:"";width:28px;height:2px;background:var(--accent)}
+  #rgd-{{ sid }} .rgd-title{margin:0;font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:clamp(40px,5.2vw,{{ s.title_size }}px);line-height:.9;letter-spacing:-.005em;color:var(--text);text-wrap:balance}
+  #rgd-{{ sid }} .rgd-title em{font-style:inherit;color:var(--accent);display:block}
+  #rgd-{{ sid }} .rgd-intro{margin:0;color:var(--muted);font-size:17px;max-width:56ch}
+  #rgd-{{ sid }} .rgd-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+  #rgd-{{ sid }} .rgd-chips li{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:6px 10px;border-radius:3px;border:1px solid var(--line-strong);color:var(--muted)}
+  #rgd-{{ sid }} .rgd-price{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:20px 22px;border-radius:{{ s.radius }}px;background:color-mix(in srgb, var(--surface) 88%, transparent);border:1px solid var(--line);position:relative;overflow:hidden}
+  #rgd-{{ sid }} .rgd-price::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent)}
+  #rgd-{{ sid }} .rgd-price__v{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  #rgd-{{ sid }} .rgd-price__v b{color:var(--text);font-family:var(--body);font-size:15px;letter-spacing:0;text-transform:none;margin-left:6px}
+  #rgd-{{ sid }} .rgd-price__now{font-family:var(--mono);font-weight:600;font-size:clamp(36px,3.4vw,48px);line-height:1;font-variant-numeric:tabular-nums}
+  #rgd-{{ sid }} .rgd-price__tax{display:block;margin-top:6px;font-size:13px;color:var(--muted)}
+  #rgd-{{ sid }} .rgd-price__from{font-family:var(--mono);font-size:13px;color:var(--muted);text-align:right}
+  #rgd-{{ sid }} .rgd-price__from b{display:block;color:var(--text);font-size:18px}
+  #rgd-{{ sid }} .rgd-ctas{display:flex;gap:10px;flex-wrap:wrap}
+  #rgd-{{ sid }} .rgd-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:56px;padding:14px 26px;border-radius:4px;border:1px solid transparent;text-decoration:none;font-weight:700;font-size:16px;letter-spacing:.04em;text-transform:uppercase;overflow:hidden;transition:filter .15s,border-color .15s,background .15s}
+  #rgd-{{ sid }} .rgd-btn--primary{flex:1 1 240px;background:var(--accent);color:#1A1400}
+  #rgd-{{ sid }} .rgd-btn--primary::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%);transform:translateX(-120%);transition:transform .7s cubic-bezier(.16,1,.3,1)}
+  #rgd-{{ sid }} .rgd-btn--primary:hover{filter:brightness(1.06)}
+  #rgd-{{ sid }} .rgd-btn--primary:hover::after{transform:translateX(120%)}
+  #rgd-{{ sid }} .rgd-btn--ghost{flex:0 1 auto;border-color:var(--line-strong);color:var(--text)}
+  #rgd-{{ sid }} .rgd-btn--ghost:hover{border-color:var(--text)}
+  #rgd-{{ sid }} .rgd-perks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:0;padding:0;list-style:none;border:1px solid var(--line);border-radius:{{ s.radius }}px;overflow:hidden;background:var(--line)}
+  #rgd-{{ sid }} .rgd-perks li{display:flex;align-items:center;gap:10px;padding:14px;background:var(--bg);font-size:13px;font-weight:600;line-height:1.3}
+  #rgd-{{ sid }} .rgd-perks svg{flex:0 0 auto;color:var(--accent)}
+  @media (max-width:560px){#rgd-{{ sid }} .rgd-price__from{text-align:left}#rgd-{{ sid }} .rgd-perks{grid-template-columns:1fr}#rgd-{{ sid }} .rgd-btn--ghost{flex:1 1 100%}}
+
+  @media (prefers-reduced-motion:no-preference){
+    #rgd-{{ sid }} [data-rgd-reveal]{opacity:0;transform:translateY(22px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+    #rgd-{{ sid }} [data-rgd-reveal].is-in{opacity:1;transform:none}
+    #rgd-{{ sid }} .rgd-info[data-rgd-reveal]{transition-delay:.12s}
+  }
+</style>
+
+<section id="rgd-{{ sid }}" aria-labelledby="rgd-t-{{ sid }}">
+  <div class="rgd-wrap rgd-grid">
+    <div class="rgd-media" data-rgd-reveal>
+      <a class="rgd-stage" href="{{ fv_url }}" aria-label="Ver {{ fp.title | escape }}">
+        {%- if s.ribbon != blank -%}<span class="rgd-ribbon"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.9L22 9.3l-5.5 4.8 1.7 7.2L12 17.6 5.8 21.3l1.7-7.2L2 9.3l7.1-.4z"/></svg>{{ s.ribbon }}</span>{%- endif -%}
+        <span class="rgd-corner rgd-corner--tl" aria-hidden="true"></span>
+        <span class="rgd-corner rgd-corner--tr" aria-hidden="true"></span>
+        <span class="rgd-corner rgd-corner--bl" aria-hidden="true"></span>
+        <span class="rgd-corner rgd-corner--br" aria-hidden="true"></span>
+        <span class="rgd-shot">
+          {%- if main_media -%}
+            {{ main_media | image_url: width: 1400 | image_tag: widths: '500, 800, 1100, 1400', sizes: '(min-width: 900px) 50vw, 100vw', alt: fp.title, loading: 'lazy', class: 'rgd-main' }}
+          {%- else -%}
+            {{ 'product-1' | placeholder_svg_tag }}
+          {%- endif -%}
+        </span>
+      </a>
+      {%- if fp.media.size > 1 -%}
+        <div class="rgd-thumbs" role="group" aria-label="Fotos">
+          {%- for m in fp.media limit: s.thumbs -%}
+            {%- if m.media_type == 'image' -%}
+              <button type="button" class="rgd-thumb" data-rgd-thumb data-src="{{ m | image_url: width: 1400 }}" aria-label="Ver foto {{ forloop.index }}" aria-current="{% if m.id == main_media.id %}true{% else %}false{% endif %}">
+                {{ m | image_url: width: 160 | image_tag: loading: 'lazy', alt: '' }}
+              </button>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="rgd-info" data-rgd-reveal>
+      <p class="rgd-kicker">{{ s.kicker }}</p>
+      <h2 class="rgd-title" id="rgd-t-{{ sid }}">
+        {%- if title_parts.size > 1 -%}{{ title_parts.first | remove_first: 'Volante ' }} <em>{{ title_parts.last }}</em>{%- else -%}{{ fp.title }}{%- endif -%}
+      </h2>
+      {%- if intro != blank -%}<p class="rgd-intro">{{ intro }}</p>{%- endif -%}
+      <ul class="rgd-chips">
+        {%- for tag in fp.tags -%}{%- unless tag == 'Volante' -%}<li>{{ tag }}</li>{%- endunless -%}{%- endfor -%}
+      </ul>
+
+      <div class="rgd-price">
+        <div>
+          {%- unless fp.has_only_default_variant -%}<span class="rgd-price__v">Configuración <b>{{ fv.title }}</b></span>{%- endunless -%}
+          <span class="rgd-price__now">{{ fv.price | money }}</span>
+          <span class="rgd-price__tax">{{ s.tax_text }}</span>
+        </div>
+        {%- if fp.price_varies -%}
+          <span class="rgd-price__from">Otras versiones<b>desde {{ fp.price_min | money }}</b></span>
+        {%- endif -%}
+      </div>
+
+      <div class="rgd-ctas">
+        <a class="rgd-btn rgd-btn--primary" href="{{ fv_url }}">{{ s.button_label }}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        {%- if s.button2_label != blank -%}
+          <a class="rgd-btn rgd-btn--ghost" href="{{ s.button2_link | default: routes.all_products_collection_url }}">{{ s.button2_label }}</a>
+        {%- endif -%}
+      </div>
+
+      {%- if s.show_perks -%}
+        <ul class="rgd-perks">
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M3.5 10.5l6 1M20.5 10.5l-6 1M12 14.5V21"/></svg>{{ s.perk_1 }}</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l8 4v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V6l8-4z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>{{ s.perk_2 }}</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg>{{ s.perk_3 }}</li>
+        </ul>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<script>
+(() => {
+  const root = document.getElementById('rgd-{{ sid }}');
+  if (!root || root.dataset.ready) return; root.dataset.ready = '1';
+  const main = root.querySelector('.rgd-main');
+  const thumbs = [...root.querySelectorAll('[data-rgd-thumb]')];
+  thumbs.forEach(t => t.addEventListener('click', () => {
+    if (!main) return;
+    main.style.opacity = '0';
+    setTimeout(() => { main.removeAttribute('srcset'); main.src = t.dataset.src; main.style.opacity = '1'; }, 180);
+    thumbs.forEach(b => b.setAttribute('aria-current', b === t));
+  }));
+  const rev = root.querySelectorAll('[data-rgd-reveal]');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
+    rev.forEach(el => io.observe(el));
+  } else rev.forEach(el => el.classList.add('is-in'));
+})();
+</script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "RG · Destacado",
+  "tag": "div",
+  "class": "rg-destacado-section",
+  "settings": [
+    { "type": "header", "content": "Qué volante se destaca" },
+    { "type": "select", "id": "mode", "label": "Elegir", "default": "auto", "options": [
+      { "value": "auto", "label": "Automático: el más caro" },
+      { "value": "manual", "label": "Elegido a mano" }
+    ] },
+    { "type": "collection", "id": "source", "label": "Buscar el más caro en…", "info": "Si lo dejas vacío, se busca en todo el catálogo." },
+    { "type": "product", "id": "product", "label": "Volante elegido a mano", "info": "Solo se usa en el modo «Elegido a mano»." },
+    { "type": "header", "content": "Textos" },
+    { "type": "text", "id": "kicker", "label": "Antetítulo", "default": "Producto destacado" },
+    { "type": "text", "id": "ribbon", "label": "Distintivo sobre la foto", "default": "El más exclusivo" },
+    { "type": "text", "id": "tax_text", "label": "Texto bajo el precio", "default": "IVA incluido · Fabricado a medida" },
+    { "type": "text", "id": "button_label", "label": "Botón principal", "default": "Configúralo" },
+    { "type": "text", "id": "button2_label", "label": "Botón secundario", "default": "Ver todos los volantes" },
+    { "type": "url", "id": "button2_link", "label": "Enlace del botón secundario" },
+    { "type": "checkbox", "id": "show_perks", "label": "Mostrar ventajas", "default": true },
+    { "type": "text", "id": "perk_1", "label": "Ventaja 1", "default": "Hecho a medida" },
+    { "type": "text", "id": "perk_2", "label": "Ventaja 2", "default": "Compatibilidad por VIN" },
+    { "type": "text", "id": "perk_3", "label": "Ventaja 3", "default": "Envío asegurado" },
+    { "type": "range", "id": "thumbs", "label": "Miniaturas", "min": 0, "max": 8, "step": 1, "default": 5 },
+    { "type": "header", "content": "Colores" },
+    { "type": "color", "id": "color_bg", "label": "Fondo", "default": "#131517" },
+    { "type": "color", "id": "color_surface", "label": "Superficies", "default": "#1C1F22" },
+    { "type": "color", "id": "color_text", "label": "Texto", "default": "#F1EFEA" },
+    { "type": "color", "id": "color_muted", "label": "Texto secundario", "default": "#9AA1A8" },
+    { "type": "color", "id": "color_accent", "label": "Acento", "default": "#FFC21A" },
+    { "type": "color", "id": "color_kerb", "label": "Bordillo (rojo)", "default": "#D8342A" },
+    { "type": "header", "content": "Tamaño y espaciado" },
+    { "type": "range", "id": "title_size", "label": "Tamaño máximo del título", "min": 40, "max": 96, "step": 2, "unit": "px", "default": 72 },
+    { "type": "range", "id": "max_width", "label": "Ancho máximo", "min": 1000, "max": 1600, "step": 20, "unit": "px", "default": 1400 },
+    { "type": "range", "id": "radius", "label": "Esquinas redondeadas", "min": 0, "max": 20, "step": 1, "unit": "px", "default": 8 },
+    { "type": "range", "id": "pad_top", "label": "Espacio arriba", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 },
+    { "type": "range", "id": "pad_bottom", "label": "Espacio abajo", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 }
+  ],
+  "presets": [{ "name": "RG · Destacado" }]
+}
+{% endschema %}
