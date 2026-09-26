@@ -137,6 +137,26 @@ uk|Ucraniano|Українська
   root.querySelector('[data-rgi-code]').textContent = lang.toUpperCase();
   opts.forEach(o => o.setAttribute('aria-current', String(o.dataset.rgiLang === lang)));
 
+  /* El nombre de la tienda no se traduce nunca */
+  const protectBrand = () => {
+    document.querySelectorAll('[data-rg-logo], .rg-logo, .header-logo, .header__logo, [class*="header-logo"]').forEach(el => {
+      el.classList.add('notranslate'); el.setAttribute('translate', 'no');
+    });
+    /* Donde el nombre va solo (logo, títulos, etiquetas) se bloquea el elemento entero.
+       Dentro de frases Google ya lo respeta como nombre propio. */
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: n => {
+        const v = (n.nodeValue || '').trim();
+        if (!/^racing\s*grip[\s·|:.-]*$/i.test(v)) return NodeFilter.FILTER_REJECT;
+        const p = n.parentElement;
+        if (!p || p.closest('script, style, noscript, textarea, .notranslate, [translate="no"]')) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    const els = []; while (walker.nextNode()) els.push(walker.currentNode.parentElement);
+    els.forEach(el => { el.classList.add('notranslate'); el.setAttribute('translate', 'no'); });
+  };
+
   /* Solo se carga Google cuando hay que traducir */
   if (lang !== SRC) {
     /* Si la traducción automática por cookie no arranca, se elige el idioma en el selector oculto de Google */
@@ -159,7 +179,11 @@ uk|Ucraniano|Українська
       if (fallback) s.onerror = () => load(fallback);
       document.head.appendChild(s);
     };
-    load('https://translate.googleapis.com/translate_a/element.js?cb=rgiInit', 'https://translate.google.com/translate_a/element.js?cb=rgiInit');
+    const start = () => {
+      protectBrand();
+      load('https://translate.googleapis.com/translate_a/element.js?cb=rgiInit', 'https://translate.google.com/translate_a/element.js?cb=rgiInit');
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
   }
 
   const open = (on) => {
