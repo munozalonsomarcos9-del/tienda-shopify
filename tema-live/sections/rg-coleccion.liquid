@@ -1,0 +1,406 @@
+{%- comment -%} RacingGrip · Página de colección (marca, serie o material) {%- endcomment -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,700;1,800;1,900&family=Barlow:wght@400;500;600;700&family=Chakra+Petch:wght@500;600&display=swap">
+
+{%- liquid
+  assign sid = section.id
+  assign s = section.settings
+
+  comment
+    Accesos rápidos: se toman del menú elegido. Se busca el apartado del menú que contiene
+    esta colección (p. ej. «Catálogo») y, dentro, la marca activa para mostrar sus series.
+  endcomment
+  assign menu = linklists[s.menu]
+  assign group = nil
+  for top in menu.links
+    if top.links.size > 0
+      if top.active or top.child_active
+        assign group = top
+        break
+      endif
+    endif
+  endfor
+  if group == nil
+    for top in menu.links
+      if top.links.size > 0
+        assign group = top
+        break
+      endif
+    endfor
+  endif
+  assign active = nil
+  if group
+    for l in group.links
+      if l.active or l.child_active
+        assign active = l
+        break
+      endif
+    endfor
+  endif
+
+  assign title_words = collection.title | split: ' '
+  assign title_last = title_words.last
+  assign title_first = collection.title | remove_last: title_last | strip
+-%}
+
+<style>
+  #rgc2-{{ sid }}{
+    --bg: {{ s.color_bg }};
+    --surface: {{ s.color_surface }};
+    --text: {{ s.color_text }};
+    --muted: {{ s.color_muted }};
+    --accent: {{ s.color_accent }};
+    --kerb: {{ s.color_kerb }};
+    --line: color-mix(in srgb, var(--text) 10%, transparent);
+    --line-strong: color-mix(in srgb, var(--text) 18%, transparent);
+    --display: "Saira Condensed","Arial Narrow",Impact,sans-serif;
+    --mono: "Chakra Petch",Menlo,Consolas,monospace;
+    --body: "Barlow","Helvetica Neue",Helvetica,Arial,sans-serif;
+    position:relative;isolation:isolate;
+    background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    padding:{{ s.pad_top }}px 0 {{ s.pad_bottom }}px;
+  }
+  {%- if s.show_pattern -%}
+  #rgc2-{{ sid }}::before{
+    content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(1100px 520px at 85% -8%, color-mix(in srgb, var(--accent) 11%, transparent), transparent 70%),
+      radial-gradient(900px 600px at -10% 30%, color-mix(in srgb, var(--kerb) 7%, transparent), transparent 70%),
+      linear-gradient(color-mix(in srgb, var(--text) 3.5%, transparent) 1px, transparent 1px) 0 0/48px 48px,
+      linear-gradient(90deg, color-mix(in srgb, var(--text) 3.5%, transparent) 1px, transparent 1px) 0 0/48px 48px;
+    -webkit-mask-image:linear-gradient(to bottom,#000 0,#000 45%,transparent 100%);
+    mask-image:linear-gradient(to bottom,#000 0,#000 45%,transparent 100%);
+  }
+  {%- endif -%}
+  #rgc2-{{ sid }} *,#rgc2-{{ sid }} *::before,#rgc2-{{ sid }} *::after{box-sizing:border-box}
+  #rgc2-{{ sid }} img{display:block;max-width:100%;height:auto}
+  #rgc2-{{ sid }} a{color:inherit}
+  #rgc2-{{ sid }} button,#rgc2-{{ sid }} select{font:inherit;color:inherit;letter-spacing:inherit}
+  #rgc2-{{ sid }} :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  #rgc2-{{ sid }} .rgc2-wrap{max-width:{{ s.max_width }}px;margin:0 auto;padding-inline:clamp(16px,3vw,40px)}
+  #rgc2-{{ sid }} .rgc2-vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* Ruta */
+  #rgc2-{{ sid }} .rgc2-crumbs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 clamp(18px,2.4vw,30px);padding:0;list-style:none;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  #rgc2-{{ sid }} .rgc2-crumbs a{text-decoration:none}
+  #rgc2-{{ sid }} .rgc2-crumbs a:hover{color:var(--accent)}
+  #rgc2-{{ sid }} .rgc2-crumbs li+li::before{content:"/";margin-right:8px;color:var(--line-strong)}
+  #rgc2-{{ sid }} .rgc2-crumbs [aria-current]{color:var(--text)}
+
+  /* Cabecera de la colección */
+  #rgc2-{{ sid }} .rgc2-hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:clamp(24px,4vw,64px);align-items:center;padding-bottom:clamp(28px,4vw,48px)}
+  #rgc2-{{ sid }} .rgc2-hero--solo{grid-template-columns:1fr}
+  @media (max-width:899px){#rgc2-{{ sid }} .rgc2-hero{grid-template-columns:1fr}}
+  #rgc2-{{ sid }} .rgc2-hero__txt{display:flex;flex-direction:column;gap:16px;min-width:0}
+  #rgc2-{{ sid }} .rgc2-kicker{display:flex;align-items:center;gap:12px;margin:0;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+  #rgc2-{{ sid }} .rgc2-kicker::before{content:"";width:28px;height:2px;background:var(--accent)}
+  #rgc2-{{ sid }} .rgc2-title{margin:0;font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:clamp(46px,7vw,{{ s.title_size }}px);line-height:.88;letter-spacing:-.01em;text-wrap:balance}
+  #rgc2-{{ sid }} .rgc2-title em{font-style:inherit;color:var(--accent)}
+  #rgc2-{{ sid }} .rgc2-desc{margin:0;max-width:62ch;color:var(--muted);font-size:17px}
+  #rgc2-{{ sid }} .rgc2-desc p{margin:0 0 10px}
+  #rgc2-{{ sid }} .rgc2-desc p:last-child{margin:0}
+  #rgc2-{{ sid }} .rgc2-stats{display:flex;flex-wrap:wrap;gap:1px;margin:6px 0 0;padding:0;list-style:none;border:1px solid var(--line);border-radius:{{ s.radius }}px;overflow:hidden;background:var(--line);width:fit-content;max-width:100%}
+  #rgc2-{{ sid }} .rgc2-stats li{flex:1 1 auto;display:flex;flex-direction:column;gap:2px;padding:12px 20px;background:color-mix(in srgb, var(--surface) 92%, transparent)}
+  @media (max-width:560px){#rgc2-{{ sid }} .rgc2-stats{width:100%}}
+  #rgc2-{{ sid }} .rgc2-stats b{font-family:var(--mono);font-weight:600;font-size:22px;line-height:1.1}
+  #rgc2-{{ sid }} .rgc2-stats span{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  #rgc2-{{ sid }} .rgc2-stage{position:relative;aspect-ratio:4/3;border-radius:{{ s.radius }}px;overflow:hidden;border:1px solid var(--line);
+    background:radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--text) 13%, var(--surface)) 0%, var(--surface) 50%, color-mix(in srgb, #000 35%, var(--bg)) 100%);
+    box-shadow:0 40px 80px -30px rgba(0,0,0,.7)}
+  #rgc2-{{ sid }} .rgc2-stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:6px;z-index:2;background:repeating-linear-gradient(115deg,var(--kerb) 0 22px,#EDEAE4 22px 44px)}
+  #rgc2-{{ sid }} .rgc2-stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  #rgc2-{{ sid }} .rgc2-corner{position:absolute;z-index:2;width:22px;height:22px;border:2px solid var(--accent);pointer-events:none}
+  #rgc2-{{ sid }} .rgc2-corner--tl{top:14px;left:14px;border-right:0;border-bottom:0}
+  #rgc2-{{ sid }} .rgc2-corner--tr{top:14px;right:14px;border-left:0;border-bottom:0}
+  #rgc2-{{ sid }} .rgc2-corner--bl{bottom:22px;left:14px;border-right:0;border-top:0}
+  #rgc2-{{ sid }} .rgc2-corner--br{bottom:22px;right:14px;border-left:0;border-top:0}
+  @media (max-width:899px){#rgc2-{{ sid }} .rgc2-stage{display:none}}
+
+  /* Accesos rápidos */
+  #rgc2-{{ sid }} .rgc2-nav{display:flex;flex-direction:column;gap:10px;padding-block:18px;border-block:1px solid var(--line)}
+  #rgc2-{{ sid }} .rgc2-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0;padding:2px;list-style:none}
+  #rgc2-{{ sid }} .rgc2-chips::-webkit-scrollbar{display:none}
+  #rgc2-{{ sid }} .rgc2-chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:8px 16px;border-radius:999px;border:1px solid var(--line-strong);background:color-mix(in srgb, var(--surface) 70%, transparent);text-decoration:none;font-weight:600;font-size:14px;white-space:nowrap;transition:border-color .15s,background .15s,color .15s}
+  #rgc2-{{ sid }} .rgc2-chip:hover{border-color:var(--accent);color:var(--accent)}
+  #rgc2-{{ sid }} .rgc2-chip[aria-current="page"],#rgc2-{{ sid }} .rgc2-chip[data-parent]{background:var(--accent);border-color:var(--accent);color:#1A1400}
+  #rgc2-{{ sid }} .rgc2-chips--sub .rgc2-chip{min-height:36px;padding:6px 14px;font-size:13px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;background:transparent}
+  #rgc2-{{ sid }} .rgc2-chips--sub .rgc2-chip[aria-current="page"]{background:transparent;color:var(--accent);border-color:var(--accent)}
+  #rgc2-{{ sid }} .rgc2-chips--sub::before{content:"↳";align-self:center;color:var(--muted);font-family:var(--mono);padding:0 4px 0 8px}
+
+  /* Barra de herramientas */
+  #rgc2-{{ sid }} .rgc2-tools{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding-block:20px}
+  #rgc2-{{ sid }} .rgc2-count{font-family:var(--mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  #rgc2-{{ sid }} .rgc2-count b{color:var(--text);font-weight:600}
+  #rgc2-{{ sid }} .rgc2-sort{display:flex;align-items:center;gap:10px}
+  #rgc2-{{ sid }} .rgc2-sort label{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  #rgc2-{{ sid }} .rgc2-select{position:relative}
+  #rgc2-{{ sid }} .rgc2-select select{appearance:none;-webkit-appearance:none;min-height:44px;padding:8px 40px 8px 14px;border-radius:4px;border:1px solid var(--line-strong);background:var(--surface);color:var(--text);font-weight:600;font-size:14px;cursor:pointer}
+  #rgc2-{{ sid }} .rgc2-select select:hover{border-color:var(--accent)}
+  #rgc2-{{ sid }} .rgc2-select svg{position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--accent)}
+  #rgc2-{{ sid }} .rgc2-select option{background:var(--surface);color:var(--text)}
+
+  /* Rejilla de volantes */
+  #rgc2-{{ sid }} .rgc2-grid{display:grid;grid-template-columns:repeat({{ s.columns }},minmax(0,1fr));gap:16px;margin:0;padding:0;list-style:none}
+  @media (max-width:1100px){#rgc2-{{ sid }} .rgc2-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media (max-width:749px){#rgc2-{{ sid }} .rgc2-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}}
+  #rgc2-{{ sid }} .rgc2-card{position:relative;height:100%;display:flex;flex-direction:column;border-radius:{{ s.radius }}px;overflow:hidden;text-decoration:none;background:var(--surface);border:1px solid var(--line);transition:border-color .2s,transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s}
+  #rgc2-{{ sid }} .rgc2-card::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:repeating-linear-gradient(115deg,var(--kerb) 0 20px,#EDEAE4 20px 40px);transform:scaleX(0);transform-origin:left;transition:transform .35s cubic-bezier(.16,1,.3,1)}
+  #rgc2-{{ sid }} .rgc2-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 24px 50px -24px rgba(0,0,0,.8)}
+  #rgc2-{{ sid }} .rgc2-card:hover::after{transform:scaleX(1)}
+  #rgc2-{{ sid }} .rgc2-card__img{position:relative;aspect-ratio:1/1;overflow:hidden;background:#E9E8E4}
+  #rgc2-{{ sid }} .rgc2-card__img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.16,1,.3,1),opacity .4s}
+  #rgc2-{{ sid }} .rgc2-card__img img + img{opacity:0}
+  #rgc2-{{ sid }} .rgc2-card:hover .rgc2-card__img img{transform:scale(1.05)}
+  #rgc2-{{ sid }} .rgc2-card:hover .rgc2-card__img img + img{opacity:1}
+  #rgc2-{{ sid }} .rgc2-badge{position:absolute;z-index:2;top:12px;left:12px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:5px 9px;border-radius:3px;background:var(--bg);color:var(--accent);border:1px solid color-mix(in srgb, var(--accent) 45%, transparent)}
+  #rgc2-{{ sid }} .rgc2-badge--sale{background:var(--kerb);color:#fff;border-color:var(--kerb)}
+  #rgc2-{{ sid }} .rgc2-card__body{display:flex;flex-direction:column;gap:8px;padding:16px 18px 22px;flex:1}
+  #rgc2-{{ sid }} .rgc2-card__meta{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  #rgc2-{{ sid }} .rgc2-card__t{margin:0;font-weight:600;font-size:16px;line-height:1.3}
+  #rgc2-{{ sid }} .rgc2-card__foot{margin-top:auto;padding-top:8px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+  #rgc2-{{ sid }} .rgc2-card__p{font-family:var(--mono);font-weight:600;font-size:19px;line-height:1.1}
+  #rgc2-{{ sid }} .rgc2-card__p small{display:block;font-family:var(--body);font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  #rgc2-{{ sid }} .rgc2-card__p s{font-size:13px;color:var(--muted);margin-left:6px}
+  #rgc2-{{ sid }} .rgc2-go{flex:0 0 auto;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line-strong);color:var(--text);transition:background .2s,color .2s,border-color .2s}
+  #rgc2-{{ sid }} .rgc2-card:hover .rgc2-go{background:var(--accent);border-color:var(--accent);color:#1A1400}
+  @media (max-width:749px){
+    #rgc2-{{ sid }} .rgc2-card__body{padding:12px 12px 16px}
+    #rgc2-{{ sid }} .rgc2-card__t{font-size:14px}
+    #rgc2-{{ sid }} .rgc2-card__p{font-size:16px}
+    #rgc2-{{ sid }} .rgc2-go{display:none}
+    #rgc2-{{ sid }} .rgc2-badge{top:8px;left:8px;font-size:10px}
+  }
+
+  /* Paginación y vacío */
+  #rgc2-{{ sid }} .rgc2-pages{display:flex;justify-content:center;gap:6px;padding-top:40px;margin:0;list-style:none}
+  #rgc2-{{ sid }} .rgc2-pages a,#rgc2-{{ sid }} .rgc2-pages span{display:grid;place-items:center;min-width:44px;height:44px;padding:0 12px;border-radius:4px;border:1px solid var(--line-strong);text-decoration:none;font-family:var(--mono);font-weight:600}
+  #rgc2-{{ sid }} .rgc2-pages a:hover{border-color:var(--accent);color:var(--accent)}
+  #rgc2-{{ sid }} .rgc2-pages [aria-current]{background:var(--accent);border-color:var(--accent);color:#1A1400}
+  #rgc2-{{ sid }} .rgc2-empty{display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;padding:80px 16px;border:1px dashed var(--line-strong);border-radius:{{ s.radius }}px}
+  #rgc2-{{ sid }} .rgc2-btn{display:inline-flex;align-items:center;gap:10px;min-height:48px;padding:12px 22px;border-radius:4px;background:var(--accent);color:#1A1400;text-decoration:none;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+
+  /* Entrada animada */
+  @media (prefers-reduced-motion:no-preference){
+    #rgc2-{{ sid }} .rgc2-grid > li{animation:rgc2-in-{{ sid }} .6s cubic-bezier(.16,1,.3,1) both}
+    {%- for i in (1..12) -%}#rgc2-{{ sid }} .rgc2-grid > li:nth-child({{ i }}){animation-delay:{{ i | times: 45 }}ms}{%- endfor -%}
+  }
+  @keyframes rgc2-in-{{ sid }}{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){#rgc2-{{ sid }} *{transition:none!important}}
+</style>
+
+<div id="rgc2-{{ sid }}">
+  <div class="rgc2-wrap">
+    {%- paginate collection.products by s.per_page -%}
+      {%- liquid
+        assign min_price = nil
+        for p in collection.products
+          if min_price == nil or p.price_min < min_price
+            assign min_price = p.price_min
+          endif
+        endfor
+      -%}
+      <nav aria-label="Ruta">
+        <ol class="rgc2-crumbs">
+          <li><a href="{{ routes.root_url }}">Inicio</a></li>
+          {%- if active and active.url != collection.url -%}<li><a href="{{ active.url }}">{{ active.title }}</a></li>{%- endif -%}
+          <li><span aria-current="page">{{ collection.title }}</span></li>
+        </ol>
+      </nav>
+
+      <header class="rgc2-hero{% if collection.image == blank or s.show_image == false %} rgc2-hero--solo{% endif %}">
+        <div class="rgc2-hero__txt">
+          <p class="rgc2-kicker">{{ s.kicker }}</p>
+          <h1 class="rgc2-title">{%- if title_words.size > 1 -%}{{ title_first }} <em>{{ title_last }}</em>{%- else -%}{{ collection.title }}{%- endif -%}</h1>
+          {%- if collection.description != blank -%}<div class="rgc2-desc">{{ collection.description }}</div>{%- endif -%}
+          {%- if s.show_stats and collection.products_count > 0 -%}
+            <ul class="rgc2-stats">
+              <li><b>{{ collection.products_count }}</b><span>{% if collection.products_count == 1 %}Modelo{% else %}Modelos{% endif %}</span></li>
+              {%- if min_price -%}<li><b>{{ min_price | money_without_trailing_zeros }}</b><span>Desde · IVA incl.</span></li>{%- endif -%}
+              {%- if s.stat_3_value != blank -%}<li><b>{{ s.stat_3_value }}</b><span>{{ s.stat_3_label }}</span></li>{%- endif -%}
+            </ul>
+          {%- endif -%}
+        </div>
+        {%- if collection.image != blank and s.show_image -%}
+          <div class="rgc2-stage">
+            {{ collection.image | image_url: width: 1200 | image_tag: widths: '500, 800, 1200', sizes: '(min-width: 900px) 35vw, 100vw', alt: collection.image.alt | default: collection.title, fetchpriority: 'high' }}
+            <span class="rgc2-corner rgc2-corner--tl" aria-hidden="true"></span>
+            <span class="rgc2-corner rgc2-corner--tr" aria-hidden="true"></span>
+            <span class="rgc2-corner rgc2-corner--bl" aria-hidden="true"></span>
+            <span class="rgc2-corner rgc2-corner--br" aria-hidden="true"></span>
+          </div>
+        {%- endif -%}
+      </header>
+
+      {%- if s.show_chips and group -%}
+        <nav class="rgc2-nav" aria-label="{{ group.title | escape }}">
+          <ul class="rgc2-chips">
+            {%- for l in group.links -%}
+              <li><a class="rgc2-chip" href="{{ l.url }}" {% if l.url == collection.url %}aria-current="page"{% elsif l.child_active %}data-parent{% endif %}>{{ l.title }}</a></li>
+            {%- endfor -%}
+          </ul>
+          {%- if active and active.links.size > 0 -%}
+            <ul class="rgc2-chips rgc2-chips--sub">
+              {%- for l in active.links -%}
+                <li><a class="rgc2-chip" href="{{ l.url }}" {% if l.url == collection.url %}aria-current="page"{% endif %}>{{ l.title }}</a></li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </nav>
+      {%- endif -%}
+
+      <div class="rgc2-tools">
+        <p class="rgc2-count" style="margin:0"><b>{{ collection.products_count }}</b> {% if collection.products_count == 1 %}volante{% else %}volantes{% endif %}</p>
+        {%- if s.show_sort and collection.products_count > 1 -%}
+          <div class="rgc2-sort">
+            <label for="rgc2-sort-{{ sid }}">Ordenar</label>
+            <div class="rgc2-select">
+              {%- assign sort_by = collection.sort_by | default: collection.default_sort_by -%}
+              <select id="rgc2-sort-{{ sid }}" data-rgc2-sort>
+                {%- for option in collection.sort_options -%}
+                  <option value="{{ option.value | escape }}" {% if option.value == sort_by %}selected{% endif %}>{{ option.name | escape }}</option>
+                {%- endfor -%}
+              </select>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- if collection.products.size > 0 -%}
+        <ul class="rgc2-grid">
+          {%- for p in collection.products -%}
+            {%- liquid
+              assign meta = ''
+              for tag in p.tags
+                if tag == 'Volante'
+                  continue
+                endif
+                if meta == ''
+                  assign meta = tag
+                else
+                  assign meta = meta | append: ' · ' | append: tag
+                endif
+              endfor
+              assign on_sale = false
+              if p.compare_at_price_min > p.price_min
+                assign on_sale = true
+              endif
+            -%}
+            <li>
+              <a class="rgc2-card" href="{{ p.url }}">
+                <div class="rgc2-card__img">
+                  {%- if on_sale -%}
+                    <span class="rgc2-badge rgc2-badge--sale">Oferta</span>
+                  {%- elsif p.variants.size > 1 and s.show_variants_badge -%}
+                    <span class="rgc2-badge">{{ p.variants.size }} opciones</span>
+                  {%- endif -%}
+                  {%- if p.featured_media -%}
+                    {{ p.featured_media | image_url: width: 800 | image_tag: loading: 'lazy', widths: '300, 450, 600, 800', sizes: '(min-width: 1100px) 25vw, (min-width: 750px) 33vw, 50vw', alt: p.featured_media.alt | default: p.title }}
+                    {%- if s.hover_image and p.media.size > 1 -%}
+                      {{ p.media[1] | image_url: width: 800 | image_tag: loading: 'lazy', widths: '300, 450, 600, 800', sizes: '(min-width: 1100px) 25vw, (min-width: 750px) 33vw, 50vw', alt: '' }}
+                    {%- endif -%}
+                  {%- else -%}
+                    {{ 'product-1' | placeholder_svg_tag }}
+                  {%- endif -%}
+                </div>
+                <div class="rgc2-card__body">
+                  {%- if s.show_meta and meta != '' -%}<span class="rgc2-card__meta">{{ meta }}</span>{%- endif -%}
+                  <h2 class="rgc2-card__t">{{ p.title }}</h2>
+                  <div class="rgc2-card__foot">
+                    <span class="rgc2-card__p">
+                      {%- if p.price_varies -%}<small>Desde</small>{%- else -%}<small>Precio</small>{%- endif -%}
+                      {{ p.price_min | money }}
+                      {%- if on_sale -%}<s>{{ p.compare_at_price_min | money }}</s>{%- endif -%}
+                    </span>
+                    <span class="rgc2-go" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+                  </div>
+                </div>
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+
+        {%- if paginate.pages > 1 -%}
+          <nav aria-label="Páginas">
+            <ul class="rgc2-pages">
+              {%- if paginate.previous -%}<li><a href="{{ paginate.previous.url }}" aria-label="Página anterior">‹</a></li>{%- endif -%}
+              {%- for part in paginate.parts -%}
+                {%- if part.is_link -%}
+                  <li><a href="{{ part.url }}">{{ part.title }}</a></li>
+                {%- elsif part.title == paginate.current_page -%}
+                  <li><span aria-current="page">{{ part.title }}</span></li>
+                {%- else -%}
+                  <li><span>{{ part.title }}</span></li>
+                {%- endif -%}
+              {%- endfor -%}
+              {%- if paginate.next -%}<li><a href="{{ paginate.next.url }}" aria-label="Página siguiente">›</a></li>{%- endif -%}
+            </ul>
+          </nav>
+        {%- endif -%}
+      {%- else -%}
+        <div class="rgc2-empty">
+          <p class="rgc2-kicker">Sin volantes</p>
+          <p style="margin:0;color:var(--muted)">{{ s.empty_text }}</p>
+          <a class="rgc2-btn" href="{{ routes.all_products_collection_url }}">Ver todos los volantes</a>
+        </div>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</div>
+
+<script>
+(() => {
+  const root = document.getElementById('rgc2-{{ sid }}');
+  if (!root || root.dataset.ready) return; root.dataset.ready = '1';
+  root.querySelector('[data-rgc2-sort]')?.addEventListener('change', e => {
+    const url = new URL(location.href); url.searchParams.set('sort_by', e.target.value); url.searchParams.delete('page'); location.href = url;
+  });
+  root.querySelectorAll('.rgc2-chips').forEach(list => {
+    const cur = list.querySelector('[aria-current="page"], [data-parent]');
+    if (cur) list.scrollLeft = cur.offsetLeft - (list.clientWidth - cur.offsetWidth) / 2;
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "RG · Colección",
+  "tag": "section",
+  "class": "rg-coleccion-section",
+  "settings": [
+    { "type": "header", "content": "Colores" },
+    { "type": "color", "id": "color_bg", "label": "Fondo", "default": "#131517" },
+    { "type": "color", "id": "color_surface", "label": "Superficies (tarjetas)", "default": "#1C1F22" },
+    { "type": "color", "id": "color_text", "label": "Texto", "default": "#F1EFEA" },
+    { "type": "color", "id": "color_muted", "label": "Texto secundario", "default": "#9AA1A8" },
+    { "type": "color", "id": "color_accent", "label": "Acento (botones y detalles)", "default": "#FFC21A" },
+    { "type": "color", "id": "color_kerb", "label": "Bordillo (rojo)", "default": "#D8342A" },
+    { "type": "checkbox", "id": "show_pattern", "label": "Fondo con rejilla y brillo", "default": true },
+    { "type": "header", "content": "Cabecera" },
+    { "type": "text", "id": "kicker", "label": "Antetítulo", "default": "Volantes a medida" },
+    { "type": "checkbox", "id": "show_image", "label": "Mostrar la imagen de la colección", "default": true },
+    { "type": "checkbox", "id": "show_stats", "label": "Mostrar cifras (modelos y precio desde)", "default": true },
+    { "type": "text", "id": "stat_3_value", "label": "Cifra extra · valor", "default": "VIN" },
+    { "type": "text", "id": "stat_3_label", "label": "Cifra extra · texto", "default": "Compatibilidad verificada" },
+    { "type": "range", "id": "title_size", "label": "Tamaño máximo del título", "min": 48, "max": 120, "step": 4, "unit": "px", "default": 96 },
+    { "type": "header", "content": "Accesos rápidos" },
+    { "type": "checkbox", "id": "show_chips", "label": "Mostrar accesos a marcas y series", "default": true },
+    { "type": "link_list", "id": "menu", "label": "Menú del que salen los accesos", "default": "main-menu" },
+    { "type": "header", "content": "Volantes" },
+    { "type": "checkbox", "id": "show_sort", "label": "Mostrar «Ordenar»", "default": true },
+    { "type": "range", "id": "columns", "label": "Columnas en ordenador", "min": 2, "max": 5, "step": 1, "default": 4 },
+    { "type": "range", "id": "per_page", "label": "Volantes por página", "min": 8, "max": 48, "step": 4, "default": 24 },
+    { "type": "checkbox", "id": "hover_image", "label": "Segunda foto al pasar el ratón", "default": true },
+    { "type": "checkbox", "id": "show_meta", "label": "Mostrar etiquetas en las tarjetas", "default": true },
+    { "type": "checkbox", "id": "show_variants_badge", "label": "Mostrar «N opciones»", "default": true },
+    { "type": "text", "id": "empty_text", "label": "Texto si no hay volantes", "default": "Todavía no hay volantes en esta colección." },
+    { "type": "header", "content": "Tamaño y espaciado" },
+    { "type": "range", "id": "max_width", "label": "Ancho máximo", "min": 1000, "max": 1600, "step": 20, "unit": "px", "default": 1400 },
+    { "type": "range", "id": "radius", "label": "Esquinas redondeadas", "min": 0, "max": 20, "step": 1, "unit": "px", "default": 8 },
+    { "type": "range", "id": "pad_top", "label": "Espacio arriba", "min": 0, "max": 100, "step": 4, "unit": "px", "default": 28 },
+    { "type": "range", "id": "pad_bottom", "label": "Espacio abajo", "min": 0, "max": 140, "step": 4, "unit": "px", "default": 88 }
+  ]
+}
+{% endschema %}

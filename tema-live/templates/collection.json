@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "rg-coleccion",
+      "settings": {}
+    }
+  },
+  "order": ["main"]
+}
