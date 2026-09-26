@@ -2,7 +2,16 @@
   "sections": {
     "main": {
       "type": "rg-producto",
-      "settings": {}
+      "settings": {},
+      "blocks": {
+        "oferta": {
+          "type": "oferta",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "oferta"
+      ]
     },
     "recomendados": {
       "type": "rg-recomendados",

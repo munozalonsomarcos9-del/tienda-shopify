@@ -7,6 +7,7 @@
   assign sid = section.id
   assign s = section.settings
   assign current = product.selected_or_first_available_variant
+  assign deal = section.blocks | where: 'type', 'oferta' | first
 
   comment
     Colección de marca = la más grande del producto, sin contar la general ni las de material.
@@ -177,6 +178,30 @@
   #rgp-{{ sid }} .rgp-pill input:focus-visible + span{outline:2px solid var(--accent);outline-offset:3px}
   #rgp-{{ sid }} .rgp-pill .rgp-dot{width:12px;height:12px;border-radius:50%;border:1px solid rgba(255,255,255,.35)}
 
+  #rgp-{{ sid }} .rgp-deal{position:relative;margin:14px 0 20px;padding:28px 14px 14px;border-radius:{{ s.radius }}px;border:2px solid var(--deal);background:color-mix(in srgb, var(--deal) 10%, var(--surface));box-shadow:0 0 0 4px color-mix(in srgb, var(--deal) 14%, transparent),0 22px 44px -26px color-mix(in srgb, var(--deal) 80%, transparent)}
+  #rgp-{{ sid }} .rgp-deal__head{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);margin:0;display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:var(--deal);color:#fff;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap;box-shadow:0 8px 20px -8px var(--deal)}
+  #rgp-{{ sid }} .rgp-deal__head i{width:8px;height:8px;border-radius:50%;background:#fff;animation:rgp-pulse-{{ sid }} 1.6s ease-out infinite}
+  @keyframes rgp-pulse-{{ sid }}{0%{box-shadow:0 0 0 0 rgba(255,255,255,.8)}100%{box-shadow:0 0 0 9px rgba(255,255,255,0)}}
+  #rgp-{{ sid }} .rgp-deal__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  #rgp-{{ sid }} .rgp-deal__opt{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:22px 6px 14px;border-radius:calc({{ s.radius }}px * .8);border:1px solid var(--line-strong);background:var(--bg);color:var(--text);font:inherit;text-align:center;cursor:pointer;transition:border-color .2s,background .2s,transform .2s}
+  #rgp-{{ sid }} .rgp-deal__opt:hover{border-color:var(--deal);transform:translateY(-2px)}
+  #rgp-{{ sid }} .rgp-deal__opt:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  #rgp-{{ sid }} .rgp-deal__opt[aria-pressed="true"]{border-color:var(--deal);background:color-mix(in srgb, var(--deal) 20%, var(--bg));box-shadow:inset 0 0 0 1px var(--deal)}
+  #rgp-{{ sid }} .rgp-deal__tag{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);padding:3px 8px;border-radius:4px;background:var(--deal);color:#fff;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+  #rgp-{{ sid }} .rgp-deal__icons{display:flex;justify-content:center;color:var(--deal);margin-bottom:4px}
+  #rgp-{{ sid }} .rgp-deal__icons svg+svg{margin-left:-7px}
+  #rgp-{{ sid }} .rgp-deal__n{font-size:15px;font-weight:700}
+  #rgp-{{ sid }} .rgp-deal__save{font-size:12px;font-weight:600;color:color-mix(in srgb, var(--deal) 55%, #fff)}
+  #rgp-{{ sid }} .rgp-deal__save--off{color:var(--muted);font-weight:500}
+  #rgp-{{ sid }} .rgp-deal__now{margin-top:6px;font-family:var(--mono);font-size:17px;font-weight:700;line-height:1.1}
+  #rgp-{{ sid }} .rgp-deal__was{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  #rgp-{{ sid }} .rgp-deal__note{margin:12px 0 0;font-size:13px;color:var(--muted);text-align:center}
+  #rgp-{{ sid }} .rgp-ship{display:flex;align-items:center;gap:14px;margin-top:12px;padding:13px 16px;border-radius:{{ s.radius }}px;border:1px dashed var(--line-strong);background:color-mix(in srgb, var(--surface) 70%, transparent)}
+  #rgp-{{ sid }} .rgp-ship svg{flex:0 0 auto;color:var(--accent)}
+  #rgp-{{ sid }} .rgp-ship b{display:block;font-size:15px}
+  #rgp-{{ sid }} .rgp-ship span{display:block;font-size:13.5px;color:var(--muted)}
+  @media (max-width:420px){#rgp-{{ sid }} .rgp-deal{padding-inline:10px}#rgp-{{ sid }} .rgp-deal__grid{gap:7px}#rgp-{{ sid }} .rgp-deal__now{font-size:15px}#rgp-{{ sid }} .rgp-deal__n{font-size:14px}#rgp-{{ sid }} .rgp-deal__tag{font-size:9px;padding:3px 6px}}
+  @media (prefers-reduced-motion:reduce){#rgp-{{ sid }} .rgp-deal__head i{animation:none}#rgp-{{ sid }} .rgp-deal__opt{transition:none}}
   #rgp-{{ sid }} .rgp-buy{display:flex;flex-direction:column;gap:10px}
   #rgp-{{ sid }} .rgp-buy__row{display:flex;gap:10px}
   #rgp-{{ sid }} .rgp-qty{display:inline-flex;align-items:center;flex:0 0 auto;height:56px;border:1px solid var(--line-strong);border-radius:4px;background:color-mix(in srgb, var(--surface) 80%, transparent)}
@@ -432,6 +457,41 @@
             </div>
           {%- endunless -%}
 
+          {%- if deal and deal.settings.show -%}
+            {%- assign ds = deal.settings -%}
+            <div class="rgp-deal" data-rgp-deal style="--deal:{{ ds.color_deal }}" {{ deal.shopify_attributes }}>
+              <p class="rgp-deal__head"><i aria-hidden="true"></i>{{ ds.title }}</p>
+              <div class="rgp-deal__grid" role="group" aria-label="{{ ds.title | escape }}">
+                {%- for n in (1..3) -%}
+                  {%- liquid
+                    assign pct = 0
+                    if n == 2
+                      assign pct = ds.pct_2
+                    elsif n == 3
+                      assign pct = ds.pct_3
+                    endif
+                    assign full = current.price | times: n
+                    assign keep = 100 | minus: pct
+                    assign now = full | times: keep | divided_by: 100
+                  -%}
+                  <button type="button" class="rgp-deal__opt" data-rgp-pack="{{ n }}" data-pct="{{ pct }}" aria-pressed="{% if n == 1 %}true{% else %}false{% endif %}">
+                    {%- if n == 2 and ds.badge_2 != blank -%}<span class="rgp-deal__tag">{{ ds.badge_2 }}</span>{%- elsif n == 3 and ds.badge_3 != blank -%}<span class="rgp-deal__tag">{{ ds.badge_3 }}</span>{%- endif -%}
+                    <span class="rgp-deal__icons">{%- for i in (1..n) -%}<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M3.5 10.5l6 1M20.5 10.5l-6 1M12 14.5V21"/></svg>{%- endfor -%}</span>
+                    <b class="rgp-deal__n">{% if n == 1 %}1 volante{% elsif n == 2 %}2 volantes{% else %}3 o más{% endif %}</b>
+                    {%- if pct > 0 -%}
+                      <span class="rgp-deal__save">Ahorras {{ pct }}%</span>
+                    {%- else -%}
+                      <span class="rgp-deal__save rgp-deal__save--off">Precio normal</span>
+                    {%- endif -%}
+                    <span class="rgp-deal__now" data-rgp-pack-now>{{ now | money }}</span>
+                    {%- if pct > 0 -%}<s class="rgp-deal__was" data-rgp-pack-was>{{ full | money }}</s>{%- endif -%}
+                  </button>
+                {%- endfor -%}
+              </div>
+              {%- if ds.note != blank -%}<p class="rgp-deal__note">{{ ds.note }}</p>{%- endif -%}
+            </div>
+          {%- endif -%}
+
           <div class="rgp-buy">
             <div class="rgp-buy__row">
               <div class="rgp-qty">
@@ -448,6 +508,13 @@
             {%- if s.show_buy_now -%}{{ form | payment_button }}{%- endif -%}
           </div>
         {%- endform -%}
+
+        {%- if deal and deal.settings.ship_title != blank -%}
+          <div class="rgp-ship">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg>
+            <div><b>{{ deal.settings.ship_title }}</b>{%- if deal.settings.ship_text != blank -%}<span>{{ deal.settings.ship_text }}</span>{%- endif -%}</div>
+          </div>
+        {%- endif -%}
 
         {%- if s.show_pay -%}
           <div class="rgp-pay">
@@ -617,6 +684,7 @@
   const stockEl = $('[data-rgp-stock]'), stockLabel = $('[data-rgp-stock-label]');
   const skuEl = $('[data-rgp-sku]'), stickyPrice = $('[data-rgp-sticky-price]'), stickyBtn = $('[data-rgp-sticky-btn]');
   const availText = {{ s.available_text | json }};
+  let unit = {{ current.price | json }};
   const update = () => {
     const opts = fieldsets.map(fs => fs.querySelector('input:checked')?.value);
     fieldsets.forEach((fs, k) => { const l = fs.querySelector('[data-rgp-selected]'); if (l) l.textContent = opts[k] || ''; });
@@ -624,6 +692,7 @@
     if (!v) { addBtn.disabled = true; addLabel.textContent = 'No disponible'; if (stickyBtn) stickyBtn.disabled = true; return; }
     idInput.value = v.id;
     priceEl.textContent = fmt(v.price);
+    unit = v.price; paintPacks();
     if (stickyPrice) stickyPrice.textContent = fmt(v.price);
     const sale = v.compare_at_price > v.price;
     wasEl.hidden = !sale; saveEl.hidden = !sale;
@@ -645,7 +714,23 @@
 
   /* Cantidad */
   const q = $('.rgp-qty input');
-  $$('[data-rgp-step]').forEach(b => b.addEventListener('click', () => { q.value = Math.max(1, (parseInt(q.value, 10) || 1) + parseInt(b.dataset.rgpStep, 10)); }));
+  $$('[data-rgp-step]').forEach(b => b.addEventListener('click', () => { q.value = Math.max(1, (parseInt(q.value, 10) || 1) + parseInt(b.dataset.rgpStep, 10)); markPack(); }));
+  q.addEventListener('input', () => markPack());
+
+  /* Oferta por cantidad: 1, 2 o 3 volantes */
+  const packs = $$('[data-rgp-pack]');
+  function paintPacks() {
+    packs.forEach(b => {
+      const n = +b.dataset.rgpPack, pct = +b.dataset.pct || 0;
+      b.querySelector('[data-rgp-pack-now]').textContent = fmt(Math.floor(unit * n * (100 - pct) / 100));
+      const was = b.querySelector('[data-rgp-pack-was]'); if (was) was.textContent = fmt(unit * n);
+    });
+  }
+  function markPack() {
+    const n = Math.min(3, Math.max(1, parseInt(q.value, 10) || 1));
+    packs.forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.rgpPack === n)));
+  }
+  packs.forEach(b => b.addEventListener('click', () => { q.value = b.dataset.rgpPack; markPack(); }));
 
   /* Barra fija */
   const sticky = $('[data-rgp-sticky]');
@@ -706,8 +791,8 @@
     { "type": "checkbox", "id": "show_trust", "label": "Mostrar garantías", "default": true },
     { "type": "text", "id": "trust_1_title", "label": "Garantía 1 · título", "default": "Hecho a medida" },
     { "type": "text", "id": "trust_1_text", "label": "Garantía 1 · texto", "default": "Fabricado para la plataforma de tu coche." },
-    { "type": "text", "id": "trust_2_title", "label": "Garantía 2 · título", "default": "Envío asegurado" },
-    { "type": "text", "id": "trust_2_text", "label": "Garantía 2 · texto", "default": "Embalaje reforzado y seguimiento." },
+    { "type": "text", "id": "trust_2_title", "label": "Garantía 2 · título", "default": "Envío en 10–15 días" },
+    { "type": "text", "id": "trust_2_text", "label": "Garantía 2 · texto", "default": "Solo a Europa, con embalaje reforzado y seguimiento." },
     { "type": "text", "id": "trust_3_title", "label": "Garantía 3 · título", "default": "Pago seguro" },
     { "type": "text", "id": "trust_3_text", "label": "Garantía 3 · texto", "default": "Tarjeta y métodos habituales." },
     { "type": "header", "content": "Detalles del producto" },
@@ -728,6 +813,27 @@
     { "type": "range", "id": "radius", "label": "Esquinas redondeadas", "min": 0, "max": 20, "step": 1, "unit": "px", "default": 8 },
     { "type": "range", "id": "pad_top", "label": "Espacio arriba", "min": 0, "max": 100, "step": 4, "unit": "px", "default": 28 },
     { "type": "range", "id": "pad_bottom", "label": "Espacio abajo", "min": 0, "max": 140, "step": 4, "unit": "px", "default": 88 }
+  ],
+  "blocks": [
+    {
+      "type": "oferta",
+      "name": "Oferta por cantidad",
+      "limit": 1,
+      "settings": [
+        { "type": "paragraph", "content": "Los porcentajes tienen que coincidir con los descuentos automáticos de Shopify (Descuentos → «Pack 2 volantes» y «Pack 3 volantes»)." },
+        { "type": "checkbox", "id": "show", "label": "Mostrar la oferta", "default": true },
+        { "type": "text", "id": "title", "label": "Título", "default": "Oferta por cantidad" },
+        { "type": "range", "id": "pct_2", "label": "Descuento al llevar 2", "min": 1, "max": 30, "step": 1, "unit": "%", "default": 5 },
+        { "type": "range", "id": "pct_3", "label": "Descuento al llevar 3 o más", "min": 1, "max": 40, "step": 1, "unit": "%", "default": 10 },
+        { "type": "text", "id": "badge_2", "label": "Etiqueta de 2", "default": "Más popular" },
+        { "type": "text", "id": "badge_3", "label": "Etiqueta de 3", "default": "Mejor precio" },
+        { "type": "text", "id": "note", "label": "Nota", "default": "Puedes combinar modelos distintos: el descuento se aplica solo en el carrito." },
+        { "type": "color", "id": "color_deal", "label": "Color de la oferta", "default": "#D8342A" },
+        { "type": "header", "content": "Envío" },
+        { "type": "text", "id": "ship_title", "label": "Plazo de envío", "default": "Envío en 10–15 días" },
+        { "type": "text", "id": "ship_text", "label": "Zona de envío", "default": "Solo enviamos a países de Europa." }
+      ]
+    }
   ]
 }
 {% endschema %}
