@@ -11,34 +11,63 @@
   "type": "header",
   "name": "Header",
   "sections": {
-    "header_announcements_9jGBFp": {
-      "type": "header-announcements",
+    "rg_anuncio": {
+      "type": "rg-anuncio",
       "blocks": {
-        "announcement_BxgCk9": {
-          "type": "_announcement",
+        "mensaje_1": {
+          "type": "mensaje",
           "settings": {
-            "text": "Welcome to our store",
+            "icon": "flag",
+            "tag": "Bienvenido a RacingGrip",
+            "text": "Tu volante, <b>hecho a medida</b>",
+            "link": "shopify://collections/all",
+            "cta": "Descúbrelo"
+          }
+        },
+        "mensaje_2": {
+          "type": "mensaje",
+          "settings": {
+            "icon": "tag",
+            "tag": "Packs",
+            "text": "Llévate 2 y ahorra un <b>10 %</b> · 3 o más, un <b>15 %</b>",
+            "link": "shopify://collections/todos-los-volantes",
+            "cta": "Comprar"
+          }
+        },
+        "mensaje_3": {
+          "type": "mensaje",
+          "settings": {
+            "icon": "truck",
+            "tag": "",
+            "text": "Envío asegurado a toda <b>Europa</b> en 10–15 días",
             "link": "",
-            "font": "var(--font-subheading--family)",
-            "font_size": "0.75rem",
-            "weight": "",
-            "letter_spacing": "normal",
-            "case": "none"
-          },
-          "blocks": {}
+            "cta": ""
+          }
+        },
+        "mensaje_4": {
+          "type": "mensaje",
+          "settings": {
+            "icon": "shield",
+            "tag": "",
+            "text": "Compatibilidad <b>verificada</b> con tu número de bastidor",
+            "link": "",
+            "cta": ""
+          }
         }
       },
       "block_order": [
-        "announcement_BxgCk9"
+        "mensaje_1",
+        "mensaje_2",
+        "mensaje_3",
+        "mensaje_4"
       ],
-      "name": "t:names.announcement_bar",
       "settings": {
         "speed": 5,
-        "section_width": "page-width",
-        "color_scheme": "scheme-1",
-        "divider_width": 1,
-        "padding-block-start": 15,
-        "padding-block-end": 15
+        "height": 44,
+        "color_bg": "#0B0C0D",
+        "color_text": "#F1EFEA",
+        "color_accent": "#FFC21A",
+        "color_kerb": "#D8342A"
       }
     },
     "header_section": {
@@ -112,7 +141,7 @@
     }
   },
   "order": [
-    "header_announcements_9jGBFp",
+    "rg_anuncio",
     "header_section"
   ]
 }

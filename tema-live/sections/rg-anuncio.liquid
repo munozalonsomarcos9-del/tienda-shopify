@@ -1,0 +1,143 @@
+{%- comment -%} RacingGrip · Barra de bienvenida (encima de la cabecera). Mensajes que se van turnando. {%- endcomment -%}
+{%- assign sid = section.id -%}
+{%- assign s = section.settings -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,700;1,800;1,900&family=Barlow:wght@400;500;600;700&family=Chakra+Petch:wght@500;600&display=swap">
+<style>
+  #rga-{{ sid }}{--bg:{{ s.color_bg }};--text:{{ s.color_text }};--accent:{{ s.color_accent }};--kerb:{{ s.color_kerb }};
+    position:relative;overflow:hidden;isolation:isolate;background:var(--bg);color:var(--text);
+    font-family:"Barlow","Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  #rga-{{ sid }} *{box-sizing:border-box}
+  #rga-{{ sid }}::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+    background:linear-gradient(100deg,transparent 30%,color-mix(in srgb, var(--accent) 16%, transparent) 50%,transparent 70%);
+    background-size:250% 100%;animation:rga-shine-{{ sid }} 6s ease-in-out infinite}
+  #rga-{{ sid }}::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;
+    background:repeating-linear-gradient(115deg,var(--kerb) 0 14px,#EDEAE4 14px 28px);background-size:40px 3px;animation:rga-kerb-{{ sid }} 1.6s linear infinite}
+  @keyframes rga-shine-{{ sid }}{0%{background-position:150% 0}100%{background-position:-50% 0}}
+  @keyframes rga-kerb-{{ sid }}{to{background-position:40px 0}}
+  #rga-{{ sid }} .rga-in{position:relative;display:grid;place-items:center;min-height:{{ s.height }}px;padding:6px 44px 9px;max-width:1400px;margin:0 auto}
+  #rga-{{ sid }} .rga-msg{grid-area:1/1;display:flex;align-items:center;justify-content:center;gap:10px;margin:0;text-align:center;
+    color:inherit;text-decoration:none;font-size:14px;font-weight:500;line-height:1.25;letter-spacing:.01em;
+    opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s cubic-bezier(.16,1,.3,1);pointer-events:none}
+  #rga-{{ sid }} .rga-msg[data-on]{opacity:1;transform:none;pointer-events:auto}
+  #rga-{{ sid }} a.rga-msg:hover .rga-txt{text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px}
+  #rga-{{ sid }} .rga-ico{flex:0 0 auto;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;
+    background:color-mix(in srgb, var(--accent) 16%, transparent);color:var(--accent)}
+  #rga-{{ sid }} .rga-ico svg{width:15px;height:15px}
+  #rga-{{ sid }} .rga-tag{flex:0 0 auto;font-family:"Saira Condensed","Arial Narrow",Impact,sans-serif;font-style:italic;font-weight:900;
+    font-size:17px;line-height:1;text-transform:uppercase;letter-spacing:.02em;color:var(--accent)}
+  #rga-{{ sid }} .rga-txt em,#rga-{{ sid }} .rga-txt strong,#rga-{{ sid }} .rga-txt b{font-style:normal;font-weight:700;color:var(--accent)}
+  #rga-{{ sid }} .rga-go{flex:0 0 auto;font-family:"Chakra Petch",Menlo,monospace;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+    padding:5px 10px;border-radius:999px;background:var(--accent);color:#1A1400}
+  #rga-{{ sid }} .rga-nav{position:absolute;top:50%;transform:translateY(-50%);width:32px;height:32px;display:grid;place-items:center;border:0;border-radius:50%;
+    background:transparent;color:var(--text);opacity:.6;cursor:pointer}
+  #rga-{{ sid }} .rga-nav:hover{opacity:1;color:var(--accent)}
+  #rga-{{ sid }} .rga-nav:focus-visible,#rga-{{ sid }} .rga-msg:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  #rga-{{ sid }} .rga-nav--prev{left:6px}
+  #rga-{{ sid }} .rga-nav--next{right:6px}
+  @media (max-width:749px){
+    #rga-{{ sid }} .rga-in{padding-inline:36px}
+    #rga-{{ sid }} .rga-msg{flex-wrap:wrap;font-size:12.5px;column-gap:6px;row-gap:3px}
+    #rga-{{ sid }} .rga-tag{flex-basis:100%;font-size:15px}
+    #rga-{{ sid }} .rga-ico{display:none}
+    #rga-{{ sid }} .rga-go{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    #rga-{{ sid }}::before,#rga-{{ sid }}::after{animation:none}
+    #rga-{{ sid }} .rga-msg{transition:none}
+  }
+</style>
+<aside id="rga-{{ sid }}" aria-label="Avisos de la tienda" data-speed="{{ s.speed }}">
+  <div class="rga-in">
+    {%- for b in section.blocks -%}
+      {%- liquid
+        assign bs = b.settings
+        assign tagname = 'p'
+        if bs.link != blank
+          assign tagname = 'a'
+        endif
+      -%}
+      <{{ tagname }} class="rga-msg" data-rga-msg {% if bs.link != blank %}href="{{ bs.link }}"{% endif %} {% if forloop.first %}data-on{% else %}aria-hidden="true" tabindex="-1"{% endif %} {{ b.shopify_attributes }}>
+        {%- case bs.icon -%}
+          {%- when 'flag' -%}<span class="rga-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 3h2v18H5z"/><path d="M8 4h11l-2.5 4L19 12H8z" opacity=".9"/></svg></span>
+          {%- when 'tag' -%}<span class="rga-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span>
+          {%- when 'truck' -%}<span class="rga-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg></span>
+          {%- when 'shield' -%}<span class="rga-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V6l8-4z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></span>
+        {%- endcase -%}
+        {%- if bs.tag != blank -%}<span class="rga-tag">{{ bs.tag }}</span>{%- endif -%}
+        <span class="rga-txt">{{ bs.text }}</span>
+        {%- if bs.link != blank and bs.cta != blank -%}<span class="rga-go">{{ bs.cta }}</span>{%- endif -%}
+      </{{ tagname }}>
+    {%- endfor -%}
+    {%- if section.blocks.size > 1 -%}
+      <button type="button" class="rga-nav rga-nav--prev" data-rga-step="-1" aria-label="Aviso anterior"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <button type="button" class="rga-nav rga-nav--next" data-rga-step="1" aria-label="Aviso siguiente"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+    {%- endif -%}
+  </div>
+</aside>
+{%- if section.blocks.size > 1 -%}
+<script>
+(() => {
+  const root = document.getElementById('rga-{{ sid }}');
+  if (!root || root.dataset.ready) return; root.dataset.ready = '1';
+  const msgs = [...root.querySelectorAll('[data-rga-msg]')];
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let i = 0, timer = null;
+  const show = n => {
+    i = (n + msgs.length) % msgs.length;
+    msgs.forEach((m, k) => {
+      const on = k === i;
+      m.toggleAttribute('data-on', on);
+      m.setAttribute('aria-hidden', String(!on));
+      if (m.tagName === 'A') m.tabIndex = on ? 0 : -1;
+    });
+  };
+  const play = () => { if (reduce) return; clearInterval(timer); timer = setInterval(() => show(i + 1), (+root.dataset.speed || 5) * 1000); };
+  root.querySelectorAll('[data-rga-step]').forEach(b => b.addEventListener('click', () => { show(i + +b.dataset.rgaStep); play(); }));
+  root.addEventListener('mouseenter', () => clearInterval(timer));
+  root.addEventListener('mouseleave', play);
+  root.addEventListener('focusin', () => clearInterval(timer));
+  play();
+})();
+</script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "RG · Barra de bienvenida",
+  "tag": "div",
+  "class": "rg-anuncio-section",
+  "enabled_on": { "groups": ["header"] },
+  "settings": [
+    { "type": "range", "id": "speed", "label": "Segundos por mensaje", "min": 3, "max": 10, "step": 1, "unit": "s", "default": 5 },
+    { "type": "range", "id": "height", "label": "Altura", "min": 36, "max": 64, "step": 2, "unit": "px", "default": 44 },
+    { "type": "color", "id": "color_bg", "label": "Fondo", "default": "#0B0C0D" },
+    { "type": "color", "id": "color_text", "label": "Texto", "default": "#F1EFEA" },
+    { "type": "color", "id": "color_accent", "label": "Acento", "default": "#FFC21A" },
+    { "type": "color", "id": "color_kerb", "label": "Bordillo (rojo)", "default": "#D8342A" }
+  ],
+  "blocks": [
+    {
+      "type": "mensaje",
+      "name": "Mensaje",
+      "settings": [
+        { "type": "select", "id": "icon", "label": "Icono", "options": [
+          { "value": "none", "label": "Ninguno" },
+          { "value": "flag", "label": "Bandera de carreras" },
+          { "value": "tag", "label": "Etiqueta de oferta" },
+          { "value": "truck", "label": "Envío" },
+          { "value": "shield", "label": "Garantía" }
+        ], "default": "flag" },
+        { "type": "text", "id": "tag", "label": "Palabra destacada", "info": "Sale en grande, en amarillo y cursiva." },
+        { "type": "inline_richtext", "id": "text", "label": "Texto", "info": "Lo que pongas en negrita sale en amarillo.", "default": "Tu volante, <b>hecho a medida</b>" },
+        { "type": "url", "id": "link", "label": "Enlace" },
+        { "type": "text", "id": "cta", "label": "Botón", "info": "Solo se ve si el mensaje tiene enlace (en ordenador)." }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "RG · Barra de bienvenida", "blocks": [ { "type": "mensaje" } ] }
+  ]
+}
+{% endschema %}
