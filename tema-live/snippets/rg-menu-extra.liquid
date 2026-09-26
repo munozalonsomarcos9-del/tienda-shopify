@@ -1,0 +1,131 @@
+{%- comment -%}
+  RacingGrip · Menú lateral (móvil). Se pinta dentro del cajón de menú de Horizon (snippets/header-drawer.liquid):
+  lo pasa a oscuro con los colores de la tienda, resalta «Ofertas» en rojo y añade dos tarjetas con foto abajo.
+{%- endcomment -%}
+{%- liquid
+  assign ofertas = collections['volantes-de-oferta']
+  assign todos = collections['todos-los-volantes']
+  assign top = todos.products.first
+  assign img_ofertas = ofertas.image | default: ofertas.products.first.featured_media
+  assign img_top = top.featured_media | default: todos.image
+-%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,700;1,800;1,900&family=Barlow:wght@400;500;600;700&family=Chakra+Petch:wght@500;600&display=swap">
+<style>
+  header-drawer .menu-drawer{
+    --rgm-bg:#131517;--rgm-surface:#1C1F22;--rgm-text:#F1EFEA;--rgm-muted:#9AA1A8;--rgm-line:rgba(241,239,234,.1);--rgm-accent:#FFC21A;--rgm-red:#D8342A;
+    --color-background:var(--rgm-bg);--color-foreground:var(--rgm-text);--color-border:var(--rgm-line);--color-foreground-muted:var(--rgm-muted);
+    background:var(--rgm-bg)!important;color:var(--rgm-text)!important;
+    background-image:radial-gradient(120% 60% at 0% 0%,rgba(255,194,26,.07),transparent 60%)!important;
+    font-family:"Barlow","Helvetica Neue",Helvetica,Arial,sans-serif;
+  }
+  header-drawer .menu-drawer .menu-drawer__submenu{background:var(--rgm-bg)!important;color:var(--rgm-text)}
+  header-drawer .menu-drawer .menu-drawer__navigation{
+    --menu-top-level-font-color:var(--rgm-text)!important;--menu-parent-font-color:var(--rgm-text)!important;--menu-child-font-color:var(--rgm-text)!important;
+  }
+  header-drawer .menu-drawer .menu-drawer__close-button,header-drawer .menu-drawer .menu-drawer__back-button{color:var(--rgm-text)!important}
+
+  /* Primer nivel: grande, en mayúsculas y con línea entre apartados */
+  header-drawer .menu-drawer .menu-drawer__menu.has-submenu > .menu-drawer__list-item{border-bottom:1px solid var(--rgm-line)}
+  header-drawer .menu-drawer .menu-drawer__menu-item--mainlist{
+    font-family:"Saira Condensed","Arial Narrow",Impact,sans-serif!important;font-style:italic!important;font-weight:800!important;
+    font-size:clamp(26px,7.4vw,32px)!important;line-height:1!important;text-transform:uppercase!important;letter-spacing:.01em;
+    color:var(--rgm-text)!important;padding-block:16px!important;transition:color .15s,padding .2s;
+  }
+  header-drawer .menu-drawer .menu-drawer__menu-item--mainlist:hover{color:var(--rgm-accent)!important;padding-inline-start:6px}
+  header-drawer .menu-drawer .menu-drawer__menu-item--mainlist .svg-wrapper{color:var(--rgm-accent);padding-block:0!important}
+
+  /* «Ofertas» en rojo con un punto que late */
+  header-drawer .menu-drawer a.menu-drawer__menu-item--mainlist[href*="volantes-de-oferta"]{color:var(--rgm-red)!important;justify-content:flex-start;gap:12px}
+  header-drawer .menu-drawer a.menu-drawer__menu-item--mainlist[href*="volantes-de-oferta"]::after{
+    content:"REBAJAS";align-self:center;font-family:"Chakra Petch",Menlo,monospace;font-style:normal;font-weight:600;font-size:11px;letter-spacing:.12em;
+    padding:5px 9px;border-radius:999px;background:var(--rgm-red);color:#fff;animation:rgm-pulse 1.8s ease-out infinite;
+  }
+  @keyframes rgm-pulse{0%{box-shadow:0 0 0 0 rgba(216,52,42,.7)}100%{box-shadow:0 0 0 10px rgba(216,52,42,0)}}
+  header-drawer .menu-drawer a.menu-drawer__menu-item--mainlist[href*="best-selling"]{color:var(--rgm-accent)!important}
+
+  /* Submenús: botón volver, tarjetas de marca y enlaces */
+  header-drawer .menu-drawer .menu-drawer__back-button{
+    font-family:"Chakra Petch",Menlo,monospace;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;
+    border-bottom:1px solid var(--rgm-line)!important;padding-block:18px!important;
+  }
+  header-drawer .menu-drawer .menu-drawer__back-button .svg-wrapper{color:var(--rgm-accent)}
+  header-drawer .menu-drawer .menu-drawer__menu--childlist{padding-block-start:18px!important}
+  header-drawer .menu-drawer .menu-drawer__menu--grid{box-sizing:border-box;gap:12px!important;padding-inline:var(--drawer-padding,20px)!important}
+  header-drawer .menu-drawer .menu-drawer__menu--grid > li{min-width:0}
+  header-drawer .menu-drawer .menu-drawer__menu--grid .menu-drawer__menu-item{
+    position:relative;overflow:hidden;border-radius:8px;background:var(--rgm-surface);border:1px solid var(--rgm-line);
+  }
+  header-drawer .menu-drawer .menu-drawer__link-image{aspect-ratio:1/1!important;border-radius:0!important;transition:transform .5s cubic-bezier(.16,1,.3,1)}
+  header-drawer .menu-drawer .menu-drawer__menu--grid .menu-drawer__menu-item:hover .menu-drawer__link-image{transform:scale(1.05)}
+  header-drawer .menu-drawer .menu-drawer__menu--grid .menu-drawer__menu-item-text{
+    width:100%;padding:10px 12px 12px;font-family:"Saira Condensed","Arial Narrow",sans-serif;font-style:italic;font-weight:800;
+    font-size:18px;line-height:1.05;text-transform:uppercase;color:var(--rgm-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  header-drawer .menu-drawer .menu-drawer__menu--grid .menu-drawer__menu-item-text::after{content:" ↘";color:var(--rgm-accent);font-style:normal}
+  header-drawer .menu-drawer .menu-drawer__menu--childlist:not(.menu-drawer__menu--grid) .menu-drawer__menu-item{
+    font-family:"Saira Condensed","Arial Narrow",sans-serif!important;font-style:italic;font-weight:800!important;font-size:22px!important;
+    text-transform:uppercase;padding-block:10px!important;color:var(--rgm-text)!important;
+  }
+  header-drawer .menu-drawer .menu-drawer__menu--grandchildlist .menu-drawer__menu-item{
+    font-family:"Barlow",sans-serif!important;font-style:normal!important;font-weight:600!important;font-size:16px!important;text-transform:none!important;
+    color:var(--rgm-muted)!important;padding-block:8px!important;padding-inline-start:14px!important;border-left:2px solid var(--rgm-line);
+  }
+  header-drawer .menu-drawer .menu-drawer__menu--grandchildlist .menu-drawer__menu-item:hover{color:var(--rgm-accent)!important;border-left-color:var(--rgm-accent)}
+
+  /* Idioma / país */
+  header-drawer .menu-drawer .menu-drawer__utility-links{background:transparent!important;color:var(--rgm-muted)!important;border-top:1px solid var(--rgm-line);margin-inline:0!important;padding:14px var(--drawer-padding,20px)!important}
+  header-drawer .menu-drawer .menu-drawer__utility-links *{color:inherit}
+
+  /* Tarjetas con foto */
+  header-drawer .rgm-extra{padding:6px var(--drawer-padding,20px) 18px}
+  header-drawer .rgm-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0;padding:0;list-style:none}
+  header-drawer .rgm-card{position:relative;display:block;aspect-ratio:4/5;border-radius:10px;overflow:hidden;background:var(--rgm-surface);color:#fff;text-decoration:none;isolation:isolate}
+  header-drawer .rgm-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;transition:transform .6s cubic-bezier(.16,1,.3,1)}
+  header-drawer .rgm-card::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.85))}
+  header-drawer .rgm-card:hover img{transform:scale(1.05)}
+  header-drawer .rgm-card__tag{position:absolute;top:10px;left:10px;padding:4px 8px;border-radius:4px;font-family:"Chakra Petch",Menlo,monospace;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;background:var(--rgm-accent);color:#1A1400}
+  header-drawer .rgm-card--deal .rgm-card__tag{background:var(--rgm-red);color:#fff}
+  header-drawer .rgm-card__body{position:absolute;left:12px;right:12px;bottom:12px}
+  header-drawer .rgm-card__t{display:block;font-family:"Saira Condensed","Arial Narrow",sans-serif;font-style:italic;font-weight:900;font-size:22px;line-height:.95;text-transform:uppercase}
+  header-drawer .rgm-card__t i{font-style:normal;color:var(--rgm-accent)}
+  header-drawer .rgm-card--deal .rgm-card__t i{color:#FF6A5F}
+  header-drawer .rgm-card__s{display:block;margin-top:4px;font-size:12px;line-height:1.3;color:rgba(255,255,255,.8)}
+  header-drawer .rgm-ship{display:flex;align-items:center;gap:10px;margin-top:14px;padding:12px 14px;border-radius:8px;border:1px dashed var(--rgm-line);font-size:13px;color:var(--rgm-muted)}
+  header-drawer .rgm-ship svg{flex:0 0 auto;color:var(--rgm-accent);width:22px!important;height:22px!important}
+  header-drawer .rgm-ship b{color:var(--rgm-text)}
+  @media (prefers-reduced-motion:reduce){header-drawer .menu-drawer a[href*="volantes-de-oferta"]::after{animation:none}header-drawer .rgm-card img{transition:none}}
+</style>
+<div class="rgm-extra menu-drawer__animated-element" style="--menu-drawer-animation-index: 8;">
+  <ul class="rgm-cards" role="list">
+    {%- if ofertas != blank and ofertas.products_count > 0 -%}
+      <li>
+        <a class="rgm-card rgm-card--deal" href="{{ ofertas.url }}">
+          {%- if img_ofertas -%}{{ img_ofertas | image_url: width: 500 | image_tag: loading: 'lazy', widths: '250, 400, 500', sizes: '(min-width: 750px) 200px, 45vw', alt: '' }}{%- endif -%}
+          <span class="rgm-card__tag">Precios especiales</span>
+          <span class="rgm-card__body">
+            <span class="rgm-card__t">Ofertas <i>↘</i></span>
+            <span class="rgm-card__s">Rebajas y packs −10 % / −15 %</span>
+          </span>
+        </a>
+      </li>
+    {%- endif -%}
+    {%- if todos != blank -%}
+      <li>
+        <a class="rgm-card" href="{{ todos.url }}?sort_by=best-selling">
+          {%- if img_top -%}{{ img_top | image_url: width: 500 | image_tag: loading: 'lazy', widths: '250, 400, 500', sizes: '(min-width: 750px) 200px, 45vw', alt: '' }}{%- endif -%}
+          <span class="rgm-card__tag">Top ventas</span>
+          <span class="rgm-card__body">
+            <span class="rgm-card__t">Más vendidos <i>↘</i></span>
+            <span class="rgm-card__s">Los favoritos de nuestros clientes</span>
+          </span>
+        </a>
+      </li>
+    {%- endif -%}
+  </ul>
+  <p class="rgm-ship">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg>
+    <span><b>Envío en 10–15 días</b> · Solo a Europa</span>
+  </p>
+</div>
