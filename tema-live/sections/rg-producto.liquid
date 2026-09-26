@@ -41,6 +41,17 @@
   assign crumb_coll = collection | default: brand_coll
 
   assign desc_parts = product.description | split: '<h3>'
+  assign extras_part = ''
+  for part in desc_parts offset: 1
+    assign part_head = part | split: '</h3>' | first | strip_html | strip | downcase
+    if part_head contains 'extras'
+      assign extras_part = part
+    endif
+  endfor
+  assign show_extras = true
+  if deal and deal.settings.show_extras == false
+    assign show_extras = false
+  endif
   assign intro = desc_parts.first
 -%}
 
@@ -202,6 +213,27 @@
   #rgp-{{ sid }} .rgp-ship span{display:block;font-size:13.5px;color:var(--muted)}
   @media (max-width:420px){#rgp-{{ sid }} .rgp-deal{padding-inline:10px}#rgp-{{ sid }} .rgp-deal__grid{gap:7px}#rgp-{{ sid }} .rgp-deal__now{font-size:15px}#rgp-{{ sid }} .rgp-deal__n{font-size:14px}#rgp-{{ sid }} .rgp-deal__tag{font-size:9px;padding:3px 6px}}
   @media (prefers-reduced-motion:reduce){#rgp-{{ sid }} .rgp-deal__head i{animation:none}#rgp-{{ sid }} .rgp-deal__opt{transition:none}}
+  #rgp-{{ sid }} .rgp-price__extras{display:block;margin-top:8px;font-size:12.5px;line-height:1.45;color:var(--accent)}
+  #rgp-{{ sid }} .rgp-price__extras b{font-weight:600;color:var(--text)}
+  #rgp-{{ sid }} .rgp-extras{margin:0 0 22px;padding:0;border:0;min-width:0}
+  #rgp-{{ sid }} .rgp-extras legend{padding:0;margin:0 0 4px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  #rgp-{{ sid }} .rgp-extras__sub{margin:0 0 12px;font-size:13px;color:var(--muted)}
+  #rgp-{{ sid }} .rgp-extras__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  #rgp-{{ sid }} .rgp-extra{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;column-gap:10px;padding:11px 12px;border-radius:calc({{ s.radius }}px * .8);border:1px solid var(--line-strong);background:color-mix(in srgb, var(--surface) 80%, transparent);cursor:pointer;transition:border-color .15s,background .15s,transform .15s}
+  #rgp-{{ sid }} .rgp-extra:hover{border-color:color-mix(in srgb, var(--accent) 60%, transparent);transform:translateY(-1px)}
+  #rgp-{{ sid }} .rgp-extra input{position:absolute;opacity:0;pointer-events:none}
+  #rgp-{{ sid }} .rgp-extra__ico{display:grid;place-items:center;width:32px;height:32px;border-radius:8px;background:color-mix(in srgb, var(--text) 7%, transparent);color:var(--accent)}
+  #rgp-{{ sid }} .rgp-extra__ico svg{width:18px;height:18px}
+  #rgp-{{ sid }} .rgp-extra__t{font-size:14px;font-weight:600;line-height:1.25}
+  #rgp-{{ sid }} .rgp-extra__p{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--accent);white-space:nowrap}
+  #rgp-{{ sid }} .rgp-extra__chk{position:absolute;top:-7px;right:-7px;display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#1A1400;transform:scale(0);transition:transform .2s cubic-bezier(.16,1,.3,1)}
+  #rgp-{{ sid }} .rgp-extra__chk svg{width:12px;height:12px}
+  #rgp-{{ sid }} .rgp-extra:has(input:checked){border-color:var(--accent);background:color-mix(in srgb, var(--accent) 12%, var(--surface))}
+  #rgp-{{ sid }} .rgp-extra:has(input:checked) .rgp-extra__ico{background:var(--accent);color:#1A1400}
+  #rgp-{{ sid }} .rgp-extra:has(input:checked) .rgp-extra__chk{transform:scale(1)}
+  #rgp-{{ sid }} .rgp-extra:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+  #rgp-{{ sid }} .rgp-form[data-has-extras] .shopify-payment-button{display:none}
+  @media (max-width:520px){#rgp-{{ sid }} .rgp-extras__grid{grid-template-columns:1fr}}
   #rgp-{{ sid }} .rgp-buy{display:flex;flex-direction:column;gap:10px}
   #rgp-{{ sid }} .rgp-buy__row{display:flex;gap:10px}
   #rgp-{{ sid }} .rgp-qty{display:inline-flex;align-items:center;flex:0 0 auto;height:56px;border:1px solid var(--line-strong);border-radius:4px;background:color-mix(in srgb, var(--surface) 80%, transparent)}
@@ -407,6 +439,7 @@
               <s class="rgp-price__was" data-rgp-was {% unless current.compare_at_price > current.price %}hidden{% endunless %}>{{ current.compare_at_price | money }}</s>
               <span class="rgp-price__save" data-rgp-save {% unless current.compare_at_price > current.price %}hidden{% endunless %}>{%- if current.compare_at_price > current.price -%}−{{ current.compare_at_price | minus: current.price | times: 100.0 | divided_by: current.compare_at_price | round }}%{%- endif -%}</span>
             </div>
+            <span class="rgp-price__extras" data-rgp-extras-line hidden></span>
             <span class="rgp-price__tax">{{ s.tax_text }}</span>
           </div>
           <span class="rgp-stock" data-rgp-stock {% unless current.available %}data-off{% endunless %}><i aria-hidden="true"></i><span data-rgp-stock-label>{% if current.available %}{{ s.available_text }}{% else %}Agotado{% endif %}</span></span>
@@ -466,6 +499,17 @@
               {%- endfor -%}
             </div>
           {%- endunless -%}
+
+          {%- if show_extras and extras_part != '' -%}
+            {%- capture extras_cards -%}{%- render 'rg-extras', part: extras_part -%}{%- endcapture -%}
+            {%- if extras_cards contains 'data-rgp-extra' -%}
+              <fieldset class="rgp-extras" data-rgp-extras>
+                <legend>{{ deal.settings.extras_title | default: 'Personaliza tu volante' }}</legend>
+                <p class="rgp-extras__sub">{{ deal.settings.extras_text | default: 'Pulsa para añadir. Se suman al precio al instante.' }}</p>
+                <div class="rgp-extras__grid">{{ extras_cards }}</div>
+              </fieldset>
+            {%- endif -%}
+          {%- endif -%}
 
           {%- if deal and deal.settings.show -%}
             {%- assign ds = deal.settings -%}
@@ -564,6 +608,8 @@
           {%- for part in desc_parts offset: 1 -%}
             {%- assign bits = part | split: '</h3>' -%}
             {%- assign heading = bits.first | strip_html | strip -%}
+            {%- assign heading_l = heading | downcase -%}
+            {%- if heading_l contains 'extras' and extras_cards contains 'data-rgp-extra' -%}{%- continue -%}{%- endif -%}
             {%- assign body = part | remove_first: bits.first | remove_first: '</h3>' -%}
             <details {% if forloop.first and s.open_first %}open{% endif %}>
               <summary>
@@ -695,18 +741,35 @@
   const skuEl = $('[data-rgp-sku]'), stickyPrice = $('[data-rgp-sticky-price]'), stickyBtn = $('[data-rgp-sticky-btn]');
   const availText = {{ s.available_text | json }};
   let unit = {{ current.price | json }};
+  let curV = variants.find(x => String(x.id) === String(idInput.value)) || variants[0];
+  /* Extras opcionales: se suman al precio al instante */
+  const extraInputs = $$('[data-rgp-extra]'), extrasLine = $('[data-rgp-extras-line]');
+  const chosenExtras = () => extraInputs.filter(i => i.checked);
+  const extrasSum = () => chosenExtras().reduce((a, i) => a + (+i.dataset.price || 0), 0);
+  function paintPrice() {
+    if (!curV) return;
+    const ex = extrasSum(), total = curV.price + ex;
+    priceEl.textContent = fmt(total);
+    if (stickyPrice) stickyPrice.textContent = fmt(total);
+    const sale = curV.compare_at_price > curV.price;
+    wasEl.hidden = !sale; saveEl.hidden = !sale;
+    if (sale) { wasEl.textContent = fmt(curV.compare_at_price + ex); saveEl.textContent = '−' + Math.round((curV.compare_at_price - curV.price) * 100 / curV.compare_at_price) + '%'; }
+    const list = chosenExtras();
+    if (extrasLine) {
+      extrasLine.hidden = !list.length;
+      extrasLine.innerHTML = list.length ? '<b>' + fmt(curV.price) + '</b> + ' + list.map(i => i.dataset.name + ' (+' + fmt(+i.dataset.price) + ')').join(' · ') : '';
+    }
+    if (form) form.toggleAttribute('data-has-extras', list.length > 0);
+    paintPacks();
+  }
+  extraInputs.forEach(i => i.addEventListener('change', paintPrice));
   const update = () => {
     const opts = fieldsets.map(fs => fs.querySelector('input:checked')?.value);
     fieldsets.forEach((fs, k) => { const l = fs.querySelector('[data-rgp-selected]'); if (l) l.textContent = opts[k] || ''; });
     const v = variants.find(v => v.options.every((o, k) => o === opts[k]));
     if (!v) { addBtn.disabled = true; addLabel.textContent = 'No disponible'; if (stickyBtn) stickyBtn.disabled = true; return; }
     idInput.value = v.id;
-    priceEl.textContent = fmt(v.price);
-    unit = v.price; paintPacks();
-    if (stickyPrice) stickyPrice.textContent = fmt(v.price);
-    const sale = v.compare_at_price > v.price;
-    wasEl.hidden = !sale; saveEl.hidden = !sale;
-    if (sale) { wasEl.textContent = fmt(v.compare_at_price); saveEl.textContent = '−' + Math.round((v.compare_at_price - v.price) * 100 / v.compare_at_price) + '%'; }
+    curV = v; unit = v.price; paintPrice();
     addBtn.disabled = !v.available; addLabel.textContent = v.available ? addBtn.dataset.label : 'Agotado';
     if (stickyBtn) stickyBtn.disabled = !v.available;
     stockEl.toggleAttribute('data-off', !v.available); stockLabel.textContent = v.available ? availText : 'Agotado';
@@ -731,9 +794,9 @@
   const packs = $$('[data-rgp-pack]');
   function paintPacks() {
     packs.forEach(b => {
-      const n = +b.dataset.rgpPack, pct = +b.dataset.pct || 0;
-      b.querySelector('[data-rgp-pack-now]').textContent = fmt(Math.floor(unit * n * (100 - pct) / 100));
-      const was = b.querySelector('[data-rgp-pack-was]'); if (was) was.textContent = fmt(unit * n);
+      const n = +b.dataset.rgpPack, pct = +b.dataset.pct || 0, ex = extrasSum();
+      b.querySelector('[data-rgp-pack-now]').textContent = fmt(Math.floor(unit * n * (100 - pct) / 100) + ex * n);
+      const was = b.querySelector('[data-rgp-pack-was]'); if (was) was.textContent = fmt((unit + ex) * n);
     });
   }
   function markPack() {
@@ -741,6 +804,26 @@
     packs.forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.rgpPack === n)));
   }
   packs.forEach(b => b.addEventListener('click', () => { q.value = b.dataset.rgpPack; markPack(); }));
+
+  /* Con extras elegidos, el volante y sus extras entran juntos en el carrito */
+  if (form) form.addEventListener('submit', async (e) => {
+    const list = chosenExtras();
+    if (!list.length) return;
+    e.preventDefault();
+    const qty = Math.max(1, parseInt(q.value, 10) || 1);
+    const wheel = {{ product.title | json }} + (curV && curV.title && curV.title !== 'Default Title' ? ' · ' + curV.title : '');
+    const items = [{ id: +idInput.value, quantity: qty, properties: { 'Extras': list.map(i => i.dataset.name).join(', ') } }]
+      .concat(list.map(i => ({ id: +i.value, quantity: qty, properties: { 'Para': wheel } })));
+    const label = addLabel.textContent; addBtn.disabled = true; addLabel.textContent = 'Añadiendo…';
+    try {
+      const r = await fetch({{ routes.cart_add_url | json }} + '.js', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ items }) });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.description || d.message || 'Error'); }
+      location.href = {{ routes.cart_url | json }};
+    } catch (err) {
+      addBtn.disabled = false; addLabel.textContent = label;
+      alert('No se ha podido añadir al carrito: ' + err.message);
+    }
+  });
 
   /* Barra fija */
   const sticky = $('[data-rgp-sticky]');
@@ -839,6 +922,11 @@
         { "type": "text", "id": "badge_3", "label": "Etiqueta de 3", "default": "Mejor precio" },
         { "type": "text", "id": "note", "label": "Nota", "default": "Puedes combinar modelos distintos: el descuento se aplica solo en el carrito." },
         { "type": "color", "id": "color_deal", "label": "Color de la oferta", "default": "#D8342A" },
+        { "type": "header", "content": "Extras opcionales" },
+        { "type": "paragraph", "content": "Salen de la lista «Extras opcionales» de la descripción de cada volante. Cada extra es un producto oculto (Extra · …) con su precio." },
+        { "type": "checkbox", "id": "show_extras", "label": "Mostrar extras para elegir", "default": true },
+        { "type": "text", "id": "extras_title", "label": "Título", "default": "Personaliza tu volante" },
+        { "type": "text", "id": "extras_text", "label": "Texto", "default": "Pulsa para añadir. Se suman al precio al instante." },
         { "type": "header", "content": "Envío" },
         { "type": "text", "id": "ship_title", "label": "Plazo de envío", "default": "Envío en 10–15 días" },
         { "type": "text", "id": "ship_text", "label": "Zona de envío", "default": "Solo enviamos a países de Europa." }
