@@ -258,19 +258,7 @@
         </div>
         <ul class="rgk-grid">
           {%- for p in c.products limit: s.per_brand -%}
-            {%- liquid
-              assign meta = ''
-              for tag in p.tags
-                if tag == 'Volante' or tag == b.settings.label or tag == c.title
-                  continue
-                endif
-                if meta == ''
-                  assign meta = tag
-                else
-                  assign meta = meta | append: ' · ' | append: tag
-                endif
-              endfor
-            -%}
+            {%- capture meta -%}{%- render 'rg-specs', p: p -%}{%- endcapture -%}
             <li>
               <a class="rgk-card" href="{{ p.url }}">
                 <div class="rgk-card__img">

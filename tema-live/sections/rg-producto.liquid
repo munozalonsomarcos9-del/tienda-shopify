@@ -48,6 +48,12 @@
       assign extras_part = part
     endif
   endfor
+  assign extras_brand = ''
+  for tag in product.tags
+    if tag == 'BMW' or tag == 'Mercedes-Benz' or tag == 'Volkswagen' or tag == 'Porsche'
+      assign extras_brand = tag
+    endif
+  endfor
   assign show_extras = true
   if deal and deal.settings.show_extras == false
     assign show_extras = false
@@ -501,7 +507,7 @@
           {%- endunless -%}
 
           {%- if show_extras and extras_part != '' -%}
-            {%- capture extras_cards -%}{%- render 'rg-extras', part: extras_part -%}{%- endcapture -%}
+            {%- capture extras_cards -%}{%- render 'rg-extras', part: extras_part, brand: extras_brand -%}{%- endcapture -%}
             {%- if extras_cards contains 'data-rgp-extra' -%}
               <fieldset class="rgp-extras" data-rgp-extras>
                 <legend>{{ deal.settings.extras_title | default: 'Personaliza tu volante' }}</legend>
@@ -885,7 +891,7 @@
     { "type": "text", "id": "trust_1_title", "label": "Garantía 1 · título", "default": "Hecho a medida" },
     { "type": "text", "id": "trust_1_text", "label": "Garantía 1 · texto", "default": "Fabricado para la plataforma de tu coche." },
     { "type": "text", "id": "trust_2_title", "label": "Garantía 2 · título", "default": "Envío en 10–15 días" },
-    { "type": "text", "id": "trust_2_text", "label": "Garantía 2 · texto", "default": "Solo a Europa, con embalaje reforzado y seguimiento." },
+    { "type": "text", "id": "trust_2_text", "label": "Garantía 2 · texto", "default": "Gratis a toda Europa, con embalaje reforzado y seguimiento." },
     { "type": "text", "id": "trust_3_title", "label": "Garantía 3 · título", "default": "Pago seguro" },
     { "type": "text", "id": "trust_3_text", "label": "Garantía 3 · texto", "default": "Tarjeta y métodos habituales." },
     { "type": "header", "content": "Detalles del producto" },
@@ -928,8 +934,8 @@
         { "type": "text", "id": "extras_title", "label": "Título", "default": "Personaliza tu volante" },
         { "type": "text", "id": "extras_text", "label": "Texto", "default": "Pulsa para añadir. Se suman al precio al instante." },
         { "type": "header", "content": "Envío" },
-        { "type": "text", "id": "ship_title", "label": "Plazo de envío", "default": "Envío en 10–15 días" },
-        { "type": "text", "id": "ship_text", "label": "Zona de envío", "default": "Solo enviamos a países de Europa." }
+        { "type": "text", "id": "ship_title", "label": "Plazo de envío", "default": "Envío gratis en 10–15 días" },
+        { "type": "text", "id": "ship_text", "label": "Zona de envío", "default": "Gratis y asegurado. Solo enviamos a países de Europa." }
       ]
     }
   ]

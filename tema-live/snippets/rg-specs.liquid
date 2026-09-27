@@ -1,0 +1,47 @@
+{%- comment -%}
+  RacingGrip · Línea corta que diferencia cada volante en las tarjetas: modelo / serie y material.
+  Sale de las etiquetas del producto, p. ej. «Serie F · Cuero · Personalizado» o «911 (992) · Fibra de carbono».
+  Uso: {% render 'rg-specs', p: product %}
+{%- endcomment -%}
+{%- liquid
+  assign first = ''
+  assign rest = ''
+  for t in p.tags
+    assign lbl = ''
+    assign is_model = false
+    case t
+      when 'Volante', 'BMW', 'Mercedes-Benz', 'Porsche', 'Volkswagen', 'R', 'Extra'
+        continue
+      when 'GTI'
+        assign lbl = 'GTI y R'
+        assign is_model = true
+      when '991', '992'
+        assign lbl = '911 (' | append: t | append: ')'
+        assign is_model = true
+      when 'Serie E', 'Serie F', 'Serie G', 'AMG', 'Butterfly', 'Confort', 'CS'
+        assign lbl = t
+        assign is_model = true
+      else
+        assign lbl = t
+    endcase
+    if is_model
+      if first == ''
+        assign first = lbl
+      else
+        assign first = first | append: ' · ' | append: lbl
+      endif
+    else
+      if rest == ''
+        assign rest = lbl
+      else
+        assign rest = rest | append: ' · ' | append: lbl
+      endif
+    endif
+  endfor
+  if first != '' and rest != ''
+    assign line = first | append: ' · ' | append: rest
+  else
+    assign line = first | append: rest
+  endif
+-%}
+{{- line -}}

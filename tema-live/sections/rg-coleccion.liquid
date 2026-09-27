@@ -272,18 +272,8 @@
       {%- if collection.products.size > 0 -%}
         <ul class="rgc2-grid">
           {%- for p in collection.products -%}
+            {%- capture meta -%}{%- render 'rg-specs', p: p -%}{%- endcapture -%}
             {%- liquid
-              assign meta = ''
-              for tag in p.tags
-                if tag == 'Volante'
-                  continue
-                endif
-                if meta == ''
-                  assign meta = tag
-                else
-                  assign meta = meta | append: ' · ' | append: tag
-                endif
-              endfor
               assign on_sale = false
               if p.compare_at_price_min > p.price_min
                 assign on_sale = true

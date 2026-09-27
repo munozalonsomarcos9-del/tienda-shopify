@@ -72,7 +72,10 @@
     },
     "rg_destacado": {
       "type": "rg-destacado",
-      "settings": {}
+      "settings": {
+        "mode": "manual",
+        "product": "volante-bmw-serie-g-carbono-con-pantalla-led"
+      }
     },
     "rg_recomendados": {
       "type": "rg-recomendados",
@@ -199,7 +202,8 @@
       "settings": {
         "image_product": "volante-bmw-serie-f-cuero-estilo-m",
         "btn_link": "shopify://collections/all",
-        "btn2_link": "shopify://collections/volantes-de-oferta"
+        "btn2_link": "shopify://collections/todos-los-volantes",
+        "btn2_label": "Ahorra con los packs"
       }
     }
   },

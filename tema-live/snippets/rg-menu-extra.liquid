@@ -1,12 +1,12 @@
 {%- comment -%}
   RacingGrip · Menú lateral (móvil). Se pinta dentro del cajón de menú de Horizon (snippets/header-drawer.liquid):
-  lo pasa a oscuro con los colores de la tienda, resalta «Ofertas» en rojo y añade dos tarjetas con foto abajo.
+  lo pasa a oscuro con los colores de la tienda, resalta «Packs» en rojo y añade dos tarjetas con foto abajo.
 {%- endcomment -%}
 {%- liquid
-  assign ofertas = collections['volantes-de-oferta']
+  assign packs_img_coll = collections['volantes-de-oferta']
   assign todos = collections['todos-los-volantes']
   assign top = todos.products.first
-  assign img_ofertas = ofertas.image | default: ofertas.products.first.featured_media
+  assign img_ofertas = packs_img_coll.image | default: todos.products.last.featured_media
   assign img_top = top.featured_media | default: todos.image
 -%}
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,10 +36,10 @@
   header-drawer .menu-drawer .menu-drawer__menu-item--mainlist:hover{color:var(--rgm-accent)!important;padding-inline-start:6px}
   header-drawer .menu-drawer .menu-drawer__menu-item--mainlist .svg-wrapper{color:var(--rgm-accent);padding-block:0!important}
 
-  /* «Ofertas» en rojo con un punto que late */
-  header-drawer .menu-drawer a.menu-drawer__menu-item--mainlist[href*="volantes-de-oferta"]{color:var(--rgm-red)!important;justify-content:flex-start;gap:12px}
-  header-drawer .menu-drawer a.menu-drawer__menu-item--mainlist[href*="volantes-de-oferta"]::after{
-    content:"REBAJAS";align-self:center;font-family:"Chakra Petch",Menlo,monospace;font-style:normal;font-weight:600;font-size:11px;letter-spacing:.12em;
+  /* «Packs» en rojo con un punto que late */
+  header-drawer .menu-drawer a.menu-drawer__menu-item--mainlist[href*="packs=1"]{color:var(--rgm-red)!important;justify-content:flex-start;gap:12px}
+  header-drawer .menu-drawer a.menu-drawer__menu-item--mainlist[href*="packs=1"]::after{
+    content:"HASTA −15 %";align-self:center;font-family:"Chakra Petch",Menlo,monospace;font-style:normal;font-weight:600;font-size:11px;letter-spacing:.12em;
     padding:5px 9px;border-radius:999px;background:var(--rgm-red);color:#fff;animation:rgm-pulse 1.8s ease-out infinite;
   }
   @keyframes rgm-pulse{0%{box-shadow:0 0 0 0 rgba(216,52,42,.7)}100%{box-shadow:0 0 0 10px rgba(216,52,42,0)}}
@@ -95,18 +95,18 @@
   header-drawer .rgm-ship{display:flex;align-items:center;gap:10px;margin-top:14px;padding:12px 14px;border-radius:8px;border:1px dashed var(--rgm-line);font-size:13px;color:var(--rgm-muted)}
   header-drawer .rgm-ship svg{flex:0 0 auto;color:var(--rgm-accent);width:22px!important;height:22px!important}
   header-drawer .rgm-ship b{color:var(--rgm-text)}
-  @media (prefers-reduced-motion:reduce){header-drawer .menu-drawer a[href*="volantes-de-oferta"]::after{animation:none}header-drawer .rgm-card img{transition:none}}
+  @media (prefers-reduced-motion:reduce){header-drawer .menu-drawer a[href*="packs=1"]::after{animation:none}header-drawer .rgm-card img{transition:none}}
 </style>
 <div class="rgm-extra menu-drawer__animated-element" style="--menu-drawer-animation-index: 8;">
   <ul class="rgm-cards" role="list">
-    {%- if ofertas != blank and ofertas.products_count > 0 -%}
+    {%- if todos != blank -%}
       <li>
-        <a class="rgm-card rgm-card--deal" href="{{ ofertas.url }}">
+        <a class="rgm-card rgm-card--deal" href="{{ todos.url }}?packs=1">
           {%- if img_ofertas -%}{{ img_ofertas | image_url: width: 500 | image_tag: loading: 'lazy', widths: '250, 400, 500', sizes: '(min-width: 750px) 200px, 45vw', alt: '' }}{%- endif -%}
-          <span class="rgm-card__tag">Precios especiales</span>
+          <span class="rgm-card__tag">Ahorra más</span>
           <span class="rgm-card__body">
-            <span class="rgm-card__t">Ofertas <i>↘</i></span>
-            <span class="rgm-card__s">Rebajas y packs −10 % / −15 %</span>
+            <span class="rgm-card__t">Packs <i>↘</i></span>
+            <span class="rgm-card__s">−10 % con 2 · −15 % con 3 o más</span>
           </span>
         </a>
       </li>
@@ -126,6 +126,6 @@
   </ul>
   <p class="rgm-ship">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg>
-    <span><b>Envío en 10–15 días</b> · Solo a Europa</span>
+    <span><b>Envío gratis</b> en 10–15 días · Solo Europa</span>
   </p>
 </div>

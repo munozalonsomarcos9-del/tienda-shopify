@@ -1,22 +1,23 @@
 {%- comment -%}
   RacingGrip · Casillas de extras opcionales de la ficha de producto.
   Lee la lista «Extras opcionales» de la descripción (part) y busca cada extra como producto oculto «extra-…».
+  De ese producto usa la versión de la marca del volante (brand: BMW, Mercedes-Benz, Volkswagen o Porsche),
+  así el precio de cada extra se cambia en un solo sitio.
   Solo pinta las casillas; los estilos y el JavaScript están en sections/rg-producto.liquid.
 {%- endcomment -%}
 {%- assign lis = part | split: '<li>' -%}
 {%- for li in lis offset: 1 -%}
   {%- liquid
     assign txt = li | split: '</li>' | first | strip_html | strip
-    unless txt contains '·'
+    if txt == ''
       continue
-    endunless
+    endif
     assign ex_name = txt | split: '·' | first | strip
-    assign ex_cents = txt | split: '·' | last | remove: '+' | remove: '€' | strip | times: 100
     assign ex_handle = ex_name | downcase | replace: 'á', 'a' | replace: 'é', 'e' | replace: 'í', 'i' | replace: 'ó', 'o' | replace: 'ú', 'u' | replace: 'ñ', 'n' | replace: 'ü', 'u' | handleize | prepend: 'extra-'
     assign ex_product = all_products[ex_handle]
     assign ex_variant = nil
     for ev in ex_product.variants
-      if ev.price == ex_cents
+      if ev.title == brand
         assign ex_variant = ev
       endif
     endfor
