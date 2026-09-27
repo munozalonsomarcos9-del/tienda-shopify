@@ -217,8 +217,14 @@
   });
 
   /* En el editor de temas: se enseña al seleccionar la sección */
+  /* ¿Viene de otra página de la tienda? Entonces no es «entrar»: la ventana no sale, solo el recordatorio pequeño */
+  const internal = (() => { try { return !!document.referrer && new URL(document.referrer).host === location.host; } catch (e) { return false; } })();
+  const onceKey = 'rg-pop-visit';
+  const seenVisit = () => { try { return !!sessionStorage.getItem(onceKey); } catch (e) { return false; } };
+  const markVisit = () => { try { sessionStorage.setItem(onceKey, '1'); } catch (e) {} };
+
   if (pop.dataset.design === 'true') {
-    setTimeout(() => show('form'), 600);
+    if (internal || seenVisit()) showCup(); else { markVisit(); setTimeout(() => show('form'), 600); }
     document.addEventListener('shopify:section:select', e => { if (e.detail.sectionId === '{{ sid }}') show('form'); });
     document.addEventListener('shopify:section:deselect', e => { if (e.detail.sectionId === '{{ sid }}') hide(); });
     return;
@@ -229,10 +235,8 @@
   if (/[?&]descuento\b/.test(location.search)) { setTimeout(() => show('form'), 400); return; }
   if (preview) {
     /* En la vista previa: una vez al entrar (aunque ya la hayas cerrado otro día); en el resto de páginas, el recordatorio */
-    let seen = null; try { seen = sessionStorage.getItem('rg-pop-visit'); } catch (e) {}
-    if (seen) { showCup(); return; }
-    try { sessionStorage.setItem('rg-pop-visit', '1'); } catch (e) {}
-    setTimeout(() => show('form'), 400); return;
+    if (internal || seenVisit()) { showCup(); return; }
+    markVisit(); setTimeout(() => show('form'), 400); return;
   }
 
   /* Vuelta tras apuntarse: se enseña el código */
@@ -250,7 +254,7 @@
   if (days > 0) {
     if (last) showCup();
     if (Date.now() - last < days * 864e5) return;
-  } else if (sget()) { showCup(); return; }
+  } else if (sget() || internal) { showCup(); return; }
 
   const open = () => { if (!pop.hasAttribute('data-open') && !get(SENT)) { clearTimeout(timer); show('form'); set(KEY, String(Date.now())); sset(); } };
   const delay = pop.dataset.delay === '' ? 6 : +pop.dataset.delay;
