@@ -235,11 +235,17 @@
   if (hasError) { show('form'); return; }
   if (pop.hasAttribute('data-subscribed') || get(SENT)) { showCup(); return; }
 
-  const days = +pop.dataset.days || 7, last = +get(KEY) || 0;
-  if (last) showCup();
-  if (Date.now() - last < days * 864e5) return;
+  /* Frecuencia: 0 días = en cada visita (una vez por visita; en el resto de páginas queda el recordatorio pequeño) */
+  const days = +pop.dataset.days || 0, last = +get(KEY) || 0;
+  const SES = 'rg-pop-visit';
+  const sget = () => { try { return sessionStorage.getItem(SES); } catch (e) { return null; } };
+  const sset = () => { try { sessionStorage.setItem(SES, '1'); } catch (e) {} };
+  if (days > 0) {
+    if (last) showCup();
+    if (Date.now() - last < days * 864e5) return;
+  } else if (sget()) { showCup(); return; }
 
-  const open = () => { if (!pop.hasAttribute('data-open') && !get(SENT)) { clearTimeout(timer); show('form'); set(KEY, String(Date.now())); } };
+  const open = () => { if (!pop.hasAttribute('data-open') && !get(SENT)) { clearTimeout(timer); show('form'); set(KEY, String(Date.now())); sset(); } };
   const delay = pop.dataset.delay === '' ? 6 : +pop.dataset.delay;
   timer = setTimeout(open, delay > 0 ? delay * 1000 : 400);
   /* En ordenador, también al llevar el ratón hacia fuera de la página */
@@ -259,7 +265,7 @@
   "settings": [
     { "type": "checkbox", "id": "enabled", "label": "Mostrar la ventana", "default": true },
     { "type": "range", "id": "delay", "label": "Segundos hasta que aparece", "info": "0 = nada más entrar.", "min": 0, "max": 30, "step": 1, "unit": "s", "default": 0 },
-    { "type": "range", "id": "days", "label": "Días hasta volver a mostrarla si la cierran", "min": 1, "max": 30, "step": 1, "default": 7 },
+    { "type": "range", "id": "days", "label": "Días hasta volver a mostrarla si la cierran", "info": "0 = en cada visita a la tienda.", "min": 0, "max": 30, "step": 1, "default": 0 },
     { "type": "header", "content": "Formulario" },
     { "type": "text", "id": "title", "label": "Título", "default": "Consigue un −10 % en tu primer pedido" },
     { "type": "text", "id": "text", "label": "Texto", "default": "Apúntate y recibe tu código al momento, además de novedades y ofertas exclusivas." },
