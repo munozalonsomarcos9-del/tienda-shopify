@@ -223,6 +223,9 @@
     return;
   }
 
+  /* Enlace de prueba: con ?descuento en la dirección la ventana sale siempre */
+  if (/[?&]descuento\b/.test(location.search)) { setTimeout(() => show('form'), 300); return; }
+
   /* Vuelta tras apuntarse: se enseña el código */
   const posted = /[?&]customer_posted=true/.test(location.search);
   const hasError = !!pop.querySelector('[data-rgpop-error]');
