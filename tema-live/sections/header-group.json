@@ -141,7 +141,9 @@
     },
     "rg_popup": {
       "type": "rg-popup",
-      "settings": {}
+      "settings": {
+        "delay": 0
+      }
     }
   },
   "order": [
