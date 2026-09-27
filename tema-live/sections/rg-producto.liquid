@@ -191,9 +191,15 @@
   #rgp-{{ sid }} .rgp-price__was{font-family:var(--mono);color:var(--muted);text-decoration:line-through;font-size:18px}
   #rgp-{{ sid }} .rgp-price__save{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.1em;padding:4px 8px;border-radius:3px;background:var(--kerb);color:#fff}
   #rgp-{{ sid }} .rgp-price__tax{display:block;margin-top:6px;font-size:13px;color:var(--muted)}
-  #rgp-{{ sid }} .rgp-stock{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
-  #rgp-{{ sid }} .rgp-stock i{width:8px;height:8px;border-radius:50%;background:#3DDC84;box-shadow:0 0 0 4px color-mix(in srgb,#3DDC84 20%,transparent)}
-  #rgp-{{ sid }} .rgp-stock[data-off] i{background:var(--kerb);box-shadow:0 0 0 4px color-mix(in srgb,var(--kerb) 20%,transparent)}
+  #rgp-{{ sid }} .rgp-stock{--dot:#22C55E;display:flex;align-items:center;gap:10px;font-size:14.5px;font-weight:600;color:var(--dot)}
+  #rgp-{{ sid }} .rgp-stock i{position:relative;flex:0 0 auto;width:10px;height:10px;border-radius:50%;background:var(--dot)}
+  #rgp-{{ sid }} .rgp-stock i::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--dot);animation:rgp-dot-{{ sid }} 1.8s ease-out infinite}
+  @keyframes rgp-dot-{{ sid }}{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.8);opacity:0}}
+  #rgp-{{ sid }} .rgp-stock[data-state="low"]{--dot:#FF9F1A}
+  #rgp-{{ sid }} .rgp-stock[data-state="last"]{--dot:#FF4D3D}
+  #rgp-{{ sid }} .rgp-stock[data-state="off"]{--dot:var(--kerb)}
+  #rgp-{{ sid }} .rgp-stock[data-state="off"] i::after{animation:none}
+  @media (prefers-reduced-motion:reduce){#rgp-{{ sid }} .rgp-stock i::after{animation:none}}
 
   #rgp-{{ sid }} .rgp-options{display:flex;flex-direction:column;gap:20px}
   #rgp-{{ sid }} .rgp-eta{margin:0 0 22px;padding:16px clamp(12px,2vw,18px) 18px;border-radius:{{ s.radius }}px;border:1px solid var(--line-strong);background:color-mix(in srgb, var(--surface) 80%, transparent)}
@@ -504,7 +510,7 @@
             <span class="rgp-price__extras" data-rgp-extras-line hidden></span>
             <span class="rgp-price__tax">{{ s.tax_text }}</span>
           </div>
-          <span class="rgp-stock" data-rgp-stock {% unless current.available %}data-off{% endunless %}><i aria-hidden="true"></i><span data-rgp-stock-label>{% if current.available %}{{ s.available_text }}{% else %}Agotado{% endif %}</span></span>
+          {%- render 'rg-stock', product: product, v: current, text: s.available_text, low: eta.settings.low_stock -%}
         </div>
 
         {%- if eta -%}{%- render 'rg-entrega', eta: eta -%}{%- endif -%}
@@ -819,6 +825,16 @@
   const stockEl = $('[data-rgp-stock]'), stockLabel = $('[data-rgp-stock-label]');
   const skuEl = $('[data-rgp-sku]'), stickyPrice = $('[data-rgp-sticky-price]'), stickyBtn = $('[data-rgp-sticky-btn]');
   const availText = {{ s.available_text | json }};
+  /* Stock: «En stock», o aviso real de pocas unidades si Shopify cuenta el inventario de esa versión */
+  let invMap = {}; try { invMap = JSON.parse(stockEl.dataset.inv || '{}'); } catch (e) {}
+  const lowAt = +stockEl.dataset.low || 5;
+  const paintStock = v => {
+    const q = invMap[v.id];
+    let state = 'ok', text = availText;
+    if (!v.available) { state = 'off'; text = 'Agotado'; }
+    else if (q != null && q > 0 && q <= lowAt) { state = q === 1 ? 'last' : 'low'; text = q === 1 ? '¡Última unidad!' : `¡Solo quedan ${q} unidades!`; }
+    stockEl.dataset.state = state; stockLabel.textContent = text;
+  };
   let unit = {{ current.price | json }};
   let curV = variants.find(x => String(x.id) === String(idInput.value)) || variants[0];
   /* Extras opcionales: se suman al precio al instante */
@@ -851,7 +867,7 @@
     curV = v; unit = v.price; paintPrice();
     addBtn.disabled = !v.available; addLabel.textContent = v.available ? addBtn.dataset.label : 'Agotado';
     if (stickyBtn) stickyBtn.disabled = !v.available;
-    stockEl.toggleAttribute('data-off', !v.available); stockLabel.textContent = v.available ? availText : 'Agotado';
+    paintStock(v);
     skuEl.textContent = v.sku ? 'REF. ' + v.sku : '';
     if (v.featured_media) showMedia(v.featured_media.id);
     const url = new URL(location.href); url.searchParams.set('variant', v.id); history.replaceState({}, '', url);
@@ -1002,8 +1018,8 @@
     { "type": "header", "content": "Textos de compra" },
     { "type": "text", "id": "add_label", "label": "Botón de añadir", "default": "Añadir al carrito" },
     { "type": "checkbox", "id": "show_buy_now", "label": "Mostrar botón «Comprar ya»", "default": true },
-    { "type": "text", "id": "tax_text", "label": "Texto bajo el precio", "default": "IVA incluido · Envío calculado al finalizar la compra" },
-    { "type": "text", "id": "available_text", "label": "Texto de disponibilidad", "default": "Fabricación a medida" },
+    { "type": "text", "id": "tax_text", "label": "Texto bajo el precio", "default": "IVA incluido · Envío gratis a toda Europa" },
+    { "type": "text", "id": "available_text", "label": "Texto de disponibilidad", "default": "En stock · envío a toda Europa" },
     { "type": "checkbox", "id": "show_intro", "label": "Mostrar la entradilla de la descripción", "default": true },
     { "type": "checkbox", "id": "show_chips", "label": "Mostrar etiquetas del producto", "default": true },
     { "type": "text", "id": "zoom_hint", "label": "Ayuda sobre la foto", "default": "Pulsa para ampliar" },
@@ -1054,6 +1070,7 @@
         { "type": "number", "id": "ship_max", "label": "Enviado: hasta (días)", "default": 4 },
         { "type": "number", "id": "deliver_min", "label": "Entregado: desde (días)", "default": 10 },
         { "type": "number", "id": "deliver_max", "label": "Entregado: hasta (días)", "default": 15 },
+        { "type": "number", "id": "low_stock", "label": "Avisar de «quedan pocas» a partir de (unidades)", "info": "Solo si en Shopify está activado el seguimiento de inventario de ese volante.", "default": 5 },
         { "type": "text", "id": "label_1", "label": "Paso 1", "default": "Pedido" },
         { "type": "text", "id": "label_2", "label": "Paso 2", "default": "Enviado" },
         { "type": "text", "id": "label_3", "label": "Paso 3", "default": "Entregado" }

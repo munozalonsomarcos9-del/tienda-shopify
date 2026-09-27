@@ -1,0 +1,33 @@
+{%- comment -%}
+  RacingGrip · Indicador de stock de la ficha (punto verde que parpadea).
+  Recibe «product», «v» (la versión elegida), «text» (texto normal) y «low» (a partir de cuántas unidades avisar).
+  Solo avisa de pocas unidades si en Shopify está activado «Hacer seguimiento de la cantidad» y el número es real.
+  Los estilos y el cambio al elegir otra versión están en sections/rg-producto.liquid.
+{%- endcomment -%}
+{%- liquid
+  assign low = low | default: 5
+  assign state = 'ok'
+  assign qty = 0
+  if v.available == false
+    assign state = 'off'
+  elsif v.inventory_management == 'shopify' and v.inventory_quantity > 0 and v.inventory_quantity <= low
+    assign qty = v.inventory_quantity
+    if qty == 1
+      assign state = 'last'
+    else
+      assign state = 'low'
+    endif
+  endif
+-%}
+<span class="rgp-stock" data-rgp-stock data-state="{{ state }}" data-low="{{ low }}" data-text="{{ text | escape }}"
+  data-inv='{ {%- for x in product.variants -%}"{{ x.id }}":{% if x.inventory_management == 'shopify' %}{{ x.inventory_quantity }}{% else %}null{% endif %}{% unless forloop.last %},{% endunless %}{%- endfor -%} }'>
+  <i aria-hidden="true"></i>
+  <span data-rgp-stock-label>
+    {%- case state -%}
+      {%- when 'off' -%}Agotado
+      {%- when 'last' -%}¡Última unidad!
+      {%- when 'low' -%}¡Solo quedan {{ qty }} unidades!
+      {%- else -%}{{ text }}
+    {%- endcase -%}
+  </span>
+</span>
