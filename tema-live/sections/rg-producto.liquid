@@ -9,6 +9,7 @@
   assign current = product.selected_or_first_available_variant
   assign deal = section.blocks | where: 'type', 'oferta' | first
   assign coupon = section.blocks | where: 'type', 'cupon' | first
+  assign eta = section.blocks | where: 'type', 'entrega' | first
 
   comment
     Colección de marca = la más grande del producto, sin contar la general ni las de material.
@@ -195,6 +196,19 @@
   #rgp-{{ sid }} .rgp-stock[data-off] i{background:var(--kerb);box-shadow:0 0 0 4px color-mix(in srgb,var(--kerb) 20%,transparent)}
 
   #rgp-{{ sid }} .rgp-options{display:flex;flex-direction:column;gap:20px}
+  #rgp-{{ sid }} .rgp-eta{margin:0 0 22px;padding:16px clamp(12px,2vw,18px) 18px;border-radius:{{ s.radius }}px;border:1px solid var(--line-strong);background:color-mix(in srgb, var(--surface) 80%, transparent)}
+  #rgp-{{ sid }} .rgp-eta__head{margin:0 0 16px;font-size:15px;line-height:1.4;color:var(--text)}
+  #rgp-{{ sid }} .rgp-eta__head b{color:var(--accent);font-family:var(--mono);font-weight:600;white-space:nowrap}
+  #rgp-{{ sid }} .rgp-eta__steps{display:flex;align-items:flex-start;margin:0;padding:0;list-style:none}
+  #rgp-{{ sid }} .rgp-eta__step{flex:0 0 auto;width:30%;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;font-size:12.5px;line-height:1.3;color:var(--muted)}
+  #rgp-{{ sid }} .rgp-eta__step b{margin-top:6px;font-size:13.5px;font-weight:700;color:var(--text)}
+  #rgp-{{ sid }} .rgp-eta__ico{display:grid;place-items:center;width:50px;height:50px;border-radius:50%;background:color-mix(in srgb, var(--accent) 14%, transparent);color:var(--text)}
+  #rgp-{{ sid }} .rgp-eta__step[data-on] .rgp-eta__ico{background:var(--accent);color:#1A1400;box-shadow:0 0 0 5px color-mix(in srgb, var(--accent) 18%, transparent)}
+  #rgp-{{ sid }} .rgp-eta__line{flex:1;min-width:14px;height:50px;display:flex;align-items:center;margin:0 -6%}
+  #rgp-{{ sid }} .rgp-eta__line i{display:block;width:100%;height:2px;background:repeating-linear-gradient(90deg,var(--accent) 0 8px,transparent 8px 16px);background-size:16px 2px;animation:rgp-eta-{{ sid }} .9s linear infinite;opacity:.85}
+  @keyframes rgp-eta-{{ sid }}{to{background-position:16px 0}}
+  @media (prefers-reduced-motion:reduce){#rgp-{{ sid }} .rgp-eta__line i{animation:none}}
+  @media (max-width:420px){#rgp-{{ sid }} .rgp-eta__ico{width:42px;height:42px}#rgp-{{ sid }} .rgp-eta__line{height:42px}}
   #rgp-{{ sid }} .rgp-option{border:0;margin:0;padding:0;min-width:0}
   #rgp-{{ sid }} .rgp-option legend{display:flex;gap:10px;align-items:baseline;padding:0;margin:0 0 12px;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
   #rgp-{{ sid }} .rgp-option legend b{font-family:var(--body);font-size:15px;letter-spacing:0;text-transform:none;color:var(--text)}
@@ -492,6 +506,29 @@
           </div>
           <span class="rgp-stock" data-rgp-stock {% unless current.available %}data-off{% endunless %}><i aria-hidden="true"></i><span data-rgp-stock-label>{% if current.available %}{{ s.available_text }}{% else %}Agotado{% endif %}</span></span>
         </div>
+
+        {%- if eta -%}
+          {%- assign es = eta.settings -%}
+          <div class="rgp-eta" data-rgp-eta data-cutoff="{{ es.cutoff }}" data-ship-min="{{ es.ship_min }}" data-ship-max="{{ es.ship_max }}" data-del-min="{{ es.deliver_min }}" data-del-max="{{ es.deliver_max }}" {{ eta.shopify_attributes }}>
+            <p class="rgp-eta__head" data-rgp-eta-head>{{ es.title }}</p>
+            <ol class="rgp-eta__steps">
+              <li class="rgp-eta__step" data-on>
+                <span class="rgp-eta__ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6a3 3 0 016 0v2"/></svg></span>
+                <b>{{ es.label_1 }}</b><span data-rgp-eta-d1>Hoy</span>
+              </li>
+              <li class="rgp-eta__line" aria-hidden="true"><i></i></li>
+              <li class="rgp-eta__step">
+                <span class="rgp-eta__ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg></span>
+                <b>{{ es.label_2 }}</b><span data-rgp-eta-d2>{{ es.ship_min }}–{{ es.ship_max }} días</span>
+              </li>
+              <li class="rgp-eta__line" aria-hidden="true"><i></i></li>
+              <li class="rgp-eta__step">
+                <span class="rgp-eta__ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg></span>
+                <b>{{ es.label_3 }}</b><span data-rgp-eta-d3>{{ es.deliver_min }}–{{ es.deliver_max }} días</span>
+              </li>
+            </ol>
+          </div>
+        {%- endif -%}
 
         {%- assign form_id = 'rgp-form-' | append: sid -%}
         {%- form 'product', product, id: form_id, class: 'rgp-form', novalidate: 'novalidate' -%}
@@ -880,6 +917,38 @@
     else { vinMsg.textContent = v.length + ' de 17 caracteres'; vinMsg.removeAttribute('data-ok'); }
   });
 
+  /* Plazo de entrega: cuenta atrás hasta la hora de corte y fechas calculadas desde hoy */
+  const eta = root.querySelector('[data-rgp-eta]');
+  if (eta) {
+    const M = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const add = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+    const S = ['ene','feb','mar','abr','may','jun','jul','ago','sept','oct','nov','dic'];
+    const range = (a, b) => a.getMonth() === b.getMonth()
+      ? `${a.getDate()}–${b.getDate()} ${S[b.getMonth()]}`
+      : `${a.getDate()} ${S[a.getMonth()]} – ${b.getDate()} ${S[b.getMonth()]}`;
+    const between = (a, b) => a.getMonth() === b.getMonth()
+      ? `el ${a.getDate()} y el ${b.getDate()} de ${M[b.getMonth()]}`
+      : `el ${a.getDate()} de ${M[a.getMonth()]} y el ${b.getDate()} de ${M[b.getMonth()]}`;
+    const cut = (eta.dataset.cutoff || '23:59').split(':').map(Number);
+    const head = eta.querySelector('[data-rgp-eta-head]');
+    const d2 = eta.querySelector('[data-rgp-eta-d2]'), d3 = eta.querySelector('[data-rgp-eta-d3]');
+    const paintEta = () => {
+      const now = new Date();
+      let limit = new Date(now); limit.setHours(cut[0] || 0, cut[1] || 0, 0, 0);
+      let base = new Date(now);
+      if (limit <= now) { limit = add(limit, 1); base = add(base, 1); }
+      const mins = Math.max(1, Math.ceil((limit - now) / 60000));
+      const h = Math.floor(mins / 60), m = mins % 60;
+      const left = (h ? h + ' h ' : '') + String(m).padStart(h ? 2 : 1, '0') + ' min';
+      const sMin = add(base, +eta.dataset.shipMin), sMax = add(base, +eta.dataset.shipMax);
+      const dMin = add(base, +eta.dataset.delMin), dMax = add(base, +eta.dataset.delMax);
+      d2.textContent = range(sMin, sMax);
+      d3.textContent = range(dMin, dMax);
+      head.innerHTML = `Si lo pides en las próximas <b>${left}</b>, te llega entre <b>${between(dMin, dMax)}</b>`;
+    };
+    paintEta(); setInterval(paintEta, 30000);
+  }
+
   /* Cupón de primer pedido: copiar el código */
   root.querySelectorAll('[data-rgp-coupon]').forEach(b => b.addEventListener('click', async () => {
     const code = b.dataset.rgpCoupon, lbl = b.querySelector('[data-rgp-coupon-label]');
@@ -994,6 +1063,23 @@
     { "type": "range", "id": "pad_bottom", "label": "Espacio abajo", "min": 0, "max": 140, "step": 4, "unit": "px", "default": 88 }
   ],
   "blocks": [
+    {
+      "type": "entrega",
+      "name": "Plazo de entrega",
+      "limit": 1,
+      "settings": [
+        { "type": "paragraph", "content": "Las fechas se calculan solas cada día contando desde hoy." },
+        { "type": "text", "id": "title", "label": "Texto si no hay JavaScript", "default": "Envío gratis a toda Europa en 10–15 días" },
+        { "type": "text", "id": "cutoff", "label": "Hora límite del día (HH:MM)", "info": "La cuenta atrás termina a esta hora; después las fechas cuentan desde mañana.", "default": "23:59" },
+        { "type": "number", "id": "ship_min", "label": "Enviado: desde (días)", "default": 2 },
+        { "type": "number", "id": "ship_max", "label": "Enviado: hasta (días)", "default": 4 },
+        { "type": "number", "id": "deliver_min", "label": "Entregado: desde (días)", "default": 10 },
+        { "type": "number", "id": "deliver_max", "label": "Entregado: hasta (días)", "default": 15 },
+        { "type": "text", "id": "label_1", "label": "Paso 1", "default": "Pedido" },
+        { "type": "text", "id": "label_2", "label": "Paso 2", "default": "Enviado" },
+        { "type": "text", "id": "label_3", "label": "Paso 3", "default": "Entregado" }
+      ]
+    },
     {
       "type": "cupon",
       "name": "Cupón primer pedido",

@@ -11,11 +11,16 @@
         "cupon": {
           "type": "cupon",
           "settings": {}
+        },
+        "entrega": {
+          "type": "entrega",
+          "settings": {}
         }
       },
       "block_order": [
         "cupon",
-        "oferta"
+        "oferta",
+        "entrega"
       ]
     },
     "recomendados": {
