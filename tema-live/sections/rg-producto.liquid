@@ -507,28 +507,7 @@
           <span class="rgp-stock" data-rgp-stock {% unless current.available %}data-off{% endunless %}><i aria-hidden="true"></i><span data-rgp-stock-label>{% if current.available %}{{ s.available_text }}{% else %}Agotado{% endif %}</span></span>
         </div>
 
-        {%- if eta -%}
-          {%- assign es = eta.settings -%}
-          <div class="rgp-eta" data-rgp-eta data-cutoff="{{ es.cutoff }}" data-ship-min="{{ es.ship_min }}" data-ship-max="{{ es.ship_max }}" data-del-min="{{ es.deliver_min }}" data-del-max="{{ es.deliver_max }}" {{ eta.shopify_attributes }}>
-            <p class="rgp-eta__head" data-rgp-eta-head>{{ es.title }}</p>
-            <ol class="rgp-eta__steps">
-              <li class="rgp-eta__step" data-on>
-                <span class="rgp-eta__ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6a3 3 0 016 0v2"/></svg></span>
-                <b>{{ es.label_1 }}</b><span data-rgp-eta-d1>Hoy</span>
-              </li>
-              <li class="rgp-eta__line" aria-hidden="true"><i></i></li>
-              <li class="rgp-eta__step">
-                <span class="rgp-eta__ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg></span>
-                <b>{{ es.label_2 }}</b><span data-rgp-eta-d2>{{ es.ship_min }}–{{ es.ship_max }} días</span>
-              </li>
-              <li class="rgp-eta__line" aria-hidden="true"><i></i></li>
-              <li class="rgp-eta__step">
-                <span class="rgp-eta__ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/></svg></span>
-                <b>{{ es.label_3 }}</b><span data-rgp-eta-d3>{{ es.deliver_min }}–{{ es.deliver_max }} días</span>
-              </li>
-            </ol>
-          </div>
-        {%- endif -%}
+        {%- if eta -%}{%- render 'rg-entrega', eta: eta -%}{%- endif -%}
 
         {%- assign form_id = 'rgp-form-' | append: sid -%}
         {%- form 'product', product, id: form_id, class: 'rgp-form', novalidate: 'novalidate' -%}
