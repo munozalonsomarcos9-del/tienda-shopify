@@ -611,15 +611,17 @@
           {%- if s.details_text != blank -%}<p>{{ s.details_text }}</p>{%- endif -%}
         </div>
         <div class="rgp-acc">
+          {%- assign acc_n = 0 -%}
           {%- for part in desc_parts offset: 1 -%}
             {%- assign bits = part | split: '</h3>' -%}
             {%- assign heading = bits.first | strip_html | strip -%}
             {%- assign heading_l = heading | downcase -%}
             {%- if heading_l contains 'extras' and extras_cards contains 'data-rgp-extra' -%}{%- continue -%}{%- endif -%}
+            {%- assign acc_n = acc_n | plus: 1 -%}
             {%- assign body = part | remove_first: bits.first | remove_first: '</h3>' -%}
-            <details {% if forloop.first and s.open_first %}open{% endif %}>
+            <details {% if acc_n == 1 and s.open_first %}open{% endif %}>
               <summary>
-                <span class="rgp-acc__n">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+                <span class="rgp-acc__n">{{ acc_n | prepend: '0' | slice: -2, 2 }}</span>
                 <span class="rgp-acc__t">{{ heading }}</span>
                 <span class="rgp-acc__i" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>
               </summary>
