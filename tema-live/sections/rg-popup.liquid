@@ -58,43 +58,19 @@
   .rgpop__copy{flex:0 0 auto;min-height:42px;padding:0 18px;border:0;border-radius:999px;background:color-mix(in srgb, var(--ink) 10%, transparent);color:var(--ink);font:600 14px/1 "Barlow",sans-serif;cursor:pointer}
   .rgpop__done{text-align:center}
   .rgpop__done .rgpop__title{text-align:center}
-  /* Cupón fijo arriba a la derecha (cuando se cierra la ventana) */
+  /* Recordatorio pequeño arriba a la derecha (cuando se cierra la ventana) */
   .rgcup{--card:{{ s.color_card }};--ink:{{ s.color_text }};--kerb:{{ s.color_kerb }};
-    position:fixed;right:16px;top:var(--rgcup-top,16px);z-index:2147482000;width:min(330px,calc(100vw - 32px));
-    font-family:"Barlow","Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:var(--ink);
-    opacity:0;visibility:hidden;transform:translateX(24px);transition:opacity .35s ease,transform .45s cubic-bezier(.16,1,.3,1),visibility 0s linear .35s,top .2s ease}
-  .rgcup *{box-sizing:border-box}
+    position:fixed;right:14px;top:var(--rgcup-top,14px);z-index:2147482000;
+    display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:0 14px 0 12px;border:0;border-radius:999px;
+    background:var(--card);color:var(--ink);box-shadow:0 10px 26px -10px rgba(0,0,0,.6),0 0 0 1px color-mix(in srgb, var(--ink) 10%, transparent);
+    font:700 13px/1 "Barlow","Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;white-space:nowrap;cursor:pointer;
+    opacity:0;visibility:hidden;transform:translateX(16px);transition:opacity .35s ease,transform .45s cubic-bezier(.16,1,.3,1),visibility 0s linear .35s,top .2s ease}
   .rgcup[data-show]{opacity:1;visibility:visible;transform:none;transition:opacity .35s ease,transform .45s cubic-bezier(.16,1,.3,1),top .2s ease}
-  .rgcup__card{position:relative;display:flex;gap:12px;align-items:flex-start;padding:14px 38px 14px 14px;border-radius:8px;background:var(--card);
-    border:1px solid color-mix(in srgb, var(--ink) 12%, transparent);box-shadow:0 18px 40px -18px rgba(0,0,0,.55)}
-  .rgcup__ico{flex:0 0 auto;margin-top:3px;color:var(--ink)}
-  .rgcup p{margin:0}
-  .rgcup__body{flex:1;display:grid;gap:5px;min-width:0}
-  .rgcup__t span{display:inline;padding:3px 8px;border-radius:3px;background:var(--ink);color:var(--card);font-weight:800;font-size:14px;line-height:1.55;
-    -webkit-box-decoration-break:clone;box-decoration-break:clone}
-  .rgcup__x{font-size:12.5px;line-height:1.4;color:color-mix(in srgb, var(--ink) 70%, transparent)}
-  .rgcup__c{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-family:"Chakra Petch",Menlo,monospace;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:color-mix(in srgb, var(--ink) 65%, transparent)}
-  .rgcup__c b{color:var(--ink);font-size:13px;letter-spacing:.1em}
-  .rgcup__copy{display:inline-flex;align-items:center;gap:5px;min-height:30px;padding:0 9px;border-radius:999px;border:1px solid color-mix(in srgb, var(--ink) 25%, transparent);background:transparent;color:var(--ink);
-    font:600 11px/1 "Chakra Petch",Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
-  .rgcup__copy:hover{border-color:var(--kerb);color:var(--kerb)}
-  .rgcup__min{position:absolute;top:6px;right:6px;width:30px;height:30px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:var(--ink);cursor:pointer;opacity:.6}
-  .rgcup__min:hover{opacity:1;background:color-mix(in srgb, var(--ink) 8%, transparent)}
-  /* Minimizado: solo una etiqueta pequeña */
-  .rgcup__chip{display:none;margin-left:auto;align-items:center;gap:7px;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:var(--card);color:var(--ink);
-    box-shadow:0 12px 30px -12px rgba(0,0,0,.6);font:800 14px/1 "Barlow",sans-serif;cursor:pointer}
-  .rgcup__chip b{color:var(--kerb)}
-  .rgcup[data-mini]{width:auto}
-  .rgcup[data-mini] .rgcup__card{display:none}
-  .rgcup[data-mini] .rgcup__chip{display:inline-flex}
-  .rgcup button:focus-visible{outline:2px solid #6AA8FF;outline-offset:2px}
-  @media (max-width:749px){
-    .rgcup{right:10px;width:min(300px,calc(100vw - 20px))}
-    .rgcup__card{padding:11px 34px 11px 11px;gap:10px}
-    .rgcup__t span{font-size:13px}
-    .rgcup__c{letter-spacing:.08em}
-    .rgcup__c b{font-size:12.5px;letter-spacing:.06em}
-  }
+  .rgcup b{color:var(--kerb);font-weight:800}
+  .rgcup svg{flex:0 0 auto;color:var(--kerb)}
+  .rgcup:hover{transform:translateY(-1px)}
+  .rgcup:focus-visible{outline:2px solid #6AA8FF;outline-offset:2px}
+  @media (max-width:749px){.rgcup{right:10px;min-height:32px;padding:0 12px 0 10px;font-size:12px}}
   @media (prefers-reduced-motion:reduce){.rgpop,.rgpop__card,.rgcup{transition:none}}
 </style>
 
@@ -148,28 +124,10 @@
 </div>
 
 {%- if s.float_enabled -%}
-<aside class="rgcup" id="rgcup-{{ sid }}" aria-label="Descuento en tu primer pedido" hidden>
-  <div class="rgcup__card">
-    <svg class="rgcup__ico" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
-    <div class="rgcup__body">
-      <p class="rgcup__t"><span>{{ s.float_title }}</span></p>
-      {%- if s.float_text != blank -%}<p class="rgcup__x">{{ s.float_text }}</p>{%- endif -%}
-      <p class="rgcup__c">Código: <b class="notranslate" translate="no">{{ s.code }}</b>
-        <button type="button" class="rgcup__copy" data-rgcup-copy aria-label="Copiar el código {{ s.code | escape }}">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>
-          <span data-rgcup-label>Copiar</span>
-        </button>
-      </p>
-    </div>
-    <button type="button" class="rgcup__min" data-rgcup-min aria-label="Minimizar">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
-    </button>
-  </div>
-  <button type="button" class="rgcup__chip" data-rgcup-chip aria-label="Ver el código de descuento">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
-    <span><b>−10 %</b> primer pedido</span>
-  </button>
-</aside>
+<button type="button" class="rgcup" id="rgcup-{{ sid }}" aria-haspopup="dialog" aria-controls="rgpop-{{ sid }}" hidden>
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+  <span>{{ s.float_label }}</span>
+</button>
 {%- endif -%}
 
 <script>
@@ -196,33 +154,27 @@
     const first = touch ? pop.querySelector('.rgpop__card') : pop.querySelector(step === 'form' ? 'input[type=email]' : '[data-rgpop-copy]');
     setTimeout(() => first && first.focus({ preventScroll: true }), 60);
   };
-  /* Cupón fijo arriba a la derecha: aparece al cerrar la ventana y se queda en todas las páginas */
+  /* Recordatorio pequeño arriba a la derecha: aparece al cerrar la ventana y se queda en todas las páginas.
+     Al pulsarlo se vuelve a abrir la ventana (o el código, si ya se apuntó). */
   const cup = document.getElementById('rgcup-{{ sid }}');
-  const MINI = 'rg-cup-mini';
   let placeCup = () => {};
   if (cup) {
     document.body.appendChild(cup);
-    /* Se coloca justo debajo de la cabecera para no tapar el carrito ni el buscador */
+    /* Justo debajo de la cabecera, para no tapar el menú, el buscador ni el carrito */
     const header = document.querySelector('#header-component, header-component, .header-section, header');
     placeCup = () => {
       const r = header ? header.getBoundingClientRect() : null;
-      const top = r && r.height ? Math.max(0, r.bottom) + 12 : 16;
+      const top = r && r.height ? Math.max(0, r.bottom) + 10 : 14;
       cup.style.setProperty('--rgcup-top', top + 'px');
     };
     let raf = 0;
     addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; placeCup(); }); }, { passive: true });
     addEventListener('resize', placeCup);
-    cup.querySelector('[data-rgcup-min]').addEventListener('click', () => { cup.setAttribute('data-mini', ''); set(MINI, '1'); cup.querySelector('[data-rgcup-chip]').focus(); });
-    cup.querySelector('[data-rgcup-chip]').addEventListener('click', () => { cup.removeAttribute('data-mini'); set(MINI, ''); cup.querySelector('[data-rgcup-copy]').focus(); });
-    cup.querySelector('[data-rgcup-copy]').addEventListener('click', async () => {
-      const lbl = cup.querySelector('[data-rgcup-label]');
-      await copyCode(); lbl.textContent = '¡Copiado!'; setTimeout(() => { lbl.textContent = 'Copiar'; }, 1800);
-    });
+    cup.addEventListener('click', () => show(get(SENT) ? 'done' : 'form'));
   }
   const showCup = () => {
     if (!cup) return;
     placeCup(); cup.hidden = false;
-    if (get(MINI) === '1') cup.setAttribute('data-mini', '');
     requestAnimationFrame(() => requestAnimationFrame(() => cup.setAttribute('data-show', '')));
   };
   const hideCup = () => { if (cup) cup.removeAttribute('data-show'); };
@@ -313,11 +265,10 @@
     { "type": "text", "id": "done_text", "label": "Texto", "default": "Aquí tienes tu 10 % de descuento. Si pulsas el botón, se aplicará solo al pagar." },
     { "type": "text", "id": "done_button", "label": "Botón", "default": "Usar mi descuento" },
     { "type": "text", "id": "done_link", "label": "A dónde lleva el botón", "default": "/collections/todos-los-volantes" },
-    { "type": "header", "content": "Cupón fijo arriba a la derecha" },
-    { "type": "paragraph", "content": "Aparece cuando el cliente cierra la ventana y se queda visible en todas las páginas." },
-    { "type": "checkbox", "id": "float_enabled", "label": "Mostrar el cupón fijo", "default": true },
-    { "type": "text", "id": "float_title", "label": "Título", "default": "¡Consigue un 10 % en tu primer volante!" },
-    { "type": "text", "id": "float_text", "label": "Texto", "default": "Usa este código al pagar. No acumulable con los packs." },
+    { "type": "header", "content": "Recordatorio pequeño arriba a la derecha" },
+    { "type": "paragraph", "content": "Aparece cuando el cliente cierra la ventana y se queda visible en todas las páginas. Al pulsarlo se vuelve a abrir la ventana." },
+    { "type": "checkbox", "id": "float_enabled", "label": "Mostrar el recordatorio", "default": true },
+    { "type": "inline_richtext", "id": "float_label", "label": "Texto", "info": "Lo que pongas en negrita sale en rojo.", "default": "<b>−10 %</b> en tu primer pedido" },
     { "type": "header", "content": "Colores" },
     { "type": "color", "id": "color_card", "label": "Fondo de la ventana", "default": "#FFFFFF" },
     { "type": "color", "id": "color_text", "label": "Texto y bordes", "default": "#131517" },

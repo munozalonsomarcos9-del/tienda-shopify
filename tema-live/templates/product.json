@@ -7,14 +7,9 @@
         "oferta": {
           "type": "oferta",
           "settings": {}
-        },
-        "cupon": {
-          "type": "cupon",
-          "settings": {}
         }
       },
       "block_order": [
-        "cupon",
         "oferta"
       ]
     },
