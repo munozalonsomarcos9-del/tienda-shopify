@@ -1,0 +1,225 @@
+{%- comment -%}
+  RacingGrip · Ventana de bienvenida con descuento para el primer pedido.
+  Aparece a los pocos segundos (o al ir a salir de la página en ordenador), una sola vez cada X días.
+  Al apuntarse, el correo entra en la lista de clientes de Shopify y se muestra el código de descuento.
+{%- endcomment -%}
+{%- assign sid = section.id -%}
+{%- assign s = section.settings -%}
+{%- if s.enabled and template.name != 'cart' and template.name != 'password' -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,700;1,800;1,900&family=Barlow:wght@400;500;600;700&family=Chakra+Petch:wght@500;600&display=swap">
+<style>
+  .rgpop{--card:{{ s.color_card }};--ink:{{ s.color_text }};--btn:{{ s.color_button }};--btn-ink:{{ s.color_button_text }};--kerb:{{ s.color_kerb }};--focus:#6AA8FF;
+    position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:16px;
+    font-family:"Barlow","Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:var(--ink);
+    visibility:hidden;opacity:0;transition:opacity .35s ease,visibility 0s linear .35s}
+  .rgpop *{box-sizing:border-box}
+  .rgpop[data-open]{visibility:visible;opacity:1;transition:opacity .35s ease}
+  .rgpop__shade{position:absolute;inset:0;background:rgba(10,11,12,.55);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+  .rgpop__card{position:relative;width:100%;max-width:460px;max-height:calc(100dvh - 32px);overflow:auto;background:var(--card);border-radius:8px;
+    padding:clamp(28px,6vw,40px) clamp(22px,6vw,40px) clamp(26px,6vw,34px);box-shadow:0 30px 80px -20px rgba(0,0,0,.55);
+    transform:translateY(18px) scale(.97);transition:transform .45s cubic-bezier(.16,1,.3,1)}
+  .rgpop[data-open] .rgpop__card{transform:none}
+  .rgpop__card:focus{outline:none}
+  .rgpop__card::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;border-radius:8px 8px 0 0;
+    background:repeating-linear-gradient(115deg,var(--kerb) 0 14px,#fff 14px 28px)}
+  .rgpop__x{position:absolute;top:14px;right:14px;width:36px;height:36px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:var(--ink);cursor:pointer}
+  .rgpop__x:hover{background:color-mix(in srgb, var(--ink) 8%, transparent)}
+  .rgpop__logo{margin:14px 0 22px;text-align:center;font-family:"Saira Condensed","Arial Narrow",Impact,sans-serif;font-style:italic;font-weight:900;
+    font-size:clamp(40px,11vw,54px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase;color:var(--ink)}
+  .rgpop__logo em{font-style:inherit;color:var(--kerb)}
+  .rgpop__title{margin:0 0 8px;font-size:clamp(25px,6.6vw,31px);font-weight:700;line-height:1.12;letter-spacing:-.015em;color:var(--ink)}
+  .rgpop__title b{color:var(--kerb)}
+  .rgpop__sub{margin:0 0 22px;font-size:15px;line-height:1.45;color:color-mix(in srgb, var(--ink) 72%, transparent)}
+  .rgpop__f{display:grid;gap:14px}
+  .rgpop__in{position:relative}
+  .rgpop__in input{width:100%;height:54px;padding:0 22px;border:1.5px solid var(--ink);border-radius:999px;background:transparent;color:var(--ink);
+    font:500 16px/1 "Barlow",sans-serif;outline:none;transition:box-shadow .15s}
+  .rgpop__in input::placeholder{color:color-mix(in srgb, var(--ink) 75%, transparent)}
+  .rgpop__in input:focus{box-shadow:0 0 0 4px var(--focus)}
+  .rgpop__ok{display:flex;gap:12px;align-items:flex-start;margin:6px 0 4px;font-size:13.5px;line-height:1.4;color:var(--ink);cursor:pointer}
+  .rgpop__ok input{flex:0 0 auto;appearance:none;-webkit-appearance:none;width:24px;height:24px;margin:0;border:1.5px solid var(--ink);border-radius:4px;background:transparent;cursor:pointer;display:grid;place-items:center}
+  .rgpop__ok input:checked{background:var(--btn);border-color:var(--btn)}
+  .rgpop__ok input:checked::after{content:"";width:6px;height:11px;border:solid var(--btn-ink);border-width:0 2.5px 2.5px 0;transform:translateY(-1px) rotate(45deg)}
+  .rgpop__ok input:focus-visible{box-shadow:0 0 0 4px var(--focus)}
+  .rgpop__ok a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+  .rgpop__ok[data-warn]{color:var(--kerb)}
+  .rgpop__ok[data-warn] input{border-color:var(--kerb)}
+  .rgpop__btn{justify-self:center;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:210px;min-height:54px;margin-top:8px;padding:14px 34px;border:0;border-radius:999px;
+    background:var(--btn);color:var(--btn-ink);font:600 18px/1 "Barlow",sans-serif;letter-spacing:-.005em;text-decoration:none;cursor:pointer;transition:transform .15s,filter .15s}
+  .rgpop__btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
+  .rgpop__btn:focus-visible{outline:none;box-shadow:0 0 0 4px var(--focus)}
+  .rgpop__err{margin:0;padding:10px 14px;border-radius:10px;background:color-mix(in srgb, var(--kerb) 12%, transparent);color:var(--kerb);font-size:14px}
+  .rgpop__fine{margin:14px 0 0;text-align:center;font-size:12px;color:color-mix(in srgb, var(--ink) 55%, transparent)}
+  /* Estado: ya apuntado */
+  .rgpop__code{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 16px;padding:8px 8px 8px 22px;border:1.5px dashed var(--ink);border-radius:999px}
+  .rgpop__code b{font-family:"Chakra Petch",Menlo,monospace;font-size:22px;font-weight:600;letter-spacing:.12em}
+  .rgpop__copy{flex:0 0 auto;min-height:42px;padding:0 18px;border:0;border-radius:999px;background:color-mix(in srgb, var(--ink) 10%, transparent);color:var(--ink);font:600 14px/1 "Barlow",sans-serif;cursor:pointer}
+  .rgpop__done{text-align:center}
+  .rgpop__done .rgpop__title{text-align:center}
+  @media (prefers-reduced-motion:reduce){.rgpop,.rgpop__card{transition:none}}
+</style>
+
+<div class="rgpop" id="rgpop-{{ sid }}" role="dialog" aria-modal="true" aria-labelledby="rgpop-t-{{ sid }}" aria-hidden="true"
+  data-delay="{{ s.delay }}" data-days="{{ s.days }}" data-code="{{ s.code | escape }}" data-design="{{ request.design_mode }}"
+  {% if customer and customer.accepts_marketing %}data-subscribed{% endif %}>
+  <div class="rgpop__shade" data-rgpop-close></div>
+  <div class="rgpop__card" tabindex="-1">
+    <button type="button" class="rgpop__x" data-rgpop-close aria-label="Cerrar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <p class="rgpop__logo notranslate" translate="no" aria-hidden="true">Racing<em>Grip</em></p>
+
+    <div data-rgpop-step="form">
+      <h2 class="rgpop__title" id="rgpop-t-{{ sid }}">{{ s.title }}</h2>
+      {%- if s.text != blank -%}<p class="rgpop__sub">{{ s.text }}</p>{%- endif -%}
+      {%- form 'customer', id: 'rgpop-form', class: 'rgpop__f', novalidate: 'novalidate' -%}
+        <input type="hidden" name="contact[tags]" value="newsletter, popup-bienvenida">
+        {%- if form.errors -%}
+          <p class="rgpop__err" role="alert" data-rgpop-error>
+            {%- if form.errors.messages['email'] contains 'taken' or form.errors.messages['email'] contains 'ya' -%}Este correo ya está apuntado. ¡Tu código te espera abajo!{%- else -%}Revisa el correo electrónico e inténtalo de nuevo.{%- endif -%}
+          </p>
+        {%- endif -%}
+        <div class="rgpop__in">
+          <label class="rgpop__vh" for="rgpop-email-{{ sid }}" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Email</label>
+          <input id="rgpop-email-{{ sid }}" type="email" name="contact[email]" placeholder="Email" autocomplete="email" required>
+        </div>
+        <div class="rgpop__in">
+          <label for="rgpop-name-{{ sid }}" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Nombre</label>
+          <input id="rgpop-name-{{ sid }}" type="text" name="contact[first_name]" placeholder="Nombre" autocomplete="given-name">
+        </div>
+        <label class="rgpop__ok" data-rgpop-consent>
+          <input type="checkbox" required>
+          <span>Acepto recibir contenido de <span class="notranslate" translate="no">RacingGrip</span> vía email y he leído y acepto la <a href="{{ routes.root_url | append: 'policies/privacy-policy' | replace: '//', '/' }}" target="_blank" rel="noopener">Política de Privacidad</a></span>
+        </label>
+        <button type="submit" class="rgpop__btn">{{ s.button }}</button>
+      {%- endform -%}
+      {%- if s.fine != blank -%}<p class="rgpop__fine">{{ s.fine }}</p>{%- endif -%}
+    </div>
+
+    <div class="rgpop__done" data-rgpop-step="done" hidden>
+      <h2 class="rgpop__title">{{ s.done_title }}</h2>
+      <p class="rgpop__sub">{{ s.done_text }}</p>
+      <div class="rgpop__code">
+        <b>{{ s.code }}</b>
+        <button type="button" class="rgpop__copy" data-rgpop-copy>Copiar</button>
+      </div>
+      <a class="rgpop__btn" href="{{ routes.root_url | append: 'discount/' | replace: '//', '/' }}{{ s.code | url_encode }}?redirect={{ s.done_link | default: routes.all_products_collection_url | escape }}">{{ s.done_button }}</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const pop = document.getElementById('rgpop-{{ sid }}');
+  if (!pop || pop.dataset.ready) return; pop.dataset.ready = '1';
+  /* Se mueve al final de la página para que ninguna cabecera fija lo tape */
+  document.body.appendChild(pop);
+  const KEY = 'rg-pop', SENT = 'rg-pop-sent';
+  const get = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const set = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+  const form = pop.querySelector('form');
+  const consent = pop.querySelector('[data-rgpop-consent]');
+  const steps = { form: pop.querySelector('[data-rgpop-step="form"]'), done: pop.querySelector('[data-rgpop-step="done"]') };
+  let lastFocus = null, timer = null;
+
+  const show = step => {
+    steps.form.hidden = step !== 'form'; steps.done.hidden = step !== 'done';
+    lastFocus = document.activeElement;
+    pop.setAttribute('data-open', ''); pop.setAttribute('aria-hidden', 'false');
+    /* En móvil no se enfoca el campo, para no abrir el teclado de golpe */
+    const touch = matchMedia('(pointer:coarse)').matches;
+    const first = touch ? pop.querySelector('.rgpop__card') : pop.querySelector(step === 'form' ? 'input[type=email]' : '[data-rgpop-copy]');
+    setTimeout(() => first && first.focus({ preventScroll: true }), 60);
+  };
+  const hide = () => {
+    pop.removeAttribute('data-open'); pop.setAttribute('aria-hidden', 'true');
+    if (!get(SENT)) set(KEY, String(Date.now()));
+    if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+  };
+  pop.querySelectorAll('[data-rgpop-close]').forEach(b => b.addEventListener('click', hide));
+  pop.addEventListener('keydown', e => {
+    if (e.key === 'Escape') hide();
+    if (e.key !== 'Tab') return;
+    const f = [...pop.querySelectorAll('button, a[href], input')].filter(x => x.offsetParent);
+    if (!f.length) return;
+    if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+  });
+
+  /* Casilla obligatoria (protección de datos) */
+  form.addEventListener('submit', e => {
+    const box = consent.querySelector('input'), email = form.querySelector('input[type=email]');
+    if (!email.value || !email.checkValidity()) { e.preventDefault(); email.focus(); email.reportValidity(); return; }
+    if (!box.checked) { e.preventDefault(); consent.setAttribute('data-warn', ''); box.focus(); return; }
+    set(SENT, '1');
+  });
+  consent.querySelector('input').addEventListener('change', () => consent.removeAttribute('data-warn'));
+
+  pop.querySelector('[data-rgpop-copy]').addEventListener('click', async ev => {
+    const b = ev.currentTarget, code = pop.dataset.code;
+    try { await navigator.clipboard.writeText(code); } catch (e) {
+      const t = document.createElement('textarea'); t.value = code; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); } catch (_) {} t.remove();
+    }
+    b.textContent = '¡Copiado!'; setTimeout(() => { b.textContent = 'Copiar'; }, 1800);
+  });
+
+  /* En el editor de temas: se enseña al seleccionar la sección */
+  if (pop.dataset.design === 'true') {
+    document.addEventListener('shopify:section:select', e => { if (e.detail.sectionId === '{{ sid }}') show('form'); });
+    document.addEventListener('shopify:section:deselect', e => { if (e.detail.sectionId === '{{ sid }}') hide(); });
+    return;
+  }
+
+  /* Vuelta tras apuntarse: se enseña el código */
+  const posted = /[?&]customer_posted=true/.test(location.search);
+  const hasError = !!pop.querySelector('[data-rgpop-error]');
+  if (get(SENT) && (posted || hasError)) { show('done'); return; }
+  if (hasError) { show('form'); return; }
+  if (pop.hasAttribute('data-subscribed') || get(SENT)) return;
+
+  const days = +pop.dataset.days || 7, last = +get(KEY) || 0;
+  if (Date.now() - last < days * 864e5) return;
+
+  const open = () => { if (!pop.hasAttribute('data-open') && !get(SENT)) { clearTimeout(timer); show('form'); set(KEY, String(Date.now())); } };
+  timer = setTimeout(open, (+pop.dataset.delay || 6) * 1000);
+  /* En ordenador, también al llevar el ratón hacia fuera de la página */
+  if (matchMedia('(pointer:fine)').matches) {
+    document.addEventListener('mouseout', e => { if (!e.relatedTarget && e.clientY <= 0) open(); });
+  }
+})();
+</script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "RG · Ventana de descuento",
+  "tag": "div",
+  "class": "rg-popup-section",
+  "enabled_on": { "groups": ["header"] },
+  "settings": [
+    { "type": "checkbox", "id": "enabled", "label": "Mostrar la ventana", "default": true },
+    { "type": "range", "id": "delay", "label": "Segundos hasta que aparece", "min": 2, "max": 30, "step": 1, "unit": "s", "default": 6 },
+    { "type": "range", "id": "days", "label": "Días hasta volver a mostrarla si la cierran", "min": 1, "max": 30, "step": 1, "default": 7 },
+    { "type": "header", "content": "Formulario" },
+    { "type": "text", "id": "title", "label": "Título", "default": "Consigue un −10 % en tu primer pedido" },
+    { "type": "text", "id": "text", "label": "Texto", "default": "Apúntate y recibe tu código al momento, además de novedades y ofertas exclusivas." },
+    { "type": "text", "id": "button", "label": "Botón", "default": "Únete ahora" },
+    { "type": "text", "id": "fine", "label": "Letra pequeña", "default": "Válido en volantes para tu primera compra. No acumulable con los packs." },
+    { "type": "header", "content": "Después de apuntarse" },
+    { "type": "text", "id": "code", "label": "Código de descuento", "info": "Debe existir en Descuentos de Shopify.", "default": "RACINGGRIP10" },
+    { "type": "text", "id": "done_title", "label": "Título", "default": "¡Bienvenido al equipo!" },
+    { "type": "text", "id": "done_text", "label": "Texto", "default": "Aquí tienes tu 10 % de descuento. Si pulsas el botón, se aplicará solo al pagar." },
+    { "type": "text", "id": "done_button", "label": "Botón", "default": "Usar mi descuento" },
+    { "type": "text", "id": "done_link", "label": "A dónde lleva el botón", "default": "/collections/todos-los-volantes" },
+    { "type": "header", "content": "Colores" },
+    { "type": "color", "id": "color_card", "label": "Fondo de la ventana", "default": "#FFFFFF" },
+    { "type": "color", "id": "color_text", "label": "Texto y bordes", "default": "#131517" },
+    { "type": "color", "id": "color_button", "label": "Botón", "default": "#131517" },
+    { "type": "color", "id": "color_button_text", "label": "Texto del botón", "default": "#FFFFFF" },
+    { "type": "color", "id": "color_kerb", "label": "Rojo (bordillo y detalles)", "default": "#D8342A" }
+  ],
+  "presets": [{ "name": "RG · Ventana de descuento" }]
+}
+{% endschema %}

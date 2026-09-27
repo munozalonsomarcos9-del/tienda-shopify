@@ -106,7 +106,7 @@
             <button type="submit">Apuntarme</button>
           </div>
           {%- if form.posted_successfully? -%}
-            <p class="rgf-msg rgf-msg--ok" role="status">¡Gracias! Ya estás en la lista.</p>
+            <p class="rgf-msg rgf-msg--ok" role="status">¡Gracias! Ya estás en la lista.{% if s.news_code != blank %} Tu código para el primer pedido: <b class="notranslate" translate="no">{{ s.news_code }}</b>{% endif %}</p>
           {%- elsif form.errors -%}
             <p class="rgf-msg rgf-msg--err" role="alert">Revisa el correo electrónico e inténtalo de nuevo.</p>
           {%- endif -%}
@@ -142,7 +142,8 @@
     { "type": "link_list", "id": "help_menu", "label": "Menú de ayuda", "default": "footer" },
     { "type": "header", "content": "Boletín" },
     { "type": "text", "id": "news_title", "label": "Título", "default": "Novedades y ofertas" },
-    { "type": "text", "id": "news_text", "label": "Texto", "default": "Apúntate y sé el primero en enterarte de nuevos modelos y promociones." },
+    { "type": "text", "id": "news_text", "label": "Texto", "default": "Apúntate, consigue un 10 % de descuento en tu primer pedido y entérate antes que nadie de nuevos modelos y ofertas." },
+    { "type": "text", "id": "news_code", "label": "Código de descuento que se muestra al apuntarse", "default": "RACINGGRIP10" },
     { "type": "header", "content": "Parte inferior" },
     { "type": "text", "id": "pay_types", "label": "Formas de pago (separadas por comas)", "default": "visa, master, apple_pay, google_pay, paypal" },
     { "type": "textarea", "id": "disclaimer", "label": "Aviso de marcas", "default": "BMW, Mercedes-Benz, AMG, Porsche y Volkswagen son marcas registradas de sus respectivos titulares. RacingGrip no está afiliada ni autorizada por ellos; las marcas se mencionan solo para indicar la compatibilidad." },

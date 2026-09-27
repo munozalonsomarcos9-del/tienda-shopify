@@ -138,10 +138,15 @@
         "enable_transparent_header_collection": false,
         "collection_color_scheme": "default"
       }
+    },
+    "rg_popup": {
+      "type": "rg-popup",
+      "settings": {}
     }
   },
   "order": [
     "rg_anuncio",
-    "header_section"
+    "header_section",
+    "rg_popup"
   ]
 }
