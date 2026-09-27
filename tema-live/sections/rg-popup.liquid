@@ -219,8 +219,12 @@
   /* En el editor de temas: se enseña al seleccionar la sección */
   /* ¿Viene de otra página de la tienda? Entonces no es «entrar»: la ventana no sale, solo el recordatorio pequeño */
   const internal = (() => { try { return !!document.referrer && new URL(document.referrer).host === location.host; } catch (e) { return false; } })();
-  /* «Entrar» = llegar desde fuera de la tienda, o abrir el tema desde Shopify (editor o vista previa) */
-  const entering = !internal || /[?&](preview_theme_id|oseid|_fd)=/.test(location.search);
+  /* «Entrar» = llegar desde fuera de la tienda (Shopify, Google, redes, escribiendo la dirección…).
+     Si viene de otra página de la tienda y en esta pestaña ya se había cargado alguna, es navegar dentro: no sale. */
+  const PAGE = 'rg-pop-page';
+  const hadPage = (() => { try { return !!sessionStorage.getItem(PAGE); } catch (e) { return true; } })();
+  try { sessionStorage.setItem(PAGE, '1'); } catch (e) {}
+  const entering = !(internal && hadPage);
 
   if (pop.dataset.design === 'true') {
     if (entering) setTimeout(() => show('form'), 600); else showCup();
