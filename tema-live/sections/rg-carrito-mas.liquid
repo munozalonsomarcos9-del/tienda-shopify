@@ -1,0 +1,359 @@
+{%- comment -%}
+  RacingGrip · Sugerencias dentro del carrito para que el cliente compre más:
+  1. Barra de packs (−10 % con 2 volantes, −15 % con 3 o más).
+  2. Extras que encajan con cada volante del carrito y que aún no ha añadido.
+  3. Otros volantes destacados (primero de la misma marca).
+  Todo se añade con un clic y el carrito se actualiza al momento.
+{%- endcomment -%}
+{%- liquid
+  assign sid = section.id
+  assign s = section.settings
+  assign wheels_qty = 0
+  assign in_cart = ','
+  assign added = ','
+  assign first_brand = ''
+  for item in cart.items
+    assign h = item.product.handle
+    if h contains 'extra-'
+      assign added = added | append: item.properties['Para'] | append: '|' | append: item.variant.id | append: ','
+    else
+      assign wheels_qty = wheels_qty | plus: item.quantity
+      assign in_cart = in_cart | append: h | append: ','
+      if first_brand == ''
+        for t in item.product.tags
+          if t == 'BMW' or t == 'Mercedes-Benz' or t == 'Volkswagen' or t == 'Porsche'
+            assign first_brand = t
+          endif
+        endfor
+      endif
+    endif
+  endfor
+-%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,700;1,800;1,900&family=Barlow:wght@400;500;600;700;800&family=Chakra+Petch:wght@500;600&display=swap">
+<style>
+  #rgc-{{ sid }}{--bg:{{ s.color_bg }};--card:{{ s.color_card }};--ink:{{ s.color_text }};--muted:color-mix(in srgb, var(--ink) 62%, transparent);--line:color-mix(in srgb, var(--ink) 12%, transparent);
+    --accent:{{ s.color_accent }};--kerb:{{ s.color_kerb }};--go:{{ s.color_button }};--go-ink:{{ s.color_button_text }};
+    background:var(--bg);color:var(--ink);font-family:"Barlow","Helvetica Neue",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;
+    padding:{{ s.pad_top }}px clamp(16px,3vw,40px) {{ s.pad_bottom }}px}
+  #rgc-{{ sid }} *{box-sizing:border-box}
+  #rgc-{{ sid }} .rgc-in{max-width:{{ s.max_width }}px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(28px,4vw,44px)}
+  #rgc-{{ sid }} .rgc-in > *{min-width:0}
+  #rgc-{{ sid }} .rgc-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:0 0 16px}
+  #rgc-{{ sid }} .rgc-h h2{margin:0;font-family:"Saira Condensed","Arial Narrow",Impact,sans-serif;font-style:italic;font-weight:900;font-size:clamp(26px,3.4vw,36px);line-height:1;text-transform:uppercase;letter-spacing:-.005em}
+  #rgc-{{ sid }} .rgc-h p{margin:0;color:var(--muted);font-size:14px}
+  #rgc-{{ sid }} .rgc-kicker{display:flex;align-items:center;gap:10px;margin:0 0 8px;font-family:"Chakra Petch",Menlo,monospace;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--kerb)}
+  #rgc-{{ sid }} .rgc-kicker::before{content:"";width:28px;height:5px;border-radius:2px;background:repeating-linear-gradient(115deg,var(--kerb) 0 6px,#fff 6px 12px)}
+  #rgc-{{ sid }} button{font:inherit;cursor:pointer}
+  #rgc-{{ sid }} button:focus-visible,#rgc-{{ sid }} a:focus-visible,#rgc-{{ sid }} select:focus-visible{outline:2px solid #6AA8FF;outline-offset:2px}
+
+  /* 1 · Barra de packs */
+  #rgc-{{ sid }} .rgc-pack{position:relative;padding:20px clamp(16px,2.5vw,26px) 22px;border-radius:12px;background:var(--card);border:2px solid var(--kerb);box-shadow:0 0 0 4px color-mix(in srgb, var(--kerb) 12%, transparent)}
+  #rgc-{{ sid }} .rgc-pack__t{display:flex;align-items:center;gap:10px;margin:0 0 4px;font-size:clamp(17px,2vw,20px);font-weight:800;line-height:1.25}
+  #rgc-{{ sid }} .rgc-pack__t svg{flex:0 0 auto;color:var(--kerb)}
+  #rgc-{{ sid }} .rgc-pack__t b{color:var(--kerb)}
+  #rgc-{{ sid }} .rgc-pack__s{margin:0 0 18px;color:var(--muted);font-size:14px}
+  #rgc-{{ sid }} .rgc-bar{position:relative;height:10px;border-radius:999px;background:color-mix(in srgb, var(--ink) 10%, transparent);margin:0 22px 30px 8px}
+  #rgc-{{ sid }} .rgc-bar__fill{position:absolute;inset:0 auto 0 0;border-radius:inherit;background:repeating-linear-gradient(115deg,var(--kerb) 0 12px,color-mix(in srgb, var(--kerb) 75%, #fff) 12px 24px);transition:width .6s cubic-bezier(.16,1,.3,1)}
+  #rgc-{{ sid }} .rgc-bar__m{position:absolute;top:50%;width:26px;height:26px;margin-left:-13px;transform:translateY(-50%);border-radius:50%;display:grid;place-items:center;
+    background:var(--card);border:2px solid color-mix(in srgb, var(--ink) 25%, transparent);font-size:12px;font-weight:800}
+  #rgc-{{ sid }} .rgc-bar__m[data-on]{background:var(--kerb);border-color:var(--kerb);color:#fff}
+  #rgc-{{ sid }} .rgc-bar__m span{position:absolute;top:30px;white-space:nowrap;font-family:"Chakra Petch",Menlo,monospace;font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--muted)}
+  #rgc-{{ sid }} .rgc-bar__m[data-on] span{color:var(--kerb)}
+
+  /* 2 · Extras */
+  #rgc-{{ sid }} .rgc-group + .rgc-group{margin-top:22px}
+  #rgc-{{ sid }} .rgc-group__t{margin:0 0 10px;font-size:14px;color:var(--muted)}
+  #rgc-{{ sid }} .rgc-group__t b{color:var(--ink)}
+  #rgc-{{ sid }} .rgc-extras{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:10px}
+  #rgc-{{ sid }} .rgc-extra{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px;border-radius:10px;background:var(--card);border:1px solid var(--line)}
+  #rgc-{{ sid }} .rgc-extra__ico{display:grid;place-items:center;width:38px;height:38px;border-radius:9px;background:color-mix(in srgb, var(--accent) 22%, transparent);color:var(--ink)}
+  #rgc-{{ sid }} .rgc-extra__t{display:grid;gap:2px;min-width:0}
+  #rgc-{{ sid }} .rgc-extra__t b{font-size:14.5px;line-height:1.25}
+  #rgc-{{ sid }} .rgc-extra__t span{font-family:"Chakra Petch",Menlo,monospace;font-size:13px;font-weight:600;color:var(--kerb)}
+
+  /* Botón añadir */
+  #rgc-{{ sid }} .rgc-add{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:var(--go);color:var(--go-ink);font-weight:700;font-size:14px;white-space:nowrap;transition:filter .15s,transform .15s}
+  #rgc-{{ sid }} .rgc-add:hover{filter:brightness(1.15);transform:translateY(-1px)}
+  #rgc-{{ sid }} .rgc-add[disabled]{opacity:.6;cursor:progress;transform:none}
+  #rgc-{{ sid }} .rgc-add[data-done]{background:#1F9D55;color:#fff}
+
+  /* 3 · Volantes destacados */
+  #rgc-{{ sid }} .rgc-wheels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+  #rgc-{{ sid }} .rgc-wheel{position:relative;display:flex;flex-direction:column;border-radius:12px;background:var(--card);border:1px solid var(--line);overflow:hidden}
+  #rgc-{{ sid }} .rgc-wheel__img{position:relative;display:block;aspect-ratio:1;background:radial-gradient(circle at 50% 45%,#2a2d31,#131517 70%)}
+  #rgc-{{ sid }} .rgc-wheel__img img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:10%;filter:drop-shadow(0 10px 18px rgba(0,0,0,.45))}
+  #rgc-{{ sid }} .rgc-wheel__tag{position:absolute;top:10px;left:10px;z-index:1;padding:5px 9px;border-radius:999px;background:var(--kerb);color:#fff;font-size:11.5px;font-weight:800;letter-spacing:.02em}
+  #rgc-{{ sid }} .rgc-wheel__b{display:flex;flex-direction:column;gap:8px;padding:12px 12px 14px;flex:1}
+  #rgc-{{ sid }} .rgc-wheel__b a{color:inherit;text-decoration:none;font-weight:700;font-size:15px;line-height:1.25}
+  #rgc-{{ sid }} .rgc-wheel__b a:hover{text-decoration:underline}
+  #rgc-{{ sid }} .rgc-wheel__meta{margin:-4px 0 0;font-size:12.5px;color:var(--muted)}
+  #rgc-{{ sid }} .rgc-wheel__p{margin:0;font-family:"Chakra Petch",Menlo,monospace;font-weight:600;font-size:16px}
+  #rgc-{{ sid }} .rgc-wheel select{width:100%;min-height:40px;padding:0 10px;border-radius:8px;border:1px solid color-mix(in srgb, var(--ink) 22%, transparent);background:var(--bg);color:var(--ink);font:500 14px/1 "Barlow",sans-serif}
+  #rgc-{{ sid }} .rgc-wheel .rgc-add{margin-top:auto;width:100%}
+  #rgc-{{ sid }} .rgc-msg{margin:10px 0 0;font-size:13px;color:var(--kerb)}
+
+  @media (max-width:989px){#rgc-{{ sid }} .rgc-wheels{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:520px){
+    #rgc-{{ sid }} .rgc-wheels{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px;padding:0 16px 6px;gap:12px}
+    #rgc-{{ sid }} .rgc-wheel{flex:0 0 72%;scroll-snap-align:start}
+    #rgc-{{ sid }} .rgc-extras{grid-template-columns:1fr}
+  }
+</style>
+
+<div id="rgc-{{ sid }}" data-rgc>
+  <div class="rgc-in">
+
+    {%- comment -%} 1 · Packs {%- endcomment -%}
+    {%- if s.show_pack and wheels_qty > 0 -%}
+      {%- liquid
+        assign fill = wheels_qty | times: 100 | divided_by: 3
+        if fill > 100
+          assign fill = 100
+        endif
+      -%}
+      <div class="rgc-pack">
+        <p class="rgc-pack__t">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>
+          <span>
+            {%- if wheels_qty == 1 -%}Añade <b>1 volante más</b> y ahorra un <b>{{ s.pct_2 }} %</b> en los dos
+            {%- elsif wheels_qty == 2 -%}¡<b>−{{ s.pct_2 }} %</b> conseguido! Con <b>1 más</b> ahorras un <b>{{ s.pct_3 }} %</b> en todos
+            {%- else -%}¡Tienes el <b>−{{ s.pct_3 }} %</b> aplicado en tus volantes!{%- endif -%}
+          </span>
+        </p>
+        <p class="rgc-pack__s">{{ s.pack_text }}</p>
+        <div class="rgc-bar" role="img" aria-label="{{ wheels_qty }} de 3 volantes para el máximo descuento">
+          <div class="rgc-bar__fill" style="width:{{ fill }}%"></div>
+          <div class="rgc-bar__m" style="left:33.33%" data-on><span>1</span></div>
+          <div class="rgc-bar__m" style="left:66.66%" {% if wheels_qty >= 2 %}data-on{% endif %}>2<span>−{{ s.pct_2 }} %</span></div>
+          <div class="rgc-bar__m" style="left:100%" {% if wheels_qty >= 3 %}data-on{% endif %}>3<span>−{{ s.pct_3 }} %</span></div>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} 2 · Extras que encajan con cada volante del carrito {%- endcomment -%}
+    {%- if s.show_extras -%}
+      {%- capture extras_html -%}
+        {%- for item in cart.items -%}
+          {%- if item.product.handle contains 'extra-' -%}{%- continue -%}{%- endif -%}
+          {%- liquid
+            assign brand = ''
+            for t in item.product.tags
+              if t == 'BMW' or t == 'Mercedes-Benz' or t == 'Volkswagen' or t == 'Porsche'
+                assign brand = t
+              endif
+            endfor
+            assign wheel_key = item.product.title
+            if item.variant.title != 'Default Title'
+              assign wheel_key = wheel_key | append: ' · ' | append: item.variant.title
+            endif
+            assign ex_part = ''
+            assign parts = item.product.description | split: '<h3'
+            for part in parts
+              assign head = part | split: '</h3>' | first | downcase
+              if head contains 'extras'
+                assign ex_part = part
+              endif
+            endfor
+          -%}
+          {%- if ex_part == '' or brand == '' -%}{%- continue -%}{%- endif -%}
+          {%- capture cards -%}
+            {%- assign lis = ex_part | split: '<li>' -%}
+            {%- for li in lis offset: 1 -%}
+              {%- liquid
+                assign txt = li | split: '</li>' | first | strip_html | strip
+                if txt == ''
+                  continue
+                endif
+                assign ex_name = txt | split: '·' | first | strip
+                assign ex_handle = ex_name | downcase | replace: 'á', 'a' | replace: 'é', 'e' | replace: 'í', 'i' | replace: 'ó', 'o' | replace: 'ú', 'u' | replace: 'ñ', 'n' | replace: 'ü', 'u' | handleize | prepend: 'extra-'
+                assign ex_product = all_products[ex_handle]
+                assign ex_variant = nil
+                for ev in ex_product.variants
+                  if ev.title == brand
+                    assign ex_variant = ev
+                  endif
+                endfor
+                if ex_variant == nil or ex_variant.available == false
+                  continue
+                endif
+                assign pair = ',' | append: wheel_key | append: '|' | append: ex_variant.id | append: ','
+                if added contains pair
+                  continue
+                endif
+                assign ex_key = ex_name | downcase
+              -%}
+              <div class="rgc-extra">
+                <span class="rgc-extra__ico" aria-hidden="true">
+                  {%- if ex_key contains 'calefac' -%}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3c-1.5 2 1.5 3 0 5s1.5 3 0 5M12 3c-1.5 2 1.5 3 0 5s1.5 3 0 5M16 3c-1.5 2 1.5 3 0 5s1.5 3 0 5M4 19h16"/></svg>
+                  {%- elsif ex_key contains 'levas' -%}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5L4 8v8l5 3M15 5l5 3v8l-5 3"/><circle cx="12" cy="12" r="3"/></svg>
+                  {%- elsif ex_key contains 'pantalla' -%}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 12h2M11 12h2M15 12h2"/></svg>
+                  {%- elsif ex_key contains 'forjado' -%}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l8.7 5v10L12 22l-8.7-5V7z"/><path d="M7 9l4 2M13 14l4-2M10 16l2-5"/></svg>
+                  {%- elsif ex_key contains 'alc' -%}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7c3-2 5 2 8 0s5 2 8 0M4 12c3-2 5 2 8 0s5 2 8 0M4 17c3-2 5 2 8 0s5 2 8 0"/></svg>
+                  {%- elsif ex_key contains 'vibra' -%}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M5 8a8 8 0 000 8M19 8a8 8 0 010 8"/></svg>
+                  {%- elsif ex_key contains 'crucero' -%}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 16a8 8 0 1116 0"/><path d="M12 16l4-5"/></svg>
+                  {%- elsif ex_key contains 'bot' -%}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 16V8l4 5 4-5v8"/></svg>
+                  {%- else -%}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                  {%- endif -%}
+                </span>
+                <span class="rgc-extra__t"><b>{{ ex_name }}</b><span>+{{ ex_variant.price | times: item.quantity | money_without_trailing_zeros }}</span></span>
+                <button type="button" class="rgc-add" data-rgc-add data-id="{{ ex_variant.id }}" data-qty="{{ item.quantity }}" data-para="{{ wheel_key | escape }}">Añadir</button>
+              </div>
+            {%- endfor -%}
+          {%- endcapture -%}
+          {%- if cards contains 'rgc-extra' -%}
+            <div class="rgc-group">
+              <p class="rgc-group__t">Para tu <b>{{ wheel_key }}</b>{% if item.quantity > 1 %} (×{{ item.quantity }}){% endif %}</p>
+              <div class="rgc-extras">{{ cards }}</div>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endcapture -%}
+      {%- if extras_html contains 'rgc-group' -%}
+        <div>
+          <p class="rgc-kicker">{{ s.extras_kicker }}</p>
+          <div class="rgc-h"><h2>{{ s.extras_title }}</h2>{%- if s.extras_text != blank -%}<p>{{ s.extras_text }}</p>{%- endif -%}</div>
+          {{ extras_html }}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- comment -%} 3 · Otros volantes destacados: primero de la misma marca {%- endcomment -%}
+    {%- if s.show_wheels and s.collection != blank -%}
+      {%- liquid
+        assign shown = 0
+        assign picked = ','
+      -%}
+      {%- capture wheels_html -%}
+        {%- for pass in (1..2) -%}
+          {%- for p in s.collection.products limit: 50 -%}
+            {%- liquid
+              if shown >= s.max_wheels
+                break
+              endif
+              assign key = ',' | append: p.handle | append: ','
+              if in_cart contains key or picked contains key or p.available == false
+                continue
+              endif
+              if pass == 1
+                if first_brand == '' or p.tags contains first_brand
+                else
+                  continue
+                endif
+              endif
+              assign picked = picked | append: p.handle | append: ','
+              assign shown = shown | plus: 1
+              assign fv = p.selected_or_first_available_variant
+            -%}
+            <div class="rgc-wheel">
+              <a class="rgc-wheel__img" href="{{ p.url }}" tabindex="-1" aria-hidden="true">
+                {%- if wheels_qty > 0 and s.show_pack -%}<span class="rgc-wheel__tag">−{% if wheels_qty >= 2 %}{{ s.pct_3 }}{% else %}{{ s.pct_2 }}{% endif %} % en pack</span>{%- endif -%}
+                {%- if p.featured_image -%}{{ p.featured_image | image_url: width: 500 | image_tag: loading: 'lazy', alt: p.title, sizes: '(min-width: 990px) 25vw, 70vw' }}{%- endif -%}
+              </a>
+              <div class="rgc-wheel__b">
+                <a href="{{ p.url }}">{{ p.title }}</a>
+                {%- capture meta -%}{%- render 'rg-specs', p: p -%}{%- endcapture -%}
+                {%- if meta != blank -%}<p class="rgc-wheel__meta">{{ meta }}</p>{%- endif -%}
+                <p class="rgc-wheel__p" data-rgc-price>{% if p.price_varies %}Desde {% endif %}{{ p.price_min | money }}</p>
+                {%- if p.variants.size > 1 -%}
+                  <label class="rgc-vh" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)" for="rgc-v-{{ sid }}-{{ p.id }}">Versión de {{ p.title }}</label>
+                  <select id="rgc-v-{{ sid }}-{{ p.id }}" data-rgc-variant>
+                    {%- for v in p.variants -%}
+                      <option value="{{ v.id }}" data-price="{{ v.price | money }}" {% unless v.available %}disabled{% endunless %} {% if v.id == fv.id %}selected{% endif %}>{{ v.title }} · {{ v.price | money }}</option>
+                    {%- endfor -%}
+                  </select>
+                {%- endif -%}
+                <button type="button" class="rgc-add" data-rgc-add data-id="{{ fv.id }}" data-qty="1">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                  Añadir al carrito
+                </button>
+              </div>
+            </div>
+          {%- endfor -%}
+        {%- endfor -%}
+      {%- endcapture -%}
+      {%- if shown > 0 -%}
+        <div>
+          <p class="rgc-kicker">{{ s.wheels_kicker }}</p>
+          <div class="rgc-h"><h2>{% if wheels_qty > 0 %}{{ s.wheels_title }}{% else %}{{ s.wheels_title_empty }}{% endif %}</h2>{%- if wheels_qty > 0 and s.show_pack -%}<p>Mezcla modelos y el descuento del pack se aplica solo.</p>{%- endif -%}</div>
+          <div class="rgc-wheels">{{ wheels_html }}</div>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    <p class="rgc-msg" data-rgc-msg role="alert" hidden></p>
+  </div>
+</div>
+
+<script>
+(() => {
+  const root = document.getElementById('rgc-{{ sid }}');
+  if (!root || root.dataset.ready) return; root.dataset.ready = '1';
+  const msg = root.querySelector('[data-rgc-msg]');
+
+  /* Cambiar la versión de un volante actualiza el precio y lo que se añade */
+  root.querySelectorAll('[data-rgc-variant]').forEach(sel => sel.addEventListener('change', () => {
+    const card = sel.closest('.rgc-wheel'), opt = sel.selectedOptions[0];
+    card.querySelector('[data-rgc-add]').dataset.id = sel.value;
+    card.querySelector('[data-rgc-price]').textContent = opt.dataset.price;
+  }));
+
+  /* Añadir con un clic y recargar el carrito para ver precios y descuentos al momento */
+  root.querySelectorAll('[data-rgc-add]').forEach(btn => btn.addEventListener('click', async () => {
+    const item = { id: +btn.dataset.id, quantity: +btn.dataset.qty || 1 };
+    if (btn.dataset.para) item.properties = { 'Para': btn.dataset.para };
+    const label = btn.innerHTML;
+    btn.disabled = true; btn.textContent = 'Añadiendo…'; msg.hidden = true;
+    try {
+      const r = await fetch({{ routes.cart_add_url | json }} + '.js', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, body: JSON.stringify({ items: [item] }) });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.description || d.message || 'Error'); }
+      btn.setAttribute('data-done', ''); btn.textContent = '✓ Añadido';
+      location.reload();
+    } catch (err) {
+      btn.disabled = false; btn.innerHTML = label;
+      msg.textContent = 'No se ha podido añadir: ' + err.message; msg.hidden = false;
+    }
+  }));
+})();
+</script>
+
+{% schema %}
+{
+  "name": "RG · Completa tu pedido",
+  "tag": "section",
+  "class": "rg-carrito-mas-section",
+  "enabled_on": { "templates": ["cart"] },
+  "settings": [
+    { "type": "header", "content": "Barra de packs" },
+    { "type": "checkbox", "id": "show_pack", "label": "Mostrar la barra de packs", "default": true },
+    { "type": "number", "id": "pct_2", "label": "% de descuento con 2 volantes", "info": "Tiene que coincidir con el descuento automático de Shopify.", "default": 10 },
+    { "type": "number", "id": "pct_3", "label": "% de descuento con 3 o más", "default": 15 },
+    { "type": "text", "id": "pack_text", "label": "Texto", "default": "Puedes combinar modelos y marcas distintos. El descuento se aplica solo en el carrito." },
+    { "type": "header", "content": "Extras" },
+    { "type": "checkbox", "id": "show_extras", "label": "Mostrar extras para los volantes del carrito", "default": true },
+    { "type": "text", "id": "extras_kicker", "label": "Texto pequeño", "default": "Hazlo único" },
+    { "type": "text", "id": "extras_title", "label": "Título", "default": "Completa tu volante" },
+    { "type": "text", "id": "extras_text", "label": "Texto", "default": "Añádelos ahora y se montan de fábrica con tu volante." },
+    { "type": "header", "content": "Otros volantes" },
+    { "type": "checkbox", "id": "show_wheels", "label": "Mostrar otros volantes", "default": true },
+    { "type": "collection", "id": "collection", "label": "Colección de la que salen" },
+    { "type": "range", "id": "max_wheels", "label": "Cuántos", "min": 2, "max": 8, "step": 1, "default": 4 },
+    { "type": "text", "id": "wheels_kicker", "label": "Texto pequeño", "default": "Más vendidos" },
+    { "type": "text", "id": "wheels_title", "label": "Título (con volantes en el carrito)", "default": "Llévate otro y ahorra" },
+    { "type": "text", "id": "wheels_title_empty", "label": "Título (carrito vacío)", "default": "Volantes destacados" },
+    { "type": "header", "content": "Diseño" },
+    { "type": "color", "id": "color_bg", "label": "Fondo", "default": "#F4F4F2" },
+    { "type": "color", "id": "color_card", "label": "Fondo de las tarjetas", "default": "#FFFFFF" },
+    { "type": "color", "id": "color_text", "label": "Texto", "default": "#131517" },
+    { "type": "color", "id": "color_accent", "label": "Acento (amarillo)", "default": "#FFC21A" },
+    { "type": "color", "id": "color_kerb", "label": "Rojo", "default": "#D8342A" },
+    { "type": "color", "id": "color_button", "label": "Botón", "default": "#131517" },
+    { "type": "color", "id": "color_button_text", "label": "Texto del botón", "default": "#FFFFFF" },
+    { "type": "range", "id": "max_width", "label": "Ancho máximo", "min": 900, "max": 1600, "step": 20, "unit": "px", "default": 1200 },
+    { "type": "range", "id": "pad_top", "label": "Espacio arriba", "min": 0, "max": 100, "step": 4, "unit": "px", "default": 40 },
+    { "type": "range", "id": "pad_bottom", "label": "Espacio abajo", "min": 0, "max": 140, "step": 4, "unit": "px", "default": 64 }
+  ],
+  "presets": [{ "name": "RG · Completa tu pedido" }]
+}
+{% endschema %}
