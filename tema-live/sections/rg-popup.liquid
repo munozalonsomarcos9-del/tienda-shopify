@@ -226,7 +226,14 @@
 
   /* Enlace de prueba (?descuento) y vista previa de un tema sin publicar: la ventana sale siempre */
   const preview = !!(window.Shopify && Shopify.theme && Shopify.theme.role && Shopify.theme.role !== 'main');
-  if (/[?&]descuento\b/.test(location.search) || preview) { setTimeout(() => show('form'), 400); return; }
+  if (/[?&]descuento\b/.test(location.search)) { setTimeout(() => show('form'), 400); return; }
+  if (preview) {
+    /* En la vista previa: una vez al entrar (aunque ya la hayas cerrado otro día); en el resto de páginas, el recordatorio */
+    let seen = null; try { seen = sessionStorage.getItem('rg-pop-visit'); } catch (e) {}
+    if (seen) { showCup(); return; }
+    try { sessionStorage.setItem('rg-pop-visit', '1'); } catch (e) {}
+    setTimeout(() => show('form'), 400); return;
+  }
 
   /* Vuelta tras apuntarse: se enseña el código */
   const posted = /[?&]customer_posted=true/.test(location.search);
