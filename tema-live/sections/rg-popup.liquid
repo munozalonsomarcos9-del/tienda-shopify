@@ -1,6 +1,6 @@
 {%- comment -%}
   RacingGrip · Ventana de bienvenida con descuento para el primer pedido.
-  Aparece a los pocos segundos (o al ir a salir de la página en ordenador), una sola vez cada X días.
+  Aparece al entrar en la tienda (no al pinchar entre páginas de la tienda).
   Al apuntarse, el correo entra en la lista de clientes de Shopify y se muestra el código de descuento.
 {%- endcomment -%}
 {%- assign sid = section.id -%}
@@ -219,12 +219,11 @@
   /* En el editor de temas: se enseña al seleccionar la sección */
   /* ¿Viene de otra página de la tienda? Entonces no es «entrar»: la ventana no sale, solo el recordatorio pequeño */
   const internal = (() => { try { return !!document.referrer && new URL(document.referrer).host === location.host; } catch (e) { return false; } })();
-  const onceKey = 'rg-pop-visit';
-  const seenVisit = () => { try { return !!sessionStorage.getItem(onceKey); } catch (e) { return false; } };
-  const markVisit = () => { try { sessionStorage.setItem(onceKey, '1'); } catch (e) {} };
+  /* «Entrar» = llegar desde fuera de la tienda, o abrir el tema desde Shopify (editor o vista previa) */
+  const entering = !internal || /[?&](preview_theme_id|oseid|_fd)=/.test(location.search);
 
   if (pop.dataset.design === 'true') {
-    if (internal || seenVisit()) showCup(); else { markVisit(); setTimeout(() => show('form'), 600); }
+    if (entering) setTimeout(() => show('form'), 600); else showCup();
     document.addEventListener('shopify:section:select', e => { if (e.detail.sectionId === '{{ sid }}') show('form'); });
     document.addEventListener('shopify:section:deselect', e => { if (e.detail.sectionId === '{{ sid }}') hide(); });
     return;
@@ -235,8 +234,8 @@
   if (/[?&]descuento\b/.test(location.search)) { setTimeout(() => show('form'), 400); return; }
   if (preview) {
     /* En la vista previa: una vez al entrar (aunque ya la hayas cerrado otro día); en el resto de páginas, el recordatorio */
-    if (internal || seenVisit()) { showCup(); return; }
-    markVisit(); setTimeout(() => show('form'), 400); return;
+    if (entering) setTimeout(() => show('form'), 400); else showCup();
+    return;
   }
 
   /* Vuelta tras apuntarse: se enseña el código */
@@ -246,23 +245,16 @@
   if (hasError) { show('form'); return; }
   if (pop.hasAttribute('data-subscribed') || get(SENT)) { showCup(); return; }
 
-  /* Frecuencia: 0 días = en cada visita (una vez por visita; en el resto de páginas queda el recordatorio pequeño) */
+  /* Frecuencia: 0 días = cada vez que se entra en la tienda (al pinchar dentro, solo queda el recordatorio pequeño) */
   const days = +pop.dataset.days || 0, last = +get(KEY) || 0;
-  const SES = 'rg-pop-visit';
-  const sget = () => { try { return sessionStorage.getItem(SES); } catch (e) { return null; } };
-  const sset = () => { try { sessionStorage.setItem(SES, '1'); } catch (e) {} };
   if (days > 0) {
     if (last) showCup();
     if (Date.now() - last < days * 864e5) return;
-  } else if (sget() || internal) { showCup(); return; }
+  } else if (!entering) { showCup(); return; }
 
-  const open = () => { if (!pop.hasAttribute('data-open') && !get(SENT)) { clearTimeout(timer); show('form'); set(KEY, String(Date.now())); sset(); } };
+  const open = () => { if (!pop.hasAttribute('data-open') && !get(SENT)) { clearTimeout(timer); show('form'); set(KEY, String(Date.now())); } };
   const delay = pop.dataset.delay === '' ? 6 : +pop.dataset.delay;
   timer = setTimeout(open, delay > 0 ? delay * 1000 : 400);
-  /* En ordenador, también al llevar el ratón hacia fuera de la página */
-  if (matchMedia('(pointer:fine)').matches) {
-    document.addEventListener('mouseout', e => { if (!e.relatedTarget && e.clientY <= 0) open(); });
-  }
 })();
 </script>
 {%- endif -%}
