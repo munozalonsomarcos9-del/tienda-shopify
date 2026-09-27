@@ -1,0 +1,14 @@
+{
+  "sections": {
+    "main": {
+      "type": "rg-pagina",
+      "settings": {
+        "kicker": "Contacto",
+        "show_form": true
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

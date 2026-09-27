@@ -1,0 +1,121 @@
+{%- comment -%} RacingGrip · Páginas de información (envíos, devoluciones, preguntas frecuentes…) y contacto, con el estilo oscuro de la tienda. {%- endcomment -%}
+{%- assign sid = section.id -%}
+{%- assign s = section.settings -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:ital,wght@0,700;1,800;1,900&family=Barlow:wght@400;500;600;700&family=Chakra+Petch:wght@500;600&display=swap">
+<style>
+  #rgpg-{{ sid }}{--bg:{{ s.color_bg }};--surface:color-mix(in srgb, var(--text) 5%, var(--bg));--text:{{ s.color_text }};--muted:{{ s.color_muted }};--accent:{{ s.color_accent }};--kerb:{{ s.color_kerb }};
+    --line:color-mix(in srgb, var(--text) 12%, transparent);--line-strong:color-mix(in srgb, var(--text) 22%, transparent);
+    background:var(--bg);color:var(--text);font-family:"Barlow","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased;
+    padding:clamp(40px,6vw,88px) clamp(16px,3vw,40px) clamp(56px,8vw,112px)}
+  #rgpg-{{ sid }} *{box-sizing:border-box}
+  #rgpg-{{ sid }} .rgpg-in{max-width:{{ s.max_width }}px;margin:0 auto}
+  #rgpg-{{ sid }} .rgpg-kicker{display:flex;align-items:center;gap:12px;margin:0 0 14px;font-family:"Chakra Petch",Menlo,monospace;font-size:12px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+  #rgpg-{{ sid }} .rgpg-kicker::before{content:"";width:34px;height:6px;border-radius:2px;background:repeating-linear-gradient(115deg,var(--kerb) 0 7px,#EDEAE4 7px 14px)}
+  #rgpg-{{ sid }} h1{margin:0 0 clamp(24px,3vw,40px);font-family:"Saira Condensed","Arial Narrow",Impact,sans-serif;font-style:italic;font-weight:900;font-size:clamp(40px,6vw,72px);line-height:.95;text-transform:uppercase;letter-spacing:-.01em;text-wrap:balance}
+
+  /* Texto de la página */
+  #rgpg-{{ sid }} .rgpg-rte > :first-child{margin-top:0}
+  #rgpg-{{ sid }} .rgpg-rte h2{margin:2em 0 .6em;padding-top:1.2em;border-top:1px solid var(--line);font-family:"Saira Condensed","Arial Narrow",Impact,sans-serif;font-style:italic;font-weight:800;font-size:clamp(26px,3vw,34px);line-height:1.05;text-transform:uppercase}
+  #rgpg-{{ sid }} .rgpg-rte h3{margin:1.6em 0 .4em;font-size:19px;font-weight:700;color:var(--text)}
+  #rgpg-{{ sid }} .rgpg-rte p,#rgpg-{{ sid }} .rgpg-rte li{color:color-mix(in srgb, var(--text) 82%, transparent)}
+  #rgpg-{{ sid }} .rgpg-rte strong,#rgpg-{{ sid }} .rgpg-rte b{color:var(--text)}
+  #rgpg-{{ sid }} .rgpg-rte a{color:var(--accent);text-underline-offset:3px}
+  #rgpg-{{ sid }} .rgpg-rte ul,#rgpg-{{ sid }} .rgpg-rte ol{padding-left:1.2em}
+  #rgpg-{{ sid }} .rgpg-rte li{margin:.35em 0}
+  #rgpg-{{ sid }} .rgpg-rte li::marker{color:var(--accent)}
+  #rgpg-{{ sid }} .rgpg-rte table{width:100%;border-collapse:collapse;margin:1.2em 0;font-size:15px}
+  #rgpg-{{ sid }} .rgpg-rte th,#rgpg-{{ sid }} .rgpg-rte td{padding:10px 12px;border:1px solid var(--line);text-align:left}
+  #rgpg-{{ sid }} .rgpg-rte th{background:var(--surface)}
+  #rgpg-{{ sid }} .rgpg-rte details{margin:10px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+  #rgpg-{{ sid }} .rgpg-rte summary{padding:14px 18px;cursor:pointer;font-weight:700}
+  #rgpg-{{ sid }} .rgpg-rte details > :not(summary){margin:0 18px 14px}
+  #rgpg-{{ sid }} .rgpg-rte hr{border:0;border-top:1px solid var(--line);margin:2em 0}
+
+  /* Formulario de contacto */
+  #rgpg-{{ sid }} .rgpg-form{margin-top:clamp(32px,4vw,48px);padding:clamp(20px,3vw,32px);border-radius:14px;border:1px solid var(--line);background:var(--surface)}
+  #rgpg-{{ sid }} .rgpg-form h2{margin:0 0 6px;font-family:"Saira Condensed","Arial Narrow",Impact,sans-serif;font-style:italic;font-weight:800;font-size:30px;line-height:1;text-transform:uppercase}
+  #rgpg-{{ sid }} .rgpg-form > p,#rgpg-{{ sid }} .rgpg-form form > p{margin:0 0 20px;color:var(--muted);font-size:15px}
+  #rgpg-{{ sid }} .rgpg-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  #rgpg-{{ sid }} .rgpg-f{display:grid;gap:6px}
+  #rgpg-{{ sid }} .rgpg-f--full{grid-column:1/-1}
+  #rgpg-{{ sid }} .rgpg-f label{font-family:"Chakra Petch",Menlo,monospace;font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  #rgpg-{{ sid }} .rgpg-f input,#rgpg-{{ sid }} .rgpg-f textarea{width:100%;min-height:50px;padding:12px 14px;border-radius:6px;border:1px solid var(--line-strong);background:var(--bg);color:var(--text);font:inherit;font-size:16px}
+  #rgpg-{{ sid }} .rgpg-f textarea{min-height:150px;resize:vertical}
+  #rgpg-{{ sid }} .rgpg-f input:focus,#rgpg-{{ sid }} .rgpg-f textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+  #rgpg-{{ sid }} .rgpg-send{margin-top:18px;display:inline-flex;align-items:center;gap:10px;min-height:54px;padding:14px 28px;border:0;border-radius:4px;background:var(--accent);color:#1A1400;font:700 16px/1 "Barlow",sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+  #rgpg-{{ sid }} .rgpg-send:hover{filter:brightness(1.08)}
+  #rgpg-{{ sid }} .rgpg-send:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+  #rgpg-{{ sid }} .rgpg-ok,#rgpg-{{ sid }} .rgpg-err{margin:0 0 18px;padding:12px 14px;border-radius:8px;font-size:15px}
+  #rgpg-{{ sid }} .rgpg-ok{background:color-mix(in srgb, #3DDC84 14%, transparent);color:#8FF0B8}
+  #rgpg-{{ sid }} .rgpg-err{background:color-mix(in srgb, #FF6A5F 14%, transparent);color:#FFB3AD}
+  @media (max-width:640px){#rgpg-{{ sid }} .rgpg-grid{grid-template-columns:1fr}}
+</style>
+<div id="rgpg-{{ sid }}">
+  <div class="rgpg-in">
+    {%- if s.kicker != blank -%}<p class="rgpg-kicker">{{ s.kicker }}</p>{%- endif -%}
+    <h1>{{ page.title }}</h1>
+    <div class="rgpg-rte">{{ page.content }}</div>
+
+    {%- if s.show_form -%}
+      <div class="rgpg-form">
+        {%- if s.form_title != blank -%}<h2>{{ s.form_title }}</h2>{%- endif -%}
+        {%- form 'contact', id: 'rgpg-contact' -%}
+          {%- if form.posted_successfully? -%}
+            <p class="rgpg-ok" role="status">¡Gracias! Hemos recibido tu mensaje y te responderemos lo antes posible.</p>
+          {%- elsif form.errors -%}
+            <p class="rgpg-err" role="alert">Revisa los campos marcados: {{ form.errors | default_errors }}</p>
+          {%- endif -%}
+          {%- if s.form_text != blank -%}<p>{{ s.form_text }}</p>{%- endif -%}
+          <div class="rgpg-grid">
+            <div class="rgpg-f">
+              <label for="rgpg-name-{{ sid }}">Nombre</label>
+              <input id="rgpg-name-{{ sid }}" type="text" name="contact[name]" autocomplete="name" value="{{ form.name }}">
+            </div>
+            <div class="rgpg-f">
+              <label for="rgpg-email-{{ sid }}">Correo electrónico *</label>
+              <input id="rgpg-email-{{ sid }}" type="email" name="contact[email]" autocomplete="email" required value="{{ form.email }}">
+            </div>
+            <div class="rgpg-f">
+              <label for="rgpg-phone-{{ sid }}">Teléfono</label>
+              <input id="rgpg-phone-{{ sid }}" type="tel" name="contact[phone]" autocomplete="tel" value="{{ form.phone }}">
+            </div>
+            <div class="rgpg-f">
+              <label for="rgpg-car-{{ sid }}">Coche y año (opcional)</label>
+              <input id="rgpg-car-{{ sid }}" type="text" name="contact[Coche]" placeholder="Ej.: BMW M3 F80, 2016">
+            </div>
+            <div class="rgpg-f rgpg-f--full">
+              <label for="rgpg-body-{{ sid }}">Mensaje *</label>
+              <textarea id="rgpg-body-{{ sid }}" name="contact[body]" required>{{ form.body }}</textarea>
+            </div>
+          </div>
+          <button type="submit" class="rgpg-send">Enviar
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        {%- endform -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "RG · Página",
+  "tag": "section",
+  "class": "rg-pagina-section",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Texto pequeño encima del título", "default": "RacingGrip" },
+    { "type": "checkbox", "id": "show_form", "label": "Mostrar formulario de contacto", "default": false },
+    { "type": "text", "id": "form_title", "label": "Título del formulario", "default": "Escríbenos" },
+    { "type": "text", "id": "form_text", "label": "Texto del formulario", "default": "Cuéntanos tu coche y lo que buscas. Te respondemos en menos de 24 h en días laborables." },
+    { "type": "range", "id": "max_width", "label": "Ancho del texto", "min": 640, "max": 1100, "step": 20, "unit": "px", "default": 820 },
+    { "type": "color", "id": "color_bg", "label": "Fondo", "default": "#131517" },
+    { "type": "color", "id": "color_text", "label": "Texto", "default": "#F1EFEA" },
+    { "type": "color", "id": "color_muted", "label": "Texto secundario", "default": "#9AA1A8" },
+    { "type": "color", "id": "color_accent", "label": "Acento", "default": "#FFC21A" },
+    { "type": "color", "id": "color_kerb", "label": "Bordillo (rojo)", "default": "#D8342A" }
+  ],
+  "presets": [{ "name": "RG · Página" }]
+}
+{% endschema %}
