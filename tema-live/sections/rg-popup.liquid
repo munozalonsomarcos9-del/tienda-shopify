@@ -218,13 +218,15 @@
 
   /* En el editor de temas: se enseña al seleccionar la sección */
   if (pop.dataset.design === 'true') {
+    setTimeout(() => show('form'), 600);
     document.addEventListener('shopify:section:select', e => { if (e.detail.sectionId === '{{ sid }}') show('form'); });
     document.addEventListener('shopify:section:deselect', e => { if (e.detail.sectionId === '{{ sid }}') hide(); });
     return;
   }
 
-  /* Enlace de prueba: con ?descuento en la dirección la ventana sale siempre */
-  if (/[?&]descuento\b/.test(location.search)) { setTimeout(() => show('form'), 300); return; }
+  /* Enlace de prueba (?descuento) y vista previa de un tema sin publicar: la ventana sale siempre */
+  const preview = !!(window.Shopify && Shopify.theme && Shopify.theme.role && Shopify.theme.role !== 'main');
+  if (/[?&]descuento\b/.test(location.search) || preview) { setTimeout(() => show('form'), 400); return; }
 
   /* Vuelta tras apuntarse: se enseña el código */
   const posted = /[?&]customer_posted=true/.test(location.search);
